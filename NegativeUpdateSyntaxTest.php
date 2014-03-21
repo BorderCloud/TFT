@@ -17,11 +17,11 @@ class NegativeUpdateSyntaxTest {
 		return $res["count"]; 
    }
 	function doAllTests(){ 	
-		global $modeDebug,$modeVerbose,$ENDPOINT,$CURL,$GRAPHTESTS,$GRAPH_RESULTS_EARL;
+		global $modeDebug,$modeVerbose,$ENDPOINT,$CURL,$GRAPHTESTS,$GRAPH_RESULTS_EARL,$TAGTESTS;;
 		 //////////////////////////////////////////////////////////////////////
 		echo "
 		TESTS : NegativeUpdateSyntaxTest\n";
-		$Report = new TestsReport("NegativeUpdateSyntaxTest",'sparql11-NegativeUpdateSyntaxTest-junit.xml');
+		$Report = new TestsReport("NegativeUpdateSyntaxTest",$TAGTESTS.'-junit.xml');
 
 		$q = Test::PREFIX.' 
 

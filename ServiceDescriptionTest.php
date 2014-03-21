@@ -17,11 +17,11 @@ class ServiceDescriptionTest {
 		return $res["count"]; 
    }
 	function doAllTests(){ 	
-		global $modeDebug,$modeVerbose,$ENDPOINT,$CURL,$GRAPHTESTS,$GRAPH_RESULTS_EARL;
+		global $modeDebug,$modeVerbose,$ENDPOINT,$CURL,$GRAPHTESTS,$GRAPH_RESULTS_EARL,$TAGTESTS;;
 		 //////////////////////////////////////////////////////////////////////
 		echo "
 		TESTS : ServiceDescriptionTest\n";
-		$Report = new TestsReport("ServiceDescriptionTest",'sparql11-ServiceDescriptionTest-junit.xml');
+		$Report = new TestsReport("ServiceDescriptionTest",$TAGTESTS.'-junit.xml');
 
 		$q = Test::PREFIX.' 
 

@@ -173,6 +173,7 @@ $DATETEST = date("c", time());
 //Constant
 $FOLDERTESTS = '';
 $GRAPHTESTS = '';
+$TAGTESTS = '';
 
 //Client web
 $CURL = new Curl($modeDebug);
@@ -572,7 +573,7 @@ foreach($listTestSuite as $URL => $folder){
 	echo "TEST : ".$URL."\n";
 	$FOLDERTESTS = $folder;
 	$GRAPHTESTS = $URL ;
-	
+	$TAGTESTS =  str_replace("/", "", $folder);;
 	//////////////////////////// TESTS
 
 	// TODO 

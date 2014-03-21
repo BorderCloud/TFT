@@ -18,11 +18,11 @@ class PositiveUpdateSyntaxTest {
    }
    
 	function doAllTests(){ 	
-		global $modeDebug,$modeVerbose,$ENDPOINT,$CURL,$GRAPHTESTS,$GRAPH_RESULTS_EARL;
+		global $modeDebug,$modeVerbose,$ENDPOINT,$CURL,$GRAPHTESTS,$GRAPH_RESULTS_EARL,$TAGTESTS;;
 		 //////////////////////////////////////////////////////////////////////
 		echo "
 		TESTS : PositiveUpdateSyntaxTest\n";
-		$Report = new TestsReport("PositiveUpdateSyntaxTest",'sparql11-PositiveUpdateSyntaxTest-junit.xml');
+		$Report = new TestsReport("PositiveUpdateSyntaxTest",$TAGTESTS.'-junit.xml');
 
 		$q = Test::PREFIX.' 
 

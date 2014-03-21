@@ -17,11 +17,11 @@ class ProtocolTest {
 		return $res["count"]; 
    }
 	function doAllTests(){ 	
-		global $modeDebug,$modeVerbose,$ENDPOINT,$CURL,$GRAPHTESTS,$GRAPH_RESULTS_EARL;
+		global $modeDebug,$modeVerbose,$ENDPOINT,$CURL,$GRAPHTESTS,$GRAPH_RESULTS_EARL,$TAGTESTS;;
 		 //////////////////////////////////////////////////////////////////////
 		echo "
 		TESTS : ProtocolTest\n";
-		$Report = new TestsReport("ProtocolTest",'sparql11-ProtocolTest-junit.xml');
+		$Report = new TestsReport("ProtocolTest",$TAGTESTS.'-junit.xml');
 
 		$q = Test::PREFIX.' 
 

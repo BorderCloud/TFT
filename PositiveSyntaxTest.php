@@ -17,12 +17,12 @@ class PositiveSyntaxTest {
 		return $res["count"]; 
    }
 	function doAllTests(){ 	
-		global $modeDebug,$modeVerbose,$ENDPOINT,$CURL,$GRAPHTESTS,$GRAPH_RESULTS_EARL;
+		global $modeDebug,$modeVerbose,$ENDPOINT,$CURL,$GRAPHTESTS,$GRAPH_RESULTS_EARL,$TAGTESTS;;
 		 //////////////////////////////////////////////////////////////////////
 		echo "
 --------------------------------------------------------------------
 TESTS : PositiveSyntaxTest\n";
-		$Report = new TestsReport("PositiveSyntaxTest",'sparql11-PositiveSyntaxTest-junit.xml');
+		$Report = new TestsReport("PositiveSyntaxTest",$TAGTESTS.'-junit.xml');
 
 		$q = Test::PREFIX.' 
 

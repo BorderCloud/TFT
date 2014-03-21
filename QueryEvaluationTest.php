@@ -48,12 +48,12 @@ class QueryEvaluationTest {
    }
 
 	function doAllTests(){ 	
-		global $modeDebug,$modeVerbose,$ENDPOINT,$CURL,$GRAPHTESTS,$GRAPH_RESULTS_EARL;
+		global $modeDebug,$modeVerbose,$ENDPOINT,$CURL,$GRAPHTESTS,$GRAPH_RESULTS_EARL,$TAGTESTS;
 		 //////////////////////////////////////////////////////////////////////
 		echo "
 --------------------------------------------------------------------
 TESTS : QueryEvaluationTest";// ( ".QueryEvaluationTest::countApprovedTests()." Approved, ".QueryEvaluationTest::countSkipTests()." Skipped, ".QueryEvaluationTest::countAllTests()." Total\n";
-		$Report = new TestsReport("QueryEvaluationTest",'sparql11-QueryEvaluationTest-junit.xml');
+		$Report = new TestsReport("QueryEvaluationTest",$TAGTESTS.'-junit.xml');
 
 		$q = Test::PREFIX.' 
 select DISTINCT ?testiri ?name ?queryTest ?graphInput ?graphOutput where

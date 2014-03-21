@@ -17,11 +17,11 @@ class CSVResultFormatTest {
 		return $res["count"]; 
    }
 	function doAllTests(){ 	
-		global $modeDebug,$modeVerbose,$ENDPOINT,$CURL,$GRAPHTESTS,$GRAPH_RESULTS_EARL;
+		global $modeDebug,$modeVerbose,$ENDPOINT,$CURL,$GRAPHTESTS,$GRAPH_RESULTS_EARL,$TAGTESTS;;
 		 //////////////////////////////////////////////////////////////////////
 		echo "
 		TESTS : CSVResultFormatTest\n";
-		$Report = new TestsReport("CSVResultFormatTest",'sparql11-CSVResultFormatTest-junit.xml');
+		$Report = new TestsReport("CSVResultFormatTest",$TAGTESTS.'-junit.xml');
 
 		$q = Test::PREFIX.' 
 

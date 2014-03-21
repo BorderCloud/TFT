@@ -21,7 +21,7 @@ class NegativeUpdateSyntaxTest {
 		 //////////////////////////////////////////////////////////////////////
 		echo "
 		TESTS : NegativeUpdateSyntaxTest\n";
-		$Report = new TestsReport("NegativeUpdateSyntaxTest",$TAGTESTS.'-junit.xml');
+		$Report = new TestsReport("NegativeUpdateSyntaxTest",$TAGTESTS.'-NegativeUpdateSyntaxTest-junit.xml');
 
 		$q = Test::PREFIX.' 
 

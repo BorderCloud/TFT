@@ -21,7 +21,7 @@ class UpdateEvaluationTest {
 		 //////////////////////////////////////////////////////////////////////
 		echo "
 		TESTS : UpdateEvaluationTest\n";
-		$Report = new TestsReport("UpdateEvaluationTest",$TAGTESTS.'-junit.xml');
+		$Report = new TestsReport("UpdateEvaluationTest",$TAGTESTS.'-UpdateEvaluationTest-junit.xml');
 
 		$q = Test::PREFIX.' 
 

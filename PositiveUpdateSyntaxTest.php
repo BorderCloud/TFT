@@ -22,7 +22,7 @@ class PositiveUpdateSyntaxTest {
 		 //////////////////////////////////////////////////////////////////////
 		echo "
 		TESTS : PositiveUpdateSyntaxTest\n";
-		$Report = new TestsReport("PositiveUpdateSyntaxTest",$TAGTESTS.'-junit.xml');
+		$Report = new TestsReport("PositiveUpdateSyntaxTest",$TAGTESTS.'-PositiveUpdateSyntaxTest-junit.xml');
 
 		$q = Test::PREFIX.' 
 

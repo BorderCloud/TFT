@@ -21,7 +21,7 @@ class ProtocolTest {
 		 //////////////////////////////////////////////////////////////////////
 		echo "
 		TESTS : ProtocolTest\n";
-		$Report = new TestsReport("ProtocolTest",$TAGTESTS.'-junit.xml');
+		$Report = new TestsReport("ProtocolTest",$TAGTESTS.'-ProtocolTest-junit.xml');
 
 		$q = Test::PREFIX.' 
 

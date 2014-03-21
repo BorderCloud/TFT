@@ -53,7 +53,7 @@ class QueryEvaluationTest {
 		echo "
 --------------------------------------------------------------------
 TESTS : QueryEvaluationTest";// ( ".QueryEvaluationTest::countApprovedTests()." Approved, ".QueryEvaluationTest::countSkipTests()." Skipped, ".QueryEvaluationTest::countAllTests()." Total\n";
-		$Report = new TestsReport("QueryEvaluationTest",$TAGTESTS.'-junit.xml');
+		$Report = new TestsReport("QueryEvaluationTest",$TAGTESTS.'-QueryEvaluationTest-junit.xml');
 
 		$q = Test::PREFIX.' 
 select DISTINCT ?testiri ?name ?queryTest ?graphInput ?graphOutput where

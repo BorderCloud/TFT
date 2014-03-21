@@ -21,7 +21,7 @@ class CSVResultFormatTest {
 		 //////////////////////////////////////////////////////////////////////
 		echo "
 		TESTS : CSVResultFormatTest\n";
-		$Report = new TestsReport("CSVResultFormatTest",$TAGTESTS.'-junit.xml');
+		$Report = new TestsReport("CSVResultFormatTest",$TAGTESTS.'-CSVResultFormatTest-junit.xml');
 
 		$q = Test::PREFIX.' 
 

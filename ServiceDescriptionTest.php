@@ -21,7 +21,7 @@ class ServiceDescriptionTest {
 		 //////////////////////////////////////////////////////////////////////
 		echo "
 		TESTS : ServiceDescriptionTest\n";
-		$Report = new TestsReport("ServiceDescriptionTest",$TAGTESTS.'-junit.xml');
+		$Report = new TestsReport("ServiceDescriptionTest",$TAGTESTS.'-ServiceDescriptionTest-junit.xml');
 
 		$q = Test::PREFIX.' 
 

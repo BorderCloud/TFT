@@ -1,6 +1,6 @@
 [submodule "tests/TFT-tests"]
 	path = tests/TFT-tests
-	url = git@github.com:BorderCloud/TFT-tests.git
+	url = https://github.com/BorderCloud/TFT-tests.git
 [submodule "lib/sparql"]
 	path = lib/sparql
-	url = git@github.com:BorderCloud/SPARQL.git
+	url = https://github.com/BorderCloud/SPARQL.git

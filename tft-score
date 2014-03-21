@@ -1,0 +1,584 @@
+#!/usr/bin/php
+<?php
+/*
+
+./tft-score -d -v -t fuseki \
+-q http://dev.grid-observatory.org:3030/tests/query \
+-u http://dev.grid-observatory.org:3030/tests/update \
+-r http://dev.grid-observatory.org/testsVirtuoso10  
+
+*/
+
+require_once 'lib/sparql/Endpoint.php';
+
+//List of servers available that you can test with this script
+$listTriplestore =  array("standardSparql11","4store","sesame","fuseki","virtuoso","allegrograph");
+
+$usage = "
+USAGE : ./tft -t fuseki 
+-q http://dev.grid-observatory.org:3030/tests/query 
+-u http://dev.grid-observatory.org:3030/tests/update 
+-r http://dev.grid-observatory.org/testsVirtuoso10  
+        
+    -l, --list                          List of servers available with this script.
+    -t, --triplestore=NAME              Example: --triplestore=standard or 
+                                                 --triplestore=4store
+                                            (by default : standard)
+    -r, --recordResult=GRAPH            Save results EARL in the endpoint.
+    -e, --endpointQueryAndUpdate=URL    Put url of endpoint to do query or 
+                                        update :
+                                            URL/sparql/?query=...
+                                            URL/update/?update=... (POST)
+    -q, --endpointQueryOnly=URL         Put url of endpoint to do query :
+                                            URL?query=...
+    -u, --endpointUpdateOnly=URL        Put url of endpoint to do query :
+                                            URL?update=... (POST)
+    --nameParameterQuery=PARAMETER      Change the name of parameter in 
+                                        the request http to read.
+                                        (by default : query)
+    --nameParameterUpdate=PARAMETER     Change the name of parameter in 
+                                        the request http to write.
+                                        (by default : update)
+
+    -v, --verbose                       Mode verbose
+    -d, --debug                         Mode debug
+";
+// Variables - inputs
+$modeVerbose = false;
+$modeDebug = false;
+$init = false;
+
+$triplestore = "standard";
+$endpointQueryAndUpdate = "";
+$endpointQueryOnly = "";
+$endpointUpdateOnly = "";
+$nameParameterQuery = "query";
+$nameParameterUpdate = "update";
+
+$TTRIPLESTORE = "standard";
+$tendpointQueryAndUpdate = "";
+$tendpointQueryOnly = "";
+$tendpointUpdateOnly = "";
+$tnameParameterQuery = "query";
+$tnameParameterUpdate = "update";
+// Variables
+$listFileTTL = null;
+
+$GRAPHTESTS = 'http://dev.grid-observatory.org/sparql11-test-suite/';
+//https://wiki.jenkins-ci.org/display/JENKINS/Building+a+software+project
+$GRAPH_RESULTS_EARL = "";//'http://dev.grid-observatory.org/sparql11-test-results/';
+$OUTPUT_FOLDER_RESULTS_JUNIT = "";//getcwd();
+
+$SOFTWARE_NAME_EARL ="Unknown";
+$SOFTWARE_DESCRIBE_EARL="";
+$SOFTWARE_DESCRIBE_TAG_EARL="v0.0";
+
+
+$TFT_NAME_EARL ="TFT";
+$TFT_DESCRIBE_EARL="";
+$TFT_DESCRIBE_TAG_EARL="v0.2";
+
+//Constant
+$folderTests = 'sparql11-test-suite/';
+
+
+
+//Client web
+$CURL = new Curl($modeDebug);
+
+if(count($argv) < 2){
+	echo $usage;
+	exit();
+}
+
+for($i = 1; $i < count($argv); $i++)  {
+	$param=explode("=",$argv[$i]);
+	
+	switch($param[0]){
+		case "-h":
+		case "--help":
+			echo $usage; 
+			exit();
+		case "-v":
+		case "--verbose":
+			$modeVerbose = true;
+			break;
+		case "-d":
+		case "--debug":
+			$modeDebug = true;
+			break;
+		case "-l":
+		case "--list":
+			echo "List of servers available that you can test with this script :\n";
+			foreach ($listTriplestore as $ts) {				
+				echo $ts."\n";
+			}
+			exit();	
+		case "-r":
+			if(! array_key_exists($i + 1, $argv)){	
+				echo "ERROR : forget parameter after -r (see --help)\n";
+				exit();
+			}
+			$GRAPH_RESULTS_EARL = $argv[$i + 1];
+			if( parse_url($GRAPH_RESULTS_EARL) === FALSE){
+				echo "ERROR : The name of graph has to be a URL.\n";
+				exit();
+			}
+			$i++;
+			break;
+		case "--recordResult":
+			if(! array_key_exists(1, $param)){
+				echo "ERROR : forget parameter after --recordResult (see --help)\n";
+				exit();
+			}
+			$GRAPH_RESULTS_EARL = $param[1];
+			if( parse_url($GRAPH_RESULTS_EARL) === FALSE){
+				echo "ERROR : The name of graph has to be a URL.\n";
+				exit();
+			}
+			break;
+			
+			/*
+--softwareName=NAME                      Save name in the results EARL.
+--softwareDescribeTag=TAG           Save last tag in the results EARL.
+--softwareDescribe=DESCRIBE 
+			*/
+		case "--softwareName":
+			if(! array_key_exists(1, $param)){
+				echo "ERROR : forget parameter after --softwareName (see --help)\n";
+				exit();
+			}
+			$SOFTWARE_NAME_EARL = $param[1];
+			break;	
+		case "--softwareDescribeTag":
+			if(! array_key_exists(1, $param)){
+				echo "ERROR : forget parameter after --output (see --help)\n";
+				exit();
+			}
+			$SOFTWARE_DESCRIBE_TAG_EARL = $param[1];
+			break;	
+		case "--softwareDescribe":
+			if(! array_key_exists(1, $param)){
+				echo "ERROR : forget parameter after --output (see --help)\n";
+				exit();
+			}
+			$SOFTWARE_DESCRIBE_EARL = $param[1];
+			break;	
+//////////////////////////////////////////////////////////////////////////////////
+		case "-t":
+			if(! array_key_exists($i + 1, $argv)){	
+				echo "ERROR : forget parameter after -t (see --help)\n";
+				exit();
+			}
+			$triplestore = $argv[$i + 1];			
+			if(! in_array($triplestore, $listTriplestore)){	
+				echo "ERROR : This triplestore is not available\n";
+				exit();
+			}
+			$i++;
+			break;
+		case "--triplestore":			
+			if(! array_key_exists(1, $param)){	
+				echo "ERROR : forget parameter after --triplestore (see --help)\n";
+				exit();
+			}
+			$triplestore = $param[1];			
+			if(! in_array($triplestore, $listTriplestore)){	
+				echo "ERROR : This triplestore is not available\n";
+				exit();
+			}
+			break;		
+		case "-e":
+			if(! array_key_exists($i + 1, $argv)){	
+				echo "ERROR : forget parameter after -e (see --help)\n";
+				exit();
+			}
+			$endpointQueryAndUpdate = $argv[$i + 1];	
+			if(! filter_var($endpointQueryAndUpdate, FILTER_VALIDATE_URL)){	
+				echo "ERROR : The URL of endpoint is not valid\n";
+				exit();
+			}
+			$i++;
+			break;
+		case "--endpointQueryAndUpdate":			
+			if(! array_key_exists(1, $param)){	
+				echo "ERROR : forget parameter after --endpointQueryAndUpdate (see --help)\n";
+				exit();
+			}
+			$endpointQueryAndUpdate = $param[1];			
+			if(! filter_var($endpointQueryAndUpdate, FILTER_VALIDATE_URL)){	
+				echo "ERROR : The URL of endpoint is not valid\n";
+				exit();
+			}
+			break;	
+		case "-q":
+			if(! array_key_exists($i + 1, $argv)){	
+				echo "ERROR : forget parameter after -q (see --help)\n";
+				exit();
+			}
+			$endpointQueryOnly = $argv[$i + 1];			
+			if(! filter_var($endpointQueryOnly, FILTER_VALIDATE_URL)){	
+				echo "ERROR : The URL of endpoint is not valid\n";
+				exit();
+			}
+			$i++;
+			break;
+		case "--endpointQueryOnly":			
+			if(! array_key_exists(1, $param)){	
+				echo "ERROR : forget parameter after --endpointQueryOnly (see --help)\n";
+				exit();
+			}
+			$endpointQueryOnly = $param[1];				
+			if(! filter_var($endpointQueryOnly, FILTER_VALIDATE_URL)){	
+				echo "ERROR : The URL of endpoint is not valid\n";
+				exit();
+			}
+			break;	
+		case "-u":
+			if(! array_key_exists($i + 1, $argv)){	
+				echo "ERROR : forget parameter after -u (see --help)\n";
+				exit();
+			}
+			$endpointUpdateOnly = $argv[$i + 1];			
+			if(! filter_var($endpointUpdateOnly, FILTER_VALIDATE_URL)){	
+				echo "ERROR : The URL of endpoint is not valid\n";
+				exit();
+			}
+			$i++;
+			break;
+		case "--endpointUpdateOnly":			
+			if(! array_key_exists(1, $param)){	
+				echo "ERROR : forget parameter after --endpointUpdateOnly (see --help)\n";
+				exit();
+			}
+			$endpointUpdateOnly = $param[1];			
+			if(! filter_var($endpointUpdateOnly, FILTER_VALIDATE_URL)){	
+				echo "ERROR : The URL of endpoint is not valid\n";
+				exit();
+			}
+			break;
+		case "--nameParameterQuery":
+			if(! array_key_exists(1, $param)){
+				echo "ERROR : forget parameter after --nameParameterQuery (see --help)\n";
+				exit();
+			}
+			$nameParameterQuery  = $param[1];
+			break;
+		case "--nameParameterUpdate":
+			if(! array_key_exists(1, $param)){
+				echo "ERROR : forget parameter after --nameParameterUpdate (see --help)\n";
+				exit();
+			}
+			$nameParameterUpdate  = $param[1];
+			break;
+
+////////////////////////////////////////////////////////
+		default:
+			//echo $usage; exit();
+			echo "ERROR usage ! (".$param[0]."?)";
+			echo $usage; exit();
+	}
+}
+
+if($modeVerbose){
+	echo "VERSION : ".$TFT_DESCRIBE_TAG_EARL."\n";
+}
+
+if($modeDebug){
+	ini_set('display_errors','On');
+}else{
+    ini_set('error_log','/dev/null');
+	ini_set('display_errors','Off');
+}
+
+/////////////// INIT ENDPOINT
+$readonly = false;
+$ENDPOINT = null;
+if($endpointQueryOnly == "" && $endpointUpdateOnly == "" && $endpointQueryAndUpdate == ""){	
+	echo "ERROR : The endpoint didn't find\n"; exit();
+}elseif($endpointQueryAndUpdate != ""){
+	$ENDPOINT = new Endpoint($endpointQueryAndUpdate,$readonly,$modeDebug);
+}elseif($endpointQueryOnly == "" || $endpointUpdateOnly == ""){	
+	echo "ERROR : The endpoint SPARQL query or update didn't find\n"; exit();
+}else{
+	$ENDPOINT = new Endpoint($endpointQueryOnly,$readonly,$modeDebug);
+	$ENDPOINT->setEndpointQuery($endpointQueryOnly);
+	$ENDPOINT->setEndpointUpdate($endpointUpdateOnly);
+	$ENDPOINT->setNameParameterQueryRead($nameParameterQuery);
+	$ENDPOINT->setNameParameterQueryWrite($nameParameterUpdate);
+}
+
+///////// PRINT CONFIG
+
+echo "
+Configuration about tests :
+- Graph of output EARL : ".$GRAPH_RESULTS_EARL."
+- Endpoint type        : ".$triplestore."
+- Endpoint query       : ".$ENDPOINT->getEndpointQuery()."
+- Endpoint update      : ".$ENDPOINT->getEndpointUpdate()."
+- Endpoint type        : ".$TTRIPLESTORE."
+- Mode verbose         : ".($modeVerbose?"ON":"OFF")."
+- Mode debug           : ".($modeDebug?"ON":"OFF")."
+";
+
+	
+		$ENDPOINT->ResetErrors();
+		$q = "
+		prefix earl: <http://www.w3.org/ns/earl#>
+prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> 
+prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> 
+prefix xsd:  <http://www.w3.org/2001/XMLSchema#>
+prefix mf:  <http://www.w3.org/2001/sw/DataAccess/tests/test-manifest#>
+SELECT ?categoryIRI ?categoryName (COUNT(DISTINCT ?test) AS ?NBTest) (COUNT(DISTINCT ?test2) AS ?NBTestKO) (?NBTest-?NBTestKO AS ?SCORE) WHERE 
+{
+	GRAPH <http://dev.grid-observatory.org/sparql11-test-suite/> {
+		?categoryIRI rdfs:label ?categoryName ;
+	                 mf:conformanceRequirement ?list.
+        ?list rdf:rest*/rdf:first ?ttlTests .
+        ?ttlTests mf:entries ?entries .
+       ?entries rdf:rest*/rdf:first ?test.
+	}
+	GRAPH <".$GRAPH_RESULTS_EARL."> {
+		?assertion a earl:Assertion.
+		?assertion earl:test ?test.
+		OPTIONAL{
+		?assertion earl:result ?result.
+		?result earl:outcome ?out .
+		?assertion earl:test ?test2.
+		FILTER ( ?out != earl:passed)
+		}
+	}
+} GROUP BY ?categoryIRI ?categoryName
+ORDER BY ?categoryName
+		"; 
+		$rows = $ENDPOINT->query($q, 'rows');
+		$err = $ENDPOINT->getErrors();
+		if ($err) {
+			echo "Error (see mode debug)";
+			exit();
+		 }
+		
+
+	foreach ($rows["result"]["rows"] as $row){
+		echo $row["categoryName"] . " : " .$row["SCORE"]."/".$row["NBTest"]."\n";//."(".$row["NBTestKO"].")\n";
+		
+		$q = '
+prefix sq: <http://sparqlscore.net/Score#> 
+prefix sd: <http://www.w3.org/ns/sparql-service-description#> 
+prefix git: <http://www.w3.org/ns/git#> 
+prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> 
+prefix xsd:  <http://www.w3.org/2001/XMLSchema#>
+INSERT DATA {  
+ GRAPH <'.$GRAPH_RESULTS_EARL .'> {
+        <'.$row["categoryIRI"].'> sq:totalTest '.$row["NBTest"].' ;
+	                              sq:scoreTest '.$row["SCORE"].' ;.
+		}
+	}
+';
+//echo $q;
+		$rows = $ENDPOINT->queryUpdate($q);
+		$err = $ENDPOINT->getErrors(); 
+		if ($err) {			
+			echo "Error (see mode debug)";
+			exit();
+		}
+	}
+	
+		$ENDPOINT->ResetErrors();
+		$q = "
+prefix earl: <http://www.w3.org/ns/earl#>
+prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> 
+prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> 
+prefix xsd:  <http://www.w3.org/2001/XMLSchema#>
+prefix mf:  <http://www.w3.org/2001/sw/DataAccess/tests/test-manifest#>
+SELECT (COUNT(DISTINCT ?test) AS ?NBTest) (COUNT(DISTINCT ?test2) AS ?NBTestKO) (?NBTest-?NBTestKO AS ?SCORE)  WHERE 
+{
+	GRAPH <http://dev.grid-observatory.org/sparql11-test-suite/> {
+		?categoryIRI rdfs:label ?categoryName ;
+	                 mf:conformanceRequirement ?list.
+        ?list rdf:rest*/rdf:first ?ttlTests .
+        ?ttlTests mf:entries ?entries .
+       ?entries rdf:rest*/rdf:first ?test.
+	}
+	GRAPH <".$GRAPH_RESULTS_EARL."> {
+		?assertion a earl:Assertion.
+		?assertion earl:test ?test.
+		OPTIONAL{
+		?assertion earl:result ?result.
+		?result earl:outcome ?out .
+		?assertion earl:test ?test2.
+		FILTER ( ?out != earl:passed)
+		}
+	}
+}
+";
+		$res = $ENDPOINT->query($q, 'row');
+		$err = $ENDPOINT->getErrors();
+		if ($err) {
+			echo "Error (see mode debug)";
+			exit();
+		}
+		echo "\n
+################################################# 
+#                                               #
+#               GRAPH                           #
+#           ".$res["SCORE"]."/".$res["NBTest"]." TESTS                       #
+#                                               #
+################################################# 
+";
+		$q = '
+prefix sq: <http://sparqlscore.net/Score#> 
+prefix sd: <http://www.w3.org/ns/sparql-service-description#> 
+prefix git: <http://www.w3.org/ns/git#> 
+prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> 
+prefix xsd:  <http://www.w3.org/2001/XMLSchema#>
+INSERT DATA {  
+ GRAPH <'.$GRAPH_RESULTS_EARL .'> {
+        <'.$GRAPH_RESULTS_EARL .'/Service> sq:totalTest '.$res["NBTest"].' ;
+	                              sq:scoreTest '.$res["SCORE"].' ;.
+		}
+	}
+';
+//echo $q;
+		$rows = $ENDPOINT->queryUpdate($q);
+		$err = $ENDPOINT->getErrors(); 
+		if ($err) {			
+			echo "Error (see mode debug)";
+			exit();
+		}
+
+//query for sparqlscore
+$test = "
+//print construct
+prefix earl: <http://www.w3.org/ns/earl#>
+prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> 
+prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> 
+prefix xsd:  <http://www.w3.org/2001/XMLSchema#>
+prefix mf:  <http://www.w3.org/2001/sw/DataAccess/tests/test-manifest#>
+prefix sq: <http://sparqlscore.net/Score#> 
+prefix sd: <http://www.w3.org/ns/sparql-service-description#> 
+prefix git: <http://www.w3.org/ns/git#> 
+prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> 
+CONSTRUCT {
+	?categoryIRI rdf:label ?categoryName.
+	?categoryIRI earl:test ?test.
+	?categoryIRI sq:totalTest ?totalTest.
+	?categoryIRI sq:scoreTest ?score.
+	?test rdf:label ?testName.
+	?test earl:assertions _:x.
+	_:x  rdf:label ?assertionName.
+	_:x  earl:outcome ?outcome.
+} WHERE {
+	GRAPH <https://ci.inria.fr/go3/job/BenchmarkSPARQL11_Virtuoso/73/> {
+		?assertion a earl:Assertion.
+		?assertion earl:test ?test.
+		?assertion rdf:label ?assertionName.
+		?assertion earl:result ?result.
+		?result earl:date ?date.
+		OPTIONAL {?result earl:duration ?duration.}
+		?result earl:outcome ?outcome.
+		?categoryIRI sq:totalTest ?totalTest ;
+	                 sq:scoreTest ?score.
+					 
+	}
+	GRAPH <http://dev.grid-observatory.org/sparql11-test-suite/> {
+		?categoryIRI rdfs:label ?categoryName ;
+	                     mf:conformanceRequirement ?list.
+                ?list rdf:rest*/rdf:first ?ttlTests .
+                ?ttlTests mf:entries ?entries .
+                ?entries rdf:rest*/rdf:first ?test.
+                ?test mf:name ?testName.
+	}
+}
+
+
+//print list graph
+prefix sq: <http://sparqlscore.net/Score#> 
+prefix sd: <http://www.w3.org/ns/sparql-service-description#> 
+prefix git: <http://www.w3.org/ns/git#> 
+prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> 
+prefix xsd:  <http://www.w3.org/2001/XMLSchema#>
+SELECT DISTINCT ?graph ?serverName ?serverVersion ?testerName ?testerVersion ?score 
+WHERE {
+GRAPH ?graph {
+       ?service a sd:Service ;
+               sd:server ?server ;
+               sd:testedBy ?tester .
+       ?server git:name ?serverName ;
+               git:describeTag ?serverVersion ;
+               git:describe ?serverVersionBuild .
+       ?tester  git:name ?testerName ;
+               git:describeTag ?testerVersion  .
+			   OPTIONAL{
+			   ?service sq:scoreTest ?score .
+			   }
+    }
+} ORDER BY ?serverName DESC(?graph)
+
+
+
+
+prefix sq: <http://sparqlscore.net/Score#> 
+prefix sd: <http://www.w3.org/ns/sparql-service-description#> 
+prefix git: <http://www.w3.org/ns/git#> 
+prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> 
+prefix xsd:  <http://www.w3.org/2001/XMLSchema#>
+SELECT DISTINCT ?serverName ?serverVersion ?score ?total (Max(?date) AS ?LastDate)
+WHERE {
+GRAPH ?graph {
+       ?service a sd:Service ;
+               sd:server ?server ;
+               sd:testedBy ?tester ;
+               sd:testedDate ?date .
+       ?server git:name ?serverName ;
+               git:describeTag ?serverVersion ;
+               git:describe ?serverVersionBuild .
+       ?tester  git:name ?testerName ;
+               git:describeTag ?testerVersion  .
+			   ?service sq:scoreTest ?score .
+			   ?service sq:totalTest ?total .
+    }
+} 
+GROUP BY ?serverName ?serverVersion ?score ?total
+ORDER BY DESC(?score) ?date ?serverName 
+
+
+prefix sq: <http://sparqlscore.net/Score#> 
+prefix sd: <http://www.w3.org/ns/sparql-service-description#> 
+prefix git: <http://www.w3.org/ns/git#> 
+prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> 
+prefix xsd:  <http://www.w3.org/2001/XMLSchema#>
+SELECT ?graph ?serverName ?serverVersion ?score ?total ?LastDate
+WHERE {
+	GRAPH ?graph {
+       ?service a sd:Service ;
+               sd:server ?server ;
+               sd:testedBy ?tester ;
+               sd:testedDate ?LastDate.
+       ?server git:name ?serverName ;
+               git:describeTag ?serverVersion ;
+               git:describe ?serverVersionBuild .
+       ?tester  git:name ?testerName ;
+               git:describeTag ?testerVersion  .
+			   ?service sq:scoreTest ?score .
+			   ?service sq:totalTest ?total .
+
+
+    }
+	  {
+		SELECT ?serverName ?serverVersion (Max(?date) AS ?LastDate)
+		WHERE {
+				GRAPH ?graph {
+					  ?service a sd:Service ;
+							   sd:server ?server ;
+							   sd:testedDate ?date.
+					   ?server git:name ?serverName ;
+							   git:describeTag ?serverVersion  .
+					}
+				} GROUP BY ?serverName ?serverVersion
+	  }
+} 
+ORDER BY DESC(?score) ?date ?serverName 
+
+";
+

@@ -1,0 +1,376 @@
+#!/usr/bin/php
+<?php
+/*
+
+Tests :
+
+./tft-testsuite -l -d
+./tft-testsuite --list -d
+./tft-testsuite -s -d
+./tft-testsuite --listtestsuite -d
+
+./tft-testsuite -t fuseki -q http://dev.grid-observatory.org:3030/tests/query -u http://dev.grid-observatory.org:3030/tests/update \
+--testsuiteURL=http://bordercloud.github.io/TFT-tests/sparql11-test-suite/ \
+--testsuiteFolder=tests/TFT-tests/sparql11-test-suite/
+
+./tft-testsuite -t fuseki -q http://dev.grid-observatory.org:3030/tests/query -u http://dev.grid-observatory.org:3030/tests/update \
+--testsuiteURL=http://bordercloud.github.io/TFT-tests/GO3/ \
+--testsuiteFolder=tests/TFT-tests/GO3/
+
+
+./tft-testsuite -t fuseki -q http://dev.grid-observatory.org:3030/tests/query -u http://dev.grid-observatory.org:3030/tests/update \
+-a
+
+
+//A TESTER
+./tft-testsuite -a -t virtuoso -e http://dev.grid-observatory.org:8890/tests/ \
+--testsuiteURL=http://bordercloud.github.io/TFT-tests/sparql11-test-suite/ \
+--testsuiteFolder=tests/TFT-tests/sparql11-test-suite/
+
+
+*/
+
+require_once 'lib/sparql/Endpoint.php';
+require_once 'Tools.php';
+require_once 'TestSuite.php';
+require_once 'fuseki/FusekiTestSuite.php';
+
+//List of servers available that you can test with this script
+$listTriplestore =  array("standardSparql11","4store","sesame","fuseki","virtuoso","allegrograph");
+
+//List of test suite available that you can pass by default
+$listTestSuite =  array(
+"http://bordercloud.github.io/TFT-tests/sparql11-test-suite/" => "tests/TFT-tests/sparql11-test-suite/"
+//,
+//"http://bordercloud.github.io/TFT-tests/GO3/" => "tests/TFT-tests/GO3/"
+);
+
+$usage = "
+USAGE : tft-testsuite
+        
+    -l, --list                          List of servers available that you 
+                                        can test with this script.                         
+	-s, --listtestsuite                 List of test suite by default.
+	
+	-a, --installall                       Import all tests in the triplestore
+	
+    --testsuiteURL=URL                  Import the test suite via a url
+    --testsuiteFolder=folder            Import the test suite via a path
+	
+    -t, --triplestore=NAME              Example: --triplestore=standard or 
+                                                 --triplestore=4store
+                                            (by default : standard)
+
+    -e, --endpointQueryAndUpdate=URL    Put url of endpoint to do query or 
+                                        update :
+                                            URL/sparql/?query=...
+                                            URL/update/?update=... (POST)
+    -q, --endpointQueryOnly=URL         Put url of endpoint to do query :
+                                            URL?query=...
+    -u, --endpointUpdateOnly=URL        Put url of endpoint to do query :
+                                            URL?update=... (POST)
+    --nameParameterQuery=PARAMETER      Change the name of parameter in 
+                                        the request http to read.
+                                        (by default : query)
+    --nameParameterUpdate=PARAMETER     Change the name of parameter in 
+                                        the request http to write.
+                                        (by default : update)
+    -v, --verbose                       Mode verbose
+    -d, --debug                         Mode debug
+";
+
+// Variables - inputs
+$modeVerbose = false;
+$modeDebug = false;
+$modeAll = false;
+
+$ENDPOINT = null;
+$triplestore = "standard";
+$endpointQueryAndUpdate = "";
+$endpointQueryOnly = "";
+$endpointUpdateOnly = "";
+$nameParameterQuery = "query";
+$nameParameterUpdate = "update";
+
+$testsuiteURL = "";
+$testsuiteFolder = "";
+
+//Client web
+$CURL = new Curl($modeDebug);
+
+if(count($argv) < 2){
+	echo $usage;
+	exit();
+}
+
+for($i = 1; $i < count($argv); $i++)  {
+	$param=explode("=",$argv[$i]);
+	
+	switch($param[0]){
+		case "-h":
+		case "--help":
+			echo $usage; 
+			exit();
+		case "-v":
+		case "--verbose":
+			$modeVerbose = true;
+			break;
+		case "-d":
+		case "--debug":
+			$modeDebug = true;
+			break;
+		case "-l":
+		case "--list":
+			echo "List of servers available that you can test with this script :\n";
+			foreach ($listTriplestore as $ts) {				
+				echo $ts."\n";
+			}
+			exit();		
+		case "-s":
+		case "--listtestsuite":
+			echo "List of test suite by default :\n";			
+			echo "URL\tPATH\n";
+			foreach ($listTestSuite as $URL => $PATH) {				
+				echo $URL."\t".$PATH."\n";
+			}
+			exit();		
+		case "-a":
+		case "--installall":
+			$modeAll = true;
+			break;
+	
+		case "-a":
+		case "--installall":
+			$modeAll = true;
+			break;
+
+		case "--testsuiteURL":			
+			if(! array_key_exists(1, $param)){	
+				echo "ERROR : forget parameter after --testsuiteURL (see --help)\n";
+				exit();
+			}
+			$testsuiteURL = $param[1];				
+			if(! filter_var($testsuiteURL, FILTER_VALIDATE_URL)){	
+				echo "ERROR : The URL of endpoint is not valid\n";
+				exit();
+			}
+			break;	
+			
+		case "--testsuiteFolder":
+			if(! array_key_exists(1, $param)){
+				echo "ERROR : forget parameter after --testsuiteFolder (see --help)\n";
+				exit();
+			}
+			$testsuiteFolder = $param[1];
+			if(file_exists($testsuiteFolder) === FALSE){
+				echo "ERROR : The path of test suite didn't find\n";
+				exit();
+			}
+			break;	
+//////////////////////////////////////////////////////////////////////////////////
+		case "-t":
+			if(! array_key_exists($i + 1, $argv)){	
+				echo "ERROR : forget parameter after -t (see --help)\n";
+				exit();
+			}
+			$triplestore = $argv[$i + 1];			
+			if(! in_array($triplestore, $listTriplestore)){	
+				echo "ERROR : This triplestore is not available\n";
+				exit();
+			}
+			$i++;
+			break;
+		case "--triplestore":			
+			if(! array_key_exists(1, $param)){	
+				echo "ERROR : forget parameter after --triplestore (see --help)\n";
+				exit();
+			}
+			$triplestore = $param[1];			
+			if(! in_array($triplestore, $listTriplestore)){	
+				echo "ERROR : This triplestore is not available\n";
+				exit();
+			}
+			break;		
+		case "-e":
+			if(! array_key_exists($i + 1, $argv)){	
+				echo "ERROR : forget parameter after -e (see --help)\n";
+				exit();
+			}
+			$endpointQueryAndUpdate = $argv[$i + 1];	
+			if(! filter_var($endpointQueryAndUpdate, FILTER_VALIDATE_URL)){	
+				echo "ERROR : The URL of endpoint is not valid\n";
+				exit();
+			}
+			$i++;
+			break;
+		case "--endpointQueryAndUpdate":			
+			if(! array_key_exists(1, $param)){	
+				echo "ERROR : forget parameter after --endpointQueryAndUpdate (see --help)\n";
+				exit();
+			}
+			$endpointQueryAndUpdate = $param[1];			
+			if(! filter_var($endpointQueryAndUpdate, FILTER_VALIDATE_URL)){	
+				echo "ERROR : The URL of endpoint is not valid\n";
+				exit();
+			}
+			break;	
+		case "-q":
+			if(! array_key_exists($i + 1, $argv)){	
+				echo "ERROR : forget parameter after -q (see --help)\n";
+				exit();
+			}
+			$endpointQueryOnly = $argv[$i + 1];			
+			if(! filter_var($endpointQueryOnly, FILTER_VALIDATE_URL)){	
+				echo "ERROR : The URL of endpoint is not valid\n";
+				exit();
+			}
+			$i++;
+			break;
+		case "--endpointQueryOnly":			
+			if(! array_key_exists(1, $param)){	
+				echo "ERROR : forget parameter after --endpointQueryOnly (see --help)\n";
+				exit();
+			}
+			$endpointQueryOnly = $param[1];				
+			if(! filter_var($endpointQueryOnly, FILTER_VALIDATE_URL)){	
+				echo "ERROR : The URL of endpoint is not valid\n";
+				exit();
+			}
+			break;	
+		case "-u":
+			if(! array_key_exists($i + 1, $argv)){	
+				echo "ERROR : forget parameter after -u (see --help)\n";
+				exit();
+			}
+			$endpointUpdateOnly = $argv[$i + 1];			
+			if(! filter_var($endpointUpdateOnly, FILTER_VALIDATE_URL)){	
+				echo "ERROR : The URL of endpoint is not valid\n";
+				exit();
+			}
+			$i++;
+			break;
+		case "--endpointUpdateOnly":			
+			if(! array_key_exists(1, $param)){	
+				echo "ERROR : forget parameter after --endpointUpdateOnly (see --help)\n";
+				exit();
+			}
+			$endpointUpdateOnly = $param[1];			
+			if(! filter_var($endpointUpdateOnly, FILTER_VALIDATE_URL)){	
+				echo "ERROR : The URL of endpoint is not valid\n";
+				exit();
+			}
+			break;
+		case "--nameParameterQuery":
+			if(! array_key_exists(1, $param)){
+				echo "ERROR : forget parameter after --nameParameterQuery (see --help)\n";
+				exit();
+			}
+			$nameParameterQuery  = $param[1];
+			break;
+		case "--nameParameterUpdate":
+			if(! array_key_exists(1, $param)){
+				echo "ERROR : forget parameter after --nameParameterUpdate (see --help)\n";
+				exit();
+			}
+			$nameParameterUpdate  = $param[1];
+			break;
+////////////////////////////////////////////////////////		
+		default:
+			//echo $usage; exit();
+			echo "ERROR usage ! (".$param[0]."?)";
+			echo $usage; exit();
+	}
+}
+
+if($modeVerbose){
+	echo "VERSION : ".$TFT_DESCRIBE_TAG_EARL."\n";
+}
+
+if($modeDebug){
+	ini_set('display_errors','On');
+}else{
+    ini_set('error_log','/dev/null');
+	ini_set('display_errors','Off');
+}
+/////////////// INIT ENDPOINT
+$readonly = false;
+if($endpointQueryOnly == "" && $endpointUpdateOnly == "" && $endpointQueryAndUpdate == ""){	
+	echo "ERROR : The endpoint didn't find\n"; exit();
+}elseif($endpointQueryAndUpdate != ""){
+	$ENDPOINT = new Endpoint($endpointQueryAndUpdate,$readonly,$modeDebug);
+}elseif($endpointQueryOnly == "" || $endpointUpdateOnly == ""){	
+	echo "ERROR : The endpoint SPARQL query or update didn't find\n"; exit();
+}else{
+	$ENDPOINT = new Endpoint($endpointQueryOnly,$readonly,$modeDebug);
+	$ENDPOINT->setEndpointQuery($endpointQueryOnly);
+	$ENDPOINT->setEndpointUpdate($endpointUpdateOnly);
+	$ENDPOINT->setNameParameterQueryRead($nameParameterQuery);
+	$ENDPOINT->setNameParameterQueryWrite($nameParameterUpdate);
+}
+
+//////// PRINT CONFIG
+
+echo "
+Configuration about tests :
+- Endpoint type        : ".$triplestore."
+- Endpoint query       : ".$ENDPOINT->getEndpointQuery()."
+- Endpoint update      : ".$ENDPOINT->getEndpointUpdate()."
+- Mode install all     : ".($modeAll?"ON":"OFF")."
+- Test suite : URL     : ".$testsuiteURL."
+- Test suite : folder  : ".$testsuiteFolder."
+- Mode verbose         : ".($modeVerbose?"ON":"OFF")."
+- Mode debug           : ".($modeDebug?"ON":"OFF")."
+";
+
+/////////////// INIT TEST SUITE
+
+$TESTSUITE = null;
+//todo : condition
+
+if ($modeAll){
+	foreach($listTestSuite as $URL => $folder){
+		importTestSuite($URL,$folder);
+	}
+}else{
+	importTestSuite($testsuiteURL,$testsuiteFolder);
+}
+
+function importTestSuite($testsuiteURL,$testsuiteFolder){
+    global $ENDPOINT,$triplestore;
+	
+	$testsuite = null;
+	$success = true ;
+	$messageError = "";
+	switch($triplestore){
+		case "sesame":		
+			$success = false;
+			$messageError = "Not support LOAD SPARQL";
+			ECHO "AAAAAAAAAAAAAAAAAAAATTTTTTTTTTTTTTTTTTTTTTTTEEEEEEEEEEEEEEEEEEEEEESSSSSSSSSSSSSSSSTER";
+			$testsuite = new SesameTestSuite($ENDPOINT,$testsuiteURL,$testsuiteFolder);	
+			break;
+		case "4store":		
+			$success = false;
+			$messageError = "Not LOAD TTL with the good default URI";		
+			ECHO "AAAAAAAAAAAAAAAAAAAATTTTTTTTTTTTTTTTTTTTTTTTEEEEEEEEEEEEEEEEEEEEEESSSSSSSSSSSSSSSSTER";
+			$testsuite = new FourStoreTestSuite($ENDPOINT,$testsuiteURL,$testsuiteFolder);		
+			break;
+		case "fuseki":
+			$success = false;
+			$messageError = "Not support LOAD SPARQL";
+			$testsuite = new FusekiTestSuite($ENDPOINT,$testsuiteURL,$testsuiteFolder);
+			break;
+		default:
+			ECHO "AAAAAAAAAAAAAAAAAAAATTTTTTTTTTTTTTTTTTTTTTTTEEEEEEEEEEEEEEEEEEEEEESSSSSSSSSSSSSSSSTER";
+			$testsuite = new TestSuite($ENDPOINT,$testsuiteURL,$testsuiteFolder);
+	}
+
+
+	echo "============ CLEAN GRAPH <".$testsuiteURL."> \n";
+	echo "Before to clean : ".Tools::printNbTriples(). "\n";
+	$testsuite->clear(); 
+	echo "After to clean : ".Tools::printNbTriples(). "\n";
+	echo "================================================================= \n";
+
+	echo "Start to init the dataset via URL\n";
+	$success = $testsuite->install();
+}

@@ -1,0 +1,3 @@
+[submodule "tests/TFT-tests"]
+	path = tests/TFT-tests
+	url = git@github.com:BorderCloud/TFT-tests.git

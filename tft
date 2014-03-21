@@ -72,8 +72,8 @@ $listTriplestore =  array("standardSparql11","4store","sesame","fuseki","virtuos
 //List of test suite available that you can pass
 $listTestSuite =  array(
 "http://bordercloud.github.io/TFT-tests/sparql11-test-suite/" => "tests/TFT-tests/sparql11-test-suite/"
-//,
-//"http://bordercloud.github.io/TFT-tests/GO3/" => "tests/TFT-tests/GO3/"
+,
+"http://bordercloud.github.io/TFT-tests/GO3/" => "tests/TFT-tests/GO3/"
 );
 							  
 $usage = "

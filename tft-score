@@ -331,7 +331,7 @@ prefix xsd:  <http://www.w3.org/2001/XMLSchema#>
 prefix mf:  <http://www.w3.org/2001/sw/DataAccess/tests/test-manifest#>
 SELECT ?categoryIRI ?categoryName (COUNT(DISTINCT ?test) AS ?NBTest) (COUNT(DISTINCT ?test2) AS ?NBTestKO) (?NBTest-?NBTestKO AS ?SCORE) WHERE 
 {
-	GRAPH <http://dev.grid-observatory.org/sparql11-test-suite/> {
+	GRAPH ?g {
 		?categoryIRI rdfs:label ?categoryName ;
 	                 mf:conformanceRequirement ?list.
         ?list rdf:rest*/rdf:first ?ttlTests .
@@ -393,7 +393,7 @@ prefix xsd:  <http://www.w3.org/2001/XMLSchema#>
 prefix mf:  <http://www.w3.org/2001/sw/DataAccess/tests/test-manifest#>
 SELECT (COUNT(DISTINCT ?test) AS ?NBTest) (COUNT(DISTINCT ?test2) AS ?NBTestKO) (?NBTest-?NBTestKO AS ?SCORE)  WHERE 
 {
-	GRAPH <http://dev.grid-observatory.org/sparql11-test-suite/> {
+	GRAPH ?g {
 		?categoryIRI rdfs:label ?categoryName ;
 	                 mf:conformanceRequirement ?list.
         ?list rdf:rest*/rdf:first ?ttlTests .
@@ -481,7 +481,7 @@ CONSTRUCT {
 	                 sq:scoreTest ?score.
 					 
 	}
-	GRAPH <http://dev.grid-observatory.org/sparql11-test-suite/> {
+	GRAPH ?g {
 		?categoryIRI rdfs:label ?categoryName ;
 	                     mf:conformanceRequirement ?list.
                 ?list rdf:rest*/rdf:first ?ttlTests .

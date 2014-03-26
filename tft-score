@@ -329,7 +329,7 @@ prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> 
 prefix xsd:  <http://www.w3.org/2001/XMLSchema#>
 prefix mf:  <http://www.w3.org/2001/sw/DataAccess/tests/test-manifest#>
-SELECT ?categoryIRI ?categoryName (COUNT(DISTINCT ?test) AS ?NBTest) (COUNT(DISTINCT ?test2) AS ?NBTestKO) (?NBTest-?NBTestKO AS ?SCORE) WHERE 
+SELECT ?g ?categoryIRI ?categoryName (COUNT(DISTINCT ?test) AS ?NBTest) (COUNT(DISTINCT ?test2) AS ?NBTestKO) (?NBTest-?NBTestKO AS ?SCORE) WHERE 
 {
 	GRAPH ?g {
 		?categoryIRI rdfs:label ?categoryName ;
@@ -348,7 +348,7 @@ SELECT ?categoryIRI ?categoryName (COUNT(DISTINCT ?test) AS ?NBTest) (COUNT(DIST
 		FILTER ( ?out != earl:passed)
 		}
 	}
-} GROUP BY ?categoryIRI ?categoryName
+} GROUP BY ?g ?categoryIRI ?categoryName
 ORDER BY ?categoryName
 		"; 
 		$rows = $ENDPOINT->query($q, 'rows');
@@ -360,7 +360,7 @@ ORDER BY ?categoryName
 		
 
 	foreach ($rows["result"]["rows"] as $row){
-		echo $row["categoryName"] . " : " .$row["SCORE"]."/".$row["NBTest"]."\n";//."(".$row["NBTestKO"].")\n";
+		echo $row["g"] . " : " . $row["categoryName"] . " : " .$row["SCORE"]."/".$row["NBTest"]."\n";//."(".$row["NBTestKO"].")\n";
 		
 		$q = '
 prefix sq: <http://sparqlscore.net/Score#> 
@@ -370,8 +370,9 @@ prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 prefix xsd:  <http://www.w3.org/2001/XMLSchema#>
 INSERT DATA {  
  GRAPH <'.$GRAPH_RESULTS_EARL .'> {
+        <'.$row["g"].'> sq:testSuite <'.$row["categoryIRI"].'> .
         <'.$row["categoryIRI"].'> sq:totalTest '.$row["NBTest"].' ;
-	                              sq:scoreTest '.$row["SCORE"].' ;.
+	                              sq:scoreTest '.$row["SCORE"].' .
 		}
 	}
 ';

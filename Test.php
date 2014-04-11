@@ -128,11 +128,11 @@ EOT;
 	
 	function addGraphInput($url, $name="DEFAULT")
 	{	
-		$this->ListGraphInput[$name]= ["url"=>$url,"mimetype"=> $this->getType($url)];
+		$this->ListGraphInput[$name]= array ("url"=>$url,"mimetype"=> $this->getType($url));
 	}
 	function addGraphOutput($url, $name="DEFAULT")
 	{		
-		$this->ListGraphOutput[$name]= ["url"=>$url,"mimetype"=> $this->getType($url)];
+		$this->ListGraphOutput[$name]= array ("url"=>$url,"mimetype"=> $this->getType($url));
 	}
 	
 		

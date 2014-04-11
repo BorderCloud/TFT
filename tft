@@ -14,11 +14,15 @@ cd /home/rafes/projects/gridobs3/tools/testsparql11
 -r http://dev.grid-observatory.org/testsVirtuoso
 
 ./tft -t fuseki -q http://dev.grid-observatory.org:3030/tests/query -u http://dev.grid-observatory.org:3030/tests/update \
--tt virtuoso -te http://dev.grid-observatory.org:8890/tests/ \
+-tt virtuoso -te http://dev.grid-observatory.org:8890/ \
 -o ./junit -r http://dev.grid-observatory.org/testsVirtuoso10  \
 --softwareName=virtuoso --softwareDescribeTag=v0.2  --softwareDescribe=v0.2-truc
 
-
+curl -v -H "Accept: application/sparql-results+xml" \
+--data-urlencode \
+'query=SELECT (COUNT(?s) AS ?count) WHERE {GRAPH ?g {  ?s ?p ?v .}}' \
+http://dev.grid-observatory.org:8890/sparql/
+ 
 //4Store
 ./tft -i -t fuseki -q http://dev.grid-observatory.org:3030/tests/query -u http://dev.grid-observatory.org:3030/tests/update \
 -tt 4store -te http://dev.grid-observatory.org:8000/ \
@@ -45,6 +49,14 @@ cd /home/rafes/projects/gridobs3/tools/testsparql11
 --testnameParameterUpdate=query \
 -o ./junit \
 -r http://dev.grid-observatory.org/tests
+
+./tft -t fuseki -q http://dev.grid-observatory.org:3030/tests/query -u http://dev.grid-observatory.org:3030/tests/update \
+-tt allegrograph -tq http://dev.grid-observatory.org:10035/repositories/tests \
+-tu http://dev.grid-observatory.org:10035/repositories/tests --testnameParameterUpdate=query \
+-o ./junit -r http://dev.grid-observatory.org/testsVirtuoso10  --softwareName=virtuoso \
+--softwareDescribeTag=v0.2  --softwareDescribe=v0.2-truc
+
+
 
 
 ./tft -t fuseki -q http://dev.grid-observatory.org:3030/tests/query -u http://dev.grid-observatory.org:3030/tests/update \
@@ -73,15 +85,16 @@ require_once 'ServiceDescriptionTest.php';
 require_once 'ProtocolTest.php';
 //require_once 'Test.php';
 
+// Parse with sections
+$CONFIG = parse_ini_file("config.ini", true);
+//print_r($CONFIG);
+//exit();
+
 //List of servers available that you can test with this script
-$listTriplestore =  array("standardSparql11","4store","sesame","fuseki","virtuoso","allegrograph");
+$listTriplestore =  $CONFIG["CONFIG"]["listTriplestore"];
 
 //List of test suite available that you can pass
-$listTestSuite =  array(
-"http://bordercloud.github.io/TFT-tests/sparql11-test-suite/" => "tests/TFT-tests/sparql11-test-suite/"
-,
-"http://bordercloud.github.io/TFT-tests/GO3/" => "tests/TFT-tests/GO3/"
-);
+$listTestSuite =  $CONFIG["CONFIG"]["listTestSuite"];
 							  
 $usage = "
 USAGE : tft [-l|--list] [-t|--triplestore=NAME]
@@ -593,7 +606,6 @@ foreach($listTestSuite as $URL => $folder){
 	PositiveSyntaxTest::doAllTests();
 
 	NegativeSyntaxTest::doAllTests();
-
 
 	QueryEvaluationTest::doAllTests();
 

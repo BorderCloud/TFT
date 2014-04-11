@@ -126,9 +126,9 @@ EOT;
 		return $type;
 	}
 	
-	function addGraphInput($url, $name="DEFAULT")
+	function addGraphInput($url, $name="DEFAULT",$endpoint="")
 	{	
-		$this->ListGraphInput[$name]= array ("url"=>$url,"mimetype"=> $this->getType($url));
+		$this->ListGraphInput[$name]= array ("url"=>$url,"mimetype"=> $this->getType($url),"endpoint"=>$endpoint);
 	}
 	function addGraphOutput($url, $name="DEFAULT")
 	{		
@@ -167,6 +167,27 @@ EOT;
 		$rowsGraph = $ENDPOINT->query($qGraphOutput,"rows");
 		foreach ($rowsGraph["result"]["rows"] as $rowGraph){
 			$this->addGraphOutput($rowGraph["graphData"],$rowGraph["graphName"]);
+		}
+	}
+	
+	function readAndAddService($graphTest,$iriTest)
+	{
+		global $ENDPOINT;
+		$qGraphInput = Test::PREFIX.' 
+		select DISTINCT  ?graphData ?endpoint
+		where
+		 {GRAPH  <'.$graphTest.'>
+				 {
+					<'.$iriTest.'>  	mf:action [ qt:serviceData [
+																   qt:endpoint ?endpoint ;
+																   qt:data     ?graphData
+														   ]
+										].				
+				}
+		}';
+		$rowsGraph = $ENDPOINT->query($qGraphInput,"rows");
+		foreach ($rowsGraph["result"]["rows"] as $rowGraph){
+			$this->addGraphInput($rowGraph["graphData"],$rowGraph["endpoint"],$rowGraph["endpoint"]);
 		}
 	}
 	
@@ -384,7 +405,7 @@ EOT;
 				$tabDiff = Tools::array_diff_assoc_recursive($tabResultDataWait["triples"], $tabResultDataset["triples"]);		
 				break;							
 			case  "application/sparql-results+json":					
-				$tabResultDataWait = json_decode($expected["content"], true);
+				$tabResultDataWait = json_decode($expected, true);
 				$tabResultDataset = json_decode($result, true);		
 				$tabDiff = Tools::array_diff_assoc_recursive_with_blanknode($tabResultDataWait, $tabResultDataset);
 				//$test = true;
@@ -480,30 +501,44 @@ EOT;
     }
 	
 	private function importGraphInput(){   	
-		global $modeDebug,$modeVerbose,$TESTENDPOINT,$TTRIPLESTORE,$CURL;	
+		global $modeDebug,$modeVerbose,$TESTENDPOINT,$TTRIPLESTORE,$CURL,$CONFIG;	
 		//echo "########################################################";
 		//print_r($this->ListGraphInput);
 		foreach ($this->ListGraphInput as $name=>$data){
 			
 			$content =$CURL->fetch_url($data["url"]);
 			$this->ListGraphInput[$name]["content"]=$content ;
+			
+			if($this->ListGraphInput[$name]["endpoint"] == ""){				
+				switch($TTRIPLESTORE){ 
+					case "sesame":		
+						SesameTestSuite::importData($TESTENDPOINT ,$content,$name,$data["mimetype"]);
+						break;
+					case "4store":		
+						FourStoreTestSuite::importData($TESTENDPOINT ,$content,$name);
+						break;
+					case "fuseki":
+						FusekiTestSuite::importData($TESTENDPOINT ,$content,$name,$data["mimetype"]);
+						break;
+					default:
+						TestSuite::importData($TESTENDPOINT ,$data["url"],$name);
+				}
+			}else{
+				$nameEndpoint = $this->ListGraphInput[$name]["endpoint"];
+				if(! isset($CONFIG["SERVICE"]["endpoint"][$nameEndpoint])){
+					$this->AddFail("the service ".$name." is not defined in the file config.");
+					return;
+				}
+				
+				$endpoint = new Endpoint($CONFIG["SERVICE"]["endpoint"][$nameEndpoint],false,$modeDebug);	
+				TestSuite::importData($endpoint ,$data["url"],$name);			
+			}
+				
 			/*echo "importGraphInput\n";
 			echo $name."\n";
 			echo $content;
 			*/
-			switch($TTRIPLESTORE){ 
-				case "sesame":		
-					SesameTestSuite::importData($TESTENDPOINT,$content,$name,$data["mimetype"]);
-					break;
-				case "4store":		
-					FourStoreTestSuite::importData($TESTENDPOINT,$content,$name);
-					break;
-				case "fuseki":
-					FusekiTestSuite::importData($TESTENDPOINT,$content,$name,$data["mimetype"]);
-					break;
-				default:
-					TestSuite::importData($TESTENDPOINT,$data["url"],$name);
-			}
+			
 			/*$output = $data["mimetype"];
 			if($TTRIPLESTORE == "allegrograph" && $output == "text/turtle") //pffffff
 				$output = "text/plain";

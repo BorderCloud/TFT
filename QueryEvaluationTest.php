@@ -57,7 +57,7 @@ TESTS : QueryEvaluationTest";// ( ".QueryEvaluationTest::countApprovedTests()." 
 		$Report = new TestsReport("QueryEvaluationTest",$TAGTESTS.'-QueryEvaluationTest-junit.xml');
 		$q = Test::PREFIX.' 
 select DISTINCT ?testiri ?name ?queryTest  
-?ChangeDefaultGraph ?ChangeMultiGraph 
+?ChangeDefaultGraph ?ChangeMultiGraph ?ChangeServiceGraph
 ?graphInputDefault ?graphInputGraph ?graphOutput 
  where
 {GRAPH <'.$GRAPHTESTS .'>
@@ -74,9 +74,13 @@ select DISTINCT ?testiri ?name ?queryTest
 			}		
 		OPTIONAL{
 			?testiri mf:action [ qt:graphData    ?graphInputGraph	]							
+			}		
+		OPTIONAL{
+			?testiri mf:action [ qt:serviceData    ?serviceInputGraph	]							
 			}	
 		BIND(BOUND(?graphInputDefault) AS ?ChangeDefaultGraph)
 		BIND(BOUND(?graphInputGraph) AS ?ChangeMultiGraph)		
+		BIND(BOUND(?serviceInputGraph) AS ?ChangeServiceGraph)		
 	}
 }
 ORDER BY ?testiri
@@ -127,9 +131,12 @@ ORDER BY ?testiri
 			echo $iriTest;
 			//exit();
 			if(! preg_match("/exists03/i", $iriTest))
+				continue;				
+			
+			if(! preg_match("/service/i", $iriTest))
 				continue;
 			*/
-			
+				
 			$iriAssertProtocol =$row["testiri"]."/"."Protocol";			
 			$labelAssertProtocol = trim($row["name"])." : Test the protocol.";
 			$iriAssertResponse =$row["testiri"]."/"."Response";			
@@ -145,19 +152,22 @@ ORDER BY ?testiri
 				$test->addGraphInput(trim($row["graphInputDefault"]));
 				$test->addGraphOutput(trim($row["graphOutput"]));
 			}
-			
 			if($row["ChangeMultiGraph"]){
 				$test->addGraphInput($row["graphInputGraph"],$row["graphInputGraph"]); //todo check error http://www.w3.org/2009/sparql/docs/tests/data-sparql11/exists/exists03.rq
 			}	
-			/*
-			echo "ListGraphInput";
+			
+			if($row["ChangeServiceGraph"]){
+				$test->readAndAddService($GRAPHTESTS,$iriTest);
+			}	
+			
+			/*echo "ListGraphInput";
 			echo $iriTest;
 			echo "ListGraphInput";
 			print_r($test->ListGraphInput);
 			echo "ListGraphOutput";
 			print_r($test->ListGraphOutput);
-			exit();
-			*/
+			//exit();*/
+			
 			$test->doQuery(true);
 			$err = $test->GetErrors();
 			$fail = $test->GetFails();

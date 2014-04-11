@@ -63,7 +63,7 @@ TESTS : PositiveSyntaxTest\n";
 		//print_r($rows);
 		$nbTest = count($rows["result"]["rows"]);
 		echo "Nb tests : ".$nbTest."\n";
-		
+		//exit();
 		//Check the nb of tests
 		$nbApprovedTests = PositiveSyntaxTest::countApprovedTests();
 		
@@ -85,21 +85,16 @@ TESTS : PositiveSyntaxTest\n";
 			
 			$iriAssertSyntax =$row["testiri"]."/"."Syntax";			
 			$labelAssertSyntax = trim($row["name"])." : Test the syntax.";
-			
-			if($modeVerbose){
-				echo "\n".$iriTest.":".trim($row["name"]).":" ;
-			}
-
-			$class = trim(str_replace(array("http://www.w3.org/2009/sparql/docs/tests/","/","#"),array("PositiveSyntaxTest.",".","."),$row["testiri"]));
-						
 			$nameTestQueryPassed = trim($row["name"])." TestProtocol";
 			$nameTestQueryDataPassed = trim($row["name"])." TestData";
 
 			if($modeVerbose){
+				echo "\n".$iriTest.":".trim($row["name"]).":" ;
+				$class = trim(str_replace(array("http://www.w3.org/2009/sparql/docs/tests/","/","#"),array("PositiveSyntaxTest.",".","."),$row["testiri"]));
 				echo "\n".$class.":".$nameTestQueryDataPassed." Tests :";
 			}
 			
-			$test = new Test($row["queryTest"]);
+			$test = new Test(trim($row["queryTest"]));
 			$test->doQuery();
 			$err = $test->GetErrors();
 			$fail = $test->GetFails();

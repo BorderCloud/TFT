@@ -37,7 +37,7 @@ class PositiveUpdateSyntaxTest {
 		}
 		 ORDER BY ?testiri
 		';
-		 
+				 
 		//echo $q;
 		$ENDPOINT->ResetErrors();
 		$rows = $ENDPOINT->query($q, 'rows');

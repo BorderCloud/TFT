@@ -88,12 +88,16 @@ class FourStoreTestSuite  extends TestSuite {
 		return $resultContent;
 	}
 	
-   	function importDataTest($endpoint,$graph,$content){	
+   	function importData($endpoint,$content,$graph = "DEFAULT"){	
 		global $modeDebug,$modeVerbose;			
 		$len = strlen($TESTENDPOINT->getEndpointUpdate());
 		$url = substr($TESTENDPOINT->getEndpointUpdate(), 0, strrpos( $TESTENDPOINT->getEndpointUpdate(), "update/"))."data/";
 		
-		$postdata = array("graph" => $graph);
+		if($graph == "DEFAULT"){
+			$postdata = array();
+		}else{
+			$postdata = array("graph" => $graph);
+		}
 		$headerdata = array("Content-Type: application/x-www-form-urlencoded");
 		$curl = new Curl($modeDebug);
 		$contentFinal = FourStoreTools::fixTTL($content,$graph);

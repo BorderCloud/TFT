@@ -24,7 +24,6 @@ class NegativeUpdateSyntaxTest {
 		$Report = new TestsReport("NegativeUpdateSyntaxTest",$TAGTESTS.'-NegativeUpdateSyntaxTest-junit.xml');
 
 		$q = Test::PREFIX.' 
-
 		 select DISTINCT ?testiri ?name ?queryTest where
 		 {GRAPH <'.$GRAPHTESTS.'>
 				 {
@@ -35,8 +34,7 @@ class NegativeUpdateSyntaxTest {
 				 }
 		}
 		 ORDER BY ?testiri
-		';
-		 
+		'; 
 		//echo $q;
 		$ENDPOINT->ResetErrors();
 		$rows = $ENDPOINT->query($q, 'rows');
@@ -85,11 +83,11 @@ class NegativeUpdateSyntaxTest {
 			$test->doUpdate(false);
 			$err = $test->GetErrors();
 			$fail = $test->GetFails();
-			if (count($err) !== 0 || count($fail) !== 0  ) {	
+			if (count($err) != 0 || count($fail) != 0  ) {	
 					echo ".";//echo "\n".$nameTestQueryPassed." PASSED";					
 					$Report->addTestCasePassed($iriTest,$iriAssertSyntax,$labelAssertSyntax);
 			}else{
-					echo "E";//echo "\n".$nameTestQueryPassed." ERROR";					
+					echo "F";//echo "\n".$nameTestQueryPassed." ERROR";					
 					$Report->addTestCaseFailure($iriTest,$iriAssertSyntax,$labelAssertSyntax,									
 						"<![CDATA[".print_r($err,true).print_r($fail,true)."]]>");
 			}

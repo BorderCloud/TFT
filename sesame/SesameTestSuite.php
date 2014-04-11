@@ -11,9 +11,8 @@ curl -X POST dev.grid-observatory.org:8080/openrdf-sesame/repositories/rep/rdf-g
 curl -X POST http://dev.grid-observatory.org:8080/openrdf-sesame/repositories/sparql/rdf-graphs/service?graph=http://dev.grid-observatory.org/sparql11-test-suite/ \
 -H "Content-Type:application/x-turtle"  \
 -T SESAME_sparql11-test-suite/sparql11-test-suite/syntax-fed/manifest.ttl  --trace-ascii /dev/stdout
-
-
-	*/	
+*/
+	
   function install(){  
 		global $modeDebug,$modeVerbose;//global $output,$modeDebug,$modeVerbose,$ENDPOINT,$listFileTTL,$this->graph,$folderTests;		
 		$nb = 0;		
@@ -106,14 +105,18 @@ curl -X POST http://dev.grid-observatory.org:8080/openrdf-sesame/repositories/sp
 		return $resultContent;
 	}
 	
-	function importDataTest($endpoint,$graph,$content){				
+	function importData($endpoint,$content,$graph = "DEFAULT",$contentType){				
 		global $output,$modeDebug,$modeVerbose,$TESTENDPOINT;		
 		$len = strlen($endpoint->getEndpointUpdate());
-		
-		$urlGraphData = substr($endpoint->getEndpointUpdate(), 0, strrpos ( $endpoint->getEndpointUpdate(), "statements"))."rdf-graphs/service?graph=";
+		$urlGraphData = substr($endpoint->getEndpointUpdate(), 0, strrpos ( $endpoint->getEndpointUpdate(), "statements"))."rdf-graphs/service?";
+		if($graph == "DEFAULT"){
+			$urlGraphData .= "graph=";
+		}else{
+			$urlGraphData .= "default";
+		}
 		
 		//http://www.csee.umbc.edu/courses/graduate/691/spring14/01/examples/sesame/openrdf-sesame-2.6.10/docs/system/ch08.html#d0e764
-		$contentType =  "Content-Type:application/x-turtle";
+		/*$contentType =  "Content-Type:application/x-turtle";
 		preg_match("/^.*\.([^\.]+)$/i",$graph, $matches);
 		$extension = $matches[1];
 			switch($extension){
@@ -130,7 +133,7 @@ curl -X POST http://dev.grid-observatory.org:8080/openrdf-sesame/repositories/sp
 					
 			echo "ERROR ".$extension." : Extension unknown in input!! (".$graph.")";
 					exit();			
-			}
+			}*/
 		$header = array("Content-Type:".$contentType);
 		$curl = new Curl($modeDebug);
 		$contentFinal = SesameTools::fixTTL($content,$graph);

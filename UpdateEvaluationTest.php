@@ -15,7 +15,8 @@ class UpdateEvaluationTest {
 			return -1;
 		}
 		return $res["count"]; 
-   }
+    }
+	
 	function doAllTests(){ 	
 		global $modeDebug,$modeVerbose,$ENDPOINT,$CURL,$GRAPHTESTS,$GRAPH_RESULTS_EARL,$TAGTESTS;;
 		 //////////////////////////////////////////////////////////////////////
@@ -24,21 +25,83 @@ class UpdateEvaluationTest {
 		$Report = new TestsReport("UpdateEvaluationTest",$TAGTESTS.'-UpdateEvaluationTest-junit.xml');
 
 		$q = Test::PREFIX.' 
-
-		 select DISTINCT ?testiri ?name ?queryTest  ?graphInput ?graphOutput where
-		 {GRAPH  <'.$GRAPHTESTS.'>
+select DISTINCT ?testiri ?name ?queryTest ?ChangeDefaultGraph ?ChangeMultiGraph ?graphInput ?graphOutput
+		where
+		 {GRAPH <'.$GRAPHTESTS.'>
 				 {
 					?testiri a 				mf:UpdateEvaluationTest ;
 							 mf:name    	?name ;
 							 dawgt:approval dawgt:Approved ;
-							mf:action [ 
-										ut:request ?queryTest; 
-										ut:data  ?graphInput    ] ;
-							mf:result [ ut:data  ?graphOutput  ] .
-				 }
+							 mf:action [ 
+										ut:request ?queryTest;
+										]
+					OPTIONAL{
+							?testiri mf:action [ 
+										ut:data  ?graphInput   	];							
+									mf:result [ ut:data  ?graphOutput ] .
+							}
+					OPTIONAL{
+						?testiri	mf:action [ 
+										ut:graphData ?graphListInput	];
+									mf:result [ 
+										ut:graphData ?graphListOutput	]
+						}
+					BIND(BOUND(?graphInput) AS ?ChangeDefaultGraph)
+					BIND(BOUND(?graphListInput) AS ?ChangeMultiGraph)					
+			}
 		}
-		 ORDER BY ?testiri
-		 ';
+ORDER BY ?testiri
+ ';
+		 /* maybe a day
+$q = Test::PREFIX.' 	 
+		 prefix rdf:    <http://www.w3.org/1999/02/22-rdf-syntax-ns#> 
+prefix : <http://www.w3.org/2009/sparql/docs/tests/data-sparql11/bind/manifest#> 
+prefix rdfs:	<http://www.w3.org/2000/01/rdf-schema#> 
+prefix mf:     <http://www.w3.org/2001/sw/DataAccess/tests/test-manifest#> 
+prefix qt:     <http://www.w3.org/2001/sw/DataAccess/tests/test-query#> 
+prefix dawgt:   <http://www.w3.org/2001/sw/DataAccess/tests/test-dawg#> 
+prefix ut:     <http://www.w3.org/2009/sparql/tests/test-update#> 
+CONSTRUCT {
+		?testiri 	a 	mf:UpdateEvaluationTest ;
+					 mf:name    	?name ;
+					 dawgt:approval dawgt:Approved ;
+					 mf:action [ 
+								ut:request ?queryTest; 
+								ut:data  ?graphInput ;  	
+								ut:graphData [ ut:graph ?graphDataInput ;
+												rdfs:label ?graphDataLabelInput ]
+								];							
+					mf:result [ ut:data  ?graphOutput ;
+										ut:graphData [ ut:graph ?graphDataResult ;
+											rdfs:label ?graphDataLabelResult]	
+								] .						
+			}
+		where
+		 {GRAPH  <http://bordercloud.github.io/TFT-tests/sparql11-test-suite/>
+				 {
+					?testiri a 				mf:UpdateEvaluationTest ;
+							 mf:name    	?name ;
+							 dawgt:approval dawgt:Approved .
+					OPTIONAL{
+							?testiri mf:action [ 
+										ut:request ?queryTest; 
+										ut:data  ?graphInput   	];							
+									mf:result [ ut:data  ?graphOutput ;
+										ut:graphData ?resultGraphData ] .
+							}
+				OPTIONAL{
+						?testiri	mf:action [ 
+										ut:graphData [ ut:graph ?graphDataInput ;
+										rdfs:label ?graphDataLabelInput ]	];
+									mf:result [ 
+										ut:graphData [ ut:graph ?graphDataResult ;
+										rdfs:label ?graphDataLabelResult]	]
+						}
+			}
+		}
+ORDER BY ?testiri
+LIMIT 2';
+*/
 	/*	 
 		 :add01 rdf:type mf:UpdateEvaluationTest ;
     mf:name "ADD 1" ;
@@ -58,7 +121,9 @@ class UpdateEvaluationTest {
 		 */
 		//echo $q;
 		$ENDPOINT->ResetErrors();
-		$rows = $ENDPOINT->query($q, 'rows');
+		$rows = $ENDPOINT->query($q,"rows");
+		//print_r($rows);	
+		//exit();
 		$err = $ENDPOINT->getErrors();
 		$iriTest = $GRAPH_RESULTS_EARL."/UpdateEvaluationTest/select";
 		$iriAssert = $GRAPH_RESULTS_EARL."/UpdateEvaluationTest/selectAssert";
@@ -101,8 +166,31 @@ class UpdateEvaluationTest {
 			if($modeVerbose){
 				echo "\n".$iriTest.":".trim($row["name"]).":" ;
 			}
+			/*print_r($row);
+			echo trim($row["queryTest"])."|".trim($row["graphInput"])."|".trim($row["graphOutput"])."|".trim($row["ChangeDefaultGraph"])."|".trim($row["ChangeMultiGraph"])."\n";
+			if($row["ChangeDefaultGraph"])
+				echo "ok";
+			exit();*/
+						
+			$test = new Test(trim($row["queryTest"]));
+			
+			if($row["ChangeDefaultGraph"]){
+				$test->addGraphInput(trim($row["graphInput"]));
+				$test->addGraphOutput(trim($row["graphOutput"]));
+			}
+			
+			if($row["ChangeMultiGraph"]){
+				$test->readAndAddMultigraph($GRAPHTESTS,$iriTest);
+			}	
 
-			$test = new Test(trim($row["queryTest"]),trim($row["graphInput"]),trim($row["graphOutput"]));
+			
+			/*echo "ListGraphInput";
+			echo $iriTest;
+			echo "ListGraphInput";
+			print_r($test->ListGraphInput);
+			echo "ListGraphOutput";
+			print_r($test->ListGraphOutput);*/
+			//continue;
 			$test->doUpdate(true);
 			$err = $test->GetErrors();
 			$fail = $test->GetFails();
@@ -129,6 +217,7 @@ class UpdateEvaluationTest {
 					}
 
 			}
+			
 		}
 	}
 }

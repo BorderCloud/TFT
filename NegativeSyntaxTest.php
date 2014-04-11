@@ -83,7 +83,7 @@ TESTS : NegativeSyntaxTest\n";
 				echo "\n".$iriTest.":".trim($row["name"]).":" ;
 			}
 			
-			$test = new Test($row["queryTest"]);
+			$test = new Test(trim($row["queryTest"]));
 			$test->doQuery();				
 			$err = $test->GetErrors();
 			$fail = $test->GetFails();

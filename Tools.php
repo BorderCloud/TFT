@@ -20,10 +20,15 @@ class Tools
 		return ($nbTriples < 0)? "Error read the number of triples(see Debug)":$nbTriples." triples";
    }
    
-    function loadData($endpoint,$graph,$urldata){
+    function loadData($endpoint,$urldata,$graph = "DEFAULT"){
 		global $modeDebug,$modeVerbose;	
 		$endpoint->ResetErrors();
-		$q = 'LOAD <'.$urldata.'> INTO GRAPH <'.$graph.'>';
+		if($graph == "DEFAULT"){
+			$q = 'LOAD <'.$urldata.'>';
+		}else{
+			$q = 'LOAD <'.$urldata.'> INTO GRAPH <'.$graph.'>';
+		}
+			
 		$res = $endpoint->queryUpdate($q);
 		$err = $endpoint->getErrors();
 		 if ($err) {

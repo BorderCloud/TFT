@@ -22,7 +22,6 @@ class CSVResultFormatTest {
 		echo "
 		TESTS : CSVResultFormatTest\n";
 		$Report = new TestsReport("CSVResultFormatTest",$TAGTESTS.'-CSVResultFormatTest-junit.xml');
-
 		$q = Test::PREFIX.' 
 
 		 select DISTINCT ?testiri ?name ?queryTest  ?graphInput ?graphOutput where
@@ -39,7 +38,7 @@ class CSVResultFormatTest {
 		}
 		 ORDER BY ?testiri
 		 ';
-		 
+
 		//echo $q;
 		$ENDPOINT->ResetErrors();
 		$rows = $ENDPOINT->query($q, 'rows');
@@ -58,7 +57,7 @@ class CSVResultFormatTest {
 		//print_r($rows);
 		$nbTest = count($rows["result"]["rows"]);
 		echo "Nb tests : ".$nbTest."\n";
-
+//exit();
 		//Check the nb of tests
 		$nbApprovedTests = CSVResultFormatTest::countApprovedTests();
 		
@@ -88,9 +87,9 @@ class CSVResultFormatTest {
 				echo "\n".$iriTest.":".trim($row["name"]).":" ;
 			}
 			
-				//echo "\nTest(".trim($row["queryTest"]).",".trim($row["graphInput"]).",".trim($row["graphOutput"]).")\n";
-
-			$test = new Test(trim($row["queryTest"]),trim($row["graphInput"]),trim($row["graphOutput"]));
+			$test = new Test(trim($row["queryTest"]));
+			$test->addGraphInput(trim($row["graphInput"]));
+			$test->addGraphOutput(trim($row["graphOutput"]));
 			$test->doQuery(true);
 			$err = $test->GetErrors();
 			$fail = $test->GetFails();		

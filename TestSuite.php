@@ -55,7 +55,7 @@ class TestSuite {
 		return $success ;
 	}
 	
-	   function importDataTest($endpoint,$graph){
-			Tools::loadData($endpoint,$graph,$graph);
+	   function importData($endpoint,$urldata,$graph = "DEFAULT"){
+			Tools::loadData($endpoint,$urldata,$graph);
 	   }
 }   

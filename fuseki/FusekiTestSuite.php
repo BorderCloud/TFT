@@ -140,13 +140,17 @@ nohup ./fuseki-server --update --mem /tests &
 		echo $nb." File imported \n";
    }
    
-   
-   	function importDataTest($endpoint,$graph,$content){	
+   	function importData($endpoint,$content,$graph = "DEFAULT",$contentType){	
 		global $modeDebug,$modeVerbose;		
 		$len = strlen($endpoint->getEndpointUpdate());
-		$urlGraphData = substr($endpoint->getEndpointUpdate(), 0, $len - ($len  - strrpos ( $endpoint->getEndpointUpdate(), "update")))."data?graph=";
-		
-		$header = array("Content-Type:application/x-turtle");
+		$urlGraphData = substr($endpoint->getEndpointUpdate(), 0,  strrpos ( $endpoint->getEndpointUpdate(), "update"))."data?";
+		if($graph == "DEFAULT"){
+			$urlGraphData .= "graph=";
+		}else{
+			$urlGraphData .= "default";
+		}
+		//$header = array("Content-Type:application/x-turtle");
+		$header = array("Content-Type:".$contentType);
 		$curl = new Curl($modeDebug);
 		$contentFinal = FusekiTestSuite::fixTTL($content,$graph);
 

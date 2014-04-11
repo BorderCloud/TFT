@@ -8,7 +8,8 @@ class QueryEvaluationTest {
 		$ENDPOINT->ResetErrors();
 		$q = Test::PREFIX.'
 		SELECT (COUNT(?s) AS ?count) WHERE {
-			GRAPH <'.$GRAPHTESTS.'> { ?s a mf:QueryEvaluationTest .}} '; 
+			GRAPH <'.$GRAPHTESTS.'> { ?s a mf:QueryEvaluationTest ;
+							 dawgt:approval dawgt:Approved.}} '; 
 		$res = $ENDPOINT->query($q, 'row');
 		$err = $ENDPOINT->getErrors();
 		if ($err) {
@@ -54,22 +55,33 @@ class QueryEvaluationTest {
 --------------------------------------------------------------------
 TESTS : QueryEvaluationTest";// ( ".QueryEvaluationTest::countApprovedTests()." Approved, ".QueryEvaluationTest::countSkipTests()." Skipped, ".QueryEvaluationTest::countAllTests()." Total\n";
 		$Report = new TestsReport("QueryEvaluationTest",$TAGTESTS.'-QueryEvaluationTest-junit.xml');
-
 		$q = Test::PREFIX.' 
-select DISTINCT ?testiri ?name ?queryTest ?graphInput ?graphOutput where
+select DISTINCT ?testiri ?name ?queryTest  
+?ChangeDefaultGraph ?ChangeMultiGraph 
+?graphInputDefault ?graphInputGraph ?graphOutput 
+ where
 {GRAPH <'.$GRAPHTESTS .'>
 	 {
-		?testiri a 				mf:QueryEvaluationTest ;
+		?testiri a 			mf:QueryEvaluationTest ;
 				 mf:name    	?name ;
 				 dawgt:approval dawgt:Approved ;
-				 mf:action
-				   [ qt:query  	?queryTest ;
-					 qt:data    ?graphInput ] ;
-				mf:result  ?graphOutput .
+				 mf:action   [ 
+								qt:query  	?queryTest 
+							] ;
+				mf:result  ?graphOutput .		
+		OPTIONAL{
+			?testiri mf:action [ qt:data    ?graphInputDefault	]							
+			}		
+		OPTIONAL{
+			?testiri mf:action [ qt:graphData    ?graphInputGraph	]							
+			}	
+		BIND(BOUND(?graphInputDefault) AS ?ChangeDefaultGraph)
+		BIND(BOUND(?graphInputGraph) AS ?ChangeMultiGraph)		
 	}
 }
 ORDER BY ?testiri
 ';
+
 		 
 		//echo $q;
 		$ENDPOINT->ResetErrors();
@@ -92,6 +104,7 @@ ORDER BY ?testiri
 		//print_r($rows);
 		$nbTest = count($rows["result"]["rows"]);
 		echo "Nb tests : ".$nbTest."\n";
+		//exit();
 		$nbApprovedTests = QueryEvaluationTest::countApprovedTests();
 		
 		$iriTest = $GRAPH_RESULTS_EARL."/QueryEvaluationTest/CountTests";
@@ -100,7 +113,7 @@ ORDER BY ?testiri
 		if($nbTest !=  $nbApprovedTests ){
 			echo "F";
 		  $Report->addTestCaseFailure($iriTest,$iriAssert,$labelAssert,
-					"NB of tests (".$nbTest."/".$nbApprovedTests ." in theory) is incorrect.\n"	
+					"NB of tests (".$nbTest."/".$nbApprovedTests ." in theory) is incorrect.\n TODO//220 but there are tests with several names..."	
 					);
 		}else{		
 			echo ".";
@@ -110,6 +123,13 @@ ORDER BY ?testiri
 		foreach ($rows["result"]["rows"] as $row){
 			$iriTest = trim($row["testiri"]);
 			
+			/*
+			echo $iriTest;
+			//exit();
+			if(! preg_match("/exists03/i", $iriTest))
+				continue;
+			*/
+			
 			$iriAssertProtocol =$row["testiri"]."/"."Protocol";			
 			$labelAssertProtocol = trim($row["name"])." : Test the protocol.";
 			$iriAssertResponse =$row["testiri"]."/"."Response";			
@@ -118,8 +138,26 @@ ORDER BY ?testiri
 			if($modeVerbose){
 				echo "\n".$iriTest.":".trim($row["name"]).":" ;
 			}
-
-			$test = new Test(trim($row["queryTest"]),trim($row["graphInput"]),trim($row["graphOutput"]));
+			
+			$test = new Test(trim($row["queryTest"]));
+			
+			if($row["ChangeDefaultGraph"]){
+				$test->addGraphInput(trim($row["graphInputDefault"]));
+				$test->addGraphOutput(trim($row["graphOutput"]));
+			}
+			
+			if($row["ChangeMultiGraph"]){
+				$test->addGraphInput($row["graphInputGraph"],$row["graphInputGraph"]); //todo check error http://www.w3.org/2009/sparql/docs/tests/data-sparql11/exists/exists03.rq
+			}	
+			/*
+			echo "ListGraphInput";
+			echo $iriTest;
+			echo "ListGraphInput";
+			print_r($test->ListGraphInput);
+			echo "ListGraphOutput";
+			print_r($test->ListGraphOutput);
+			exit();
+			*/
 			$test->doQuery(true);
 			$err = $test->GetErrors();
 			$fail = $test->GetFails();

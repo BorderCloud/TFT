@@ -58,7 +58,7 @@ TESTS : QueryEvaluationTest";// ( ".QueryEvaluationTest::countApprovedTests()." 
 		$q = Test::PREFIX.' 
 select DISTINCT ?testiri ?name ?queryTest  
 ?ChangeDefaultGraph ?ChangeMultiGraph ?ChangeServiceGraph
-?graphInputDefault ?graphInputGraph ?graphOutput 
+?graphInputDefault ?graphOutput 
  where
 {GRAPH <'.$GRAPHTESTS .'>
 	 {
@@ -153,7 +153,7 @@ ORDER BY ?testiri
 				$test->addGraphOutput(trim($row["graphOutput"]));
 			}
 			if($row["ChangeMultiGraph"]){
-				$test->addGraphInput($row["graphInputGraph"],$row["graphInputGraph"]); //todo check error http://www.w3.org/2009/sparql/docs/tests/data-sparql11/exists/exists03.rq
+				$test->readAndAddMultigraph($GRAPHTESTS,$iriTest); //todo check error http://www.w3.org/2009/sparql/docs/tests/data-sparql11/exists/exists03.rq
 			}	
 			
 			if($row["ChangeServiceGraph"]){

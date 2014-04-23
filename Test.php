@@ -137,15 +137,24 @@ EOT;
 	
 		
 	
-	function readAndAddMultigraph($graphTest,$iriTest)
+	function readAndAddMultigraph($graphTest,$iriTest,$query=true)
 	{
 		global $ENDPOINT;
+		$qGraphInput = "";
+		$qGraphOutput = "";
+		$prefix = "";
+		if($query){
+			$prefix = "qt";
+		}else{
+			$prefix =  "ut";
+		}
+		
 		$qGraphInput = Test::PREFIX.' 
 		select DISTINCT  ?graphData ?graphName
 		where
 		 {GRAPH  <'.$graphTest.'>
 				 {
-					<'.$iriTest.'>  	mf:action [ ut:graphData [ ut:graph ?graphData ;
+					<'.$iriTest.'>  	mf:action [ '.$prefix.':graphData [ '.$prefix.':graph ?graphData ;
 															rdfs:label ?graphName ]
 										].				
 				}
@@ -155,7 +164,7 @@ EOT;
 		where
 		 {GRAPH  <'.$graphTest.'>
 				 {
-					<'.$iriTest.'> 	mf:result [ ut:graphData [ ut:graph ?graphData ;
+					<'.$iriTest.'> 	mf:result [ '.$prefix.':graphData [ '.$prefix.':graph ?graphData ;
 															rdfs:label ?graphName ]
 										] .		
 				}
@@ -530,7 +539,9 @@ EOT;
 					return;
 				}
 				
-				$endpoint = new Endpoint($CONFIG["SERVICE"]["endpoint"][$nameEndpoint],false,$modeDebug);	
+				$endpoint = new Endpoint($CONFIG["SERVICE"]["endpoint"][$nameEndpoint],false,$modeDebug);
+				$endpoint->setEndpointQuery($CONFIG["SERVICE"]["endpoint"][$nameEndpoint]);
+				$endpoint->setEndpointUpdate($CONFIG["SERVICE"]["endpoint"][$nameEndpoint]);
 				TestSuite::importData($endpoint ,$data["url"],$name);			
 			}
 				

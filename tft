@@ -14,7 +14,7 @@ cd /home/rafes/projects/gridobs3/tools/testsparql11
 -r http://dev.grid-observatory.org/testsVirtuoso
 
 ./tft -t fuseki -q http://dev.grid-observatory.org:3030/tests/query -u http://dev.grid-observatory.org:3030/tests/update \
--tt virtuoso -te http://dev.grid-observatory.org:8890/ \
+-tt virtuoso -tq http://onevm-194.lal.in2p3.fr:8095/sparql/ -tu http://onevm-194.lal.in2p3.fr:8095/sparql/ \
 -o ./junit -r http://dev.grid-observatory.org/testsVirtuoso10  \
 --softwareName=virtuoso --softwareDescribeTag=v0.2  --softwareDescribe=v0.2-truc
 

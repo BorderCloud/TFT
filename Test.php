@@ -520,15 +520,16 @@ EOT;
 			
 			if($this->ListGraphInput[$name]["endpoint"] == ""){				
 				switch($TTRIPLESTORE){ 
-					case "sesame":		
+					/*case "sesame":		
 						SesameTestSuite::importData($TESTENDPOINT ,$content,$name,$data["mimetype"]);
 						break;
 					case "4store":		
-						FourStoreTestSuite::importData($TESTENDPOINT ,$content,$name);
+						TestSuite::importData($TESTENDPOINT ,$data["url"],$name);
+						//FourStoreTestSuite::importData($TESTENDPOINT ,$content,$name);
 						break;
 					case "fuseki":
 						FusekiTestSuite::importData($TESTENDPOINT ,$content,$name,$data["mimetype"]);
-						break;
+						break;*/
 					default:
 						TestSuite::importData($TESTENDPOINT ,$data["url"],$name);
 				}

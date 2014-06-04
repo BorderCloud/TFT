@@ -57,7 +57,7 @@ class FourStoreTestSuite  extends TestSuite {
 				echo "\n".$path."\n";
 				echo "ERROR ".$code." : cannot import files TTL in 4store!!";
 				$success = false;		
-				exit();
+				//exit();
 			}				
 			
 			echo ".";
@@ -73,8 +73,11 @@ class FourStoreTestSuite  extends TestSuite {
 	function fixTTL($contentTTL,$path){
 		global $modeDebug,$modeVerbose;
 		
+		
 		$resultContent = $contentTTL;
-		$URI = str_replace($folderTests,$this->graph,$path);
+		
+		$URI = str_replace($this->folder,$this->graph,$path);
+		$URI = str_replace($this->folder,$this->graph,$path);
 		$patternDetectNotUri = '/<>/im';
 		$replacementNotUri = '<'.$URI.'>';
 		$resultContent = preg_replace($patternDetectNotUri, $replacementNotUri, $resultContent);
@@ -89,7 +92,7 @@ class FourStoreTestSuite  extends TestSuite {
 	}
 	
    	function importData($endpoint,$content,$graph = "DEFAULT"){	
-		global $modeDebug,$modeVerbose;			
+		global $modeDebug,$modeVerbose,$TESTENDPOINT;			
 		$len = strlen($TESTENDPOINT->getEndpointUpdate());
 		$url = substr($TESTENDPOINT->getEndpointUpdate(), 0, strrpos( $TESTENDPOINT->getEndpointUpdate(), "update/"))."data/";
 		
@@ -100,7 +103,7 @@ class FourStoreTestSuite  extends TestSuite {
 		}
 		$headerdata = array("Content-Type: application/x-www-form-urlencoded");
 		$curl = new Curl($modeDebug);
-		$contentFinal = FourStoreTools::fixTTL($content,$graph);
+		$contentFinal = $this->fixTTL($content,$graph);
 		
 		 $curl->send_post_content(
 			 $url, 

@@ -152,6 +152,8 @@ nohup ./fuseki-server --update --mem /tests &
 		//$header = array("Content-Type:application/x-turtle");
 		$header = array("Content-Type:".$contentType);
 		$curl = new Curl($modeDebug);
+		
+		//$this-> ???
 		$contentFinal = FusekiTestSuite::fixTTL($content,$graph);
 
 		$url = $urlGraphData.$graph ;

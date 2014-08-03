@@ -20,7 +20,7 @@ USAGE : ./tft -t fuseki
 -u http://dev.grid-observatory.org:3030/tests/update 
 -r http://dev.grid-observatory.org/testsVirtuoso10  
         
-    -l, --list                          List of servers available with this script.
+    ---list                          List of servers available with this script.
     -t, --triplestore=NAME              Example: --triplestore=standard or 
                                                  --triplestore=4store
                                             (by default : standard)
@@ -39,6 +39,8 @@ USAGE : ./tft -t fuseki
     --nameParameterUpdate=PARAMETER     Change the name of parameter in 
                                         the request http to write.
                                         (by default : update)
+    -l, --login=LOGIN                  Server login
+    -p, --password=PASSWORD            Server password
 
     -v, --verbose                       Mode verbose
     -d, --debug                         Mode debug
@@ -54,6 +56,8 @@ $endpointQueryOnly = "";
 $endpointUpdateOnly = "";
 $nameParameterQuery = "query";
 $nameParameterUpdate = "update";
+$endpointLogin = "";
+$endpointPassword = "";
 
 $TTRIPLESTORE = "standard";
 $tendpointQueryAndUpdate = "";
@@ -107,7 +111,6 @@ for($i = 1; $i < count($argv); $i++)  {
 		case "--debug":
 			$modeDebug = true;
 			break;
-		case "-l":
 		case "--list":
 			echo "List of servers available that you can test with this script :\n";
 			foreach ($listTriplestore as $ts) {				
@@ -187,7 +190,37 @@ for($i = 1; $i < count($argv); $i++)  {
 				echo "ERROR : This triplestore is not available\n";
 				exit();
 			}
+			break;
+		case "-l":
+			if(! array_key_exists($i + 1, $argv)){	
+				echo "ERROR : forget parameter after -l (see --help)\n";
+				exit();
+			}
+			$endpointLogin = $argv[$i + 1];
+			$i++;
+			break;
+		case "--login":			
+			if(! array_key_exists(1, $param)){	
+				echo "ERROR : forget parameter after --login (see --help)\n";
+				exit();
+			}
+			$endpointLogin = $param[1];
 			break;		
+		case "-p":
+			if(! array_key_exists($i + 1, $argv)){	
+				echo "ERROR : forget parameter after -p (see --help)\n";
+				exit();
+			}			
+			$endpointPassword = $argv[$i + 1];
+			$i++;
+			break;
+		case "--password":			
+			if(! array_key_exists(1, $param)){	
+				echo "ERROR : forget parameter after --password (see --help)\n";
+				exit();
+			}
+			$endpointPassword = $param[1];
+			break;
 		case "-e":
 			if(! array_key_exists($i + 1, $argv)){	
 				echo "ERROR : forget parameter after -e (see --help)\n";
@@ -308,6 +341,11 @@ if($endpointQueryOnly == "" && $endpointUpdateOnly == "" && $endpointQueryAndUpd
 	$ENDPOINT->setNameParameterQueryWrite($nameParameterUpdate);
 }
 
+if($endpointLogin != "" && $endpointPassword != ""){
+	$ENDPOINT->setLogin($endpointLogin);
+	$ENDPOINT->setPassword($endpointPassword);
+}
+
 ///////// PRINT CONFIG
 
 echo "
@@ -316,6 +354,8 @@ Configuration about tests :
 - Endpoint type        : ".$triplestore."
 - Endpoint query       : ".$ENDPOINT->getEndpointQuery()."
 - Endpoint update      : ".$ENDPOINT->getEndpointUpdate()."
+- Endpoint login       : ".$ENDPOINT->getLogin()."
+- Endpoint password      : ".$ENDPOINT->getPassword()."
 - Endpoint type        : ".$TTRIPLESTORE."
 - Mode verbose         : ".($modeVerbose?"ON":"OFF")."
 - Mode debug           : ".($modeDebug?"ON":"OFF")."
@@ -323,13 +363,16 @@ Configuration about tests :
 
 	
 		$ENDPOINT->ResetErrors();
+		// bug 
+		//SELECT ?g ?categoryIRI ?categoryName (COUNT(DISTINCT ?test) AS ?NBTest) (COUNT(DISTINCT ?test2) AS ?NBTestKO) (?NBTest-?NBTestKO AS ?SCORE) WHERE 
+		
 		$q = "
 		prefix earl: <http://www.w3.org/ns/earl#>
 prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> 
 prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> 
 prefix xsd:  <http://www.w3.org/2001/XMLSchema#>
 prefix mf:  <http://www.w3.org/2001/sw/DataAccess/tests/test-manifest#>
-SELECT ?g ?categoryIRI ?categoryName (COUNT(DISTINCT ?test) AS ?NBTest) (COUNT(DISTINCT ?test2) AS ?NBTestKO) (?NBTest-?NBTestKO AS ?SCORE) WHERE 
+SELECT ?g ?categoryIRI ?categoryName (COUNT(DISTINCT ?test) AS ?NBTest) (COUNT(DISTINCT ?test2) AS ?NBTestKO) (COUNT(DISTINCT ?test) - COUNT(DISTINCT ?test2)  AS ?SCORE) WHERE 
 {
 	GRAPH ?g {
 		?categoryIRI rdfs:label ?categoryName ;
@@ -385,6 +428,8 @@ INSERT DATA {
 		}
 	}
 	
+	//SELECT (COUNT(DISTINCT ?test) AS ?NBTest) (COUNT(DISTINCT ?test2) AS ?NBTestKO) (?NBTest-?NBTestKO AS ?SCORE)  WHERE 
+	
 		$ENDPOINT->ResetErrors();
 		$q = "
 prefix earl: <http://www.w3.org/ns/earl#>
@@ -392,7 +437,7 @@ prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> 
 prefix xsd:  <http://www.w3.org/2001/XMLSchema#>
 prefix mf:  <http://www.w3.org/2001/sw/DataAccess/tests/test-manifest#>
-SELECT (COUNT(DISTINCT ?test) AS ?NBTest) (COUNT(DISTINCT ?test2) AS ?NBTestKO) (?NBTest-?NBTestKO AS ?SCORE)  WHERE 
+SELECT (COUNT(DISTINCT ?test) AS ?NBTest) (COUNT(DISTINCT ?test2) AS ?NBTestKO) (COUNT(DISTINCT ?test) - COUNT(DISTINCT ?test2) AS ?SCORE)  WHERE 
 {
 	GRAPH ?g {
 		?categoryIRI rdfs:label ?categoryName ;
@@ -436,7 +481,7 @@ prefix xsd:  <http://www.w3.org/2001/XMLSchema#>
 INSERT DATA {  
  GRAPH <'.$GRAPH_RESULTS_EARL .'> {
         <'.$GRAPH_RESULTS_EARL .'/Service> sq:totalTest '.$res["NBTest"].' ;
-	                              sq:scoreTest '.$res["SCORE"].' ;.
+	                              sq:scoreTest '.$res["SCORE"].' .
 		}
 	}
 ';

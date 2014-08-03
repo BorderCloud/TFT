@@ -101,6 +101,7 @@ USAGE : tft [-l|--list] [-t|--triplestore=NAME]
         [
          [-e|--endpointQueryAndUpdate=URL]|
          [-q|--endpointQueryOnly=URL] [-u|--endpointUpdateOnly=URL]
+         [-l|--login=LOGIN] [-p|--password=PASSWORD]
         ]
         [
          [-te|--testendpointQueryAndUpdate=URL]|
@@ -108,7 +109,7 @@ USAGE : tft [-l|--list] [-t|--triplestore=NAME]
         ]
         [-v|-verbose]
         
-    -l, --list                          List of servers available that you 
+    --list                          List of servers available that you 
                                         can test with this script.
     -t, --triplestore=NAME              Example: --triplestore=standard or 
                                                  --triplestore=4store
@@ -127,12 +128,15 @@ USAGE : tft [-l|--list] [-t|--triplestore=NAME]
                                             URL?query=...
     -u, --endpointUpdateOnly=URL        Put url of endpoint to do query :
                                             URL?update=... (POST)
+                                            
     --nameParameterQuery=PARAMETER      Change the name of parameter in 
                                         the request http to read.
                                         (by default : query)
     --nameParameterUpdate=PARAMETER     Change the name of parameter in 
                                         the request http to write.
                                         (by default : update)
+     -l, --login=LOGIN                  Server login
+     -p, --password=PASSWORD            Server password
     
     -tt, --testtriplestore=NAME         Example: --triplestore=standard or 
                                                  --triplestore=4store
@@ -166,6 +170,9 @@ $endpointQueryOnly = "";
 $endpointUpdateOnly = "";
 $nameParameterQuery = "query";
 $nameParameterUpdate = "update";
+$endpointLogin = "";
+$endpointPassword = "";
+
 
 $TTRIPLESTORE = "standard";
 $tendpointQueryAndUpdate = "";
@@ -218,7 +225,6 @@ for($i = 1; $i < count($argv); $i++)  {
 		case "--debug":
 			$modeDebug = true;
 			break;
-		case "-l":
 		case "--list":
 			echo "List of servers available that you can test with this script :\n";
 			foreach ($listTriplestore as $ts) {				
@@ -329,7 +335,37 @@ for($i = 1; $i < count($argv); $i++)  {
 				echo "ERROR : This triplestore is not available\n";
 				exit();
 			}
+			break;
+		case "-l":
+			if(! array_key_exists($i + 1, $argv)){	
+				echo "ERROR : forget parameter after -l (see --help)\n";
+				exit();
+			}
+			$endpointLogin = $argv[$i + 1];
+			$i++;
+			break;
+		case "--login":			
+			if(! array_key_exists(1, $param)){	
+				echo "ERROR : forget parameter after --login (see --help)\n";
+				exit();
+			}
+			$endpointLogin = $param[1];
 			break;		
+		case "-p":
+			if(! array_key_exists($i + 1, $argv)){	
+				echo "ERROR : forget parameter after -p (see --help)\n";
+				exit();
+			}
+			$endpointPassword = $argv[$i + 1];
+			$i++;
+			break;
+		case "--password":			
+			if(! array_key_exists(1, $param)){	
+				echo "ERROR : forget parameter after --password (see --help)\n";
+				exit();
+			}
+			$endpointPassword = $param[1];
+			break;
 		case "-e":
 			if(! array_key_exists($i + 1, $argv)){	
 				echo "ERROR : forget parameter after -e (see --help)\n";
@@ -558,6 +594,11 @@ if($endpointQueryOnly == "" && $endpointUpdateOnly == "" && $endpointQueryAndUpd
 	$ENDPOINT->setNameParameterQueryWrite($nameParameterUpdate);
 }
 
+if($endpointLogin != "" && $endpointPassword != ""){
+	$ENDPOINT->setLogin($endpointLogin);
+	$ENDPOINT->setPassword($endpointPassword);
+}
+
 $TESTENDPOINT = null;
 if($tendpointQueryOnly == "" && $tendpointUpdateOnly == "" && $tendpointQueryAndUpdate == ""){	
 	echo "ERROR : The endpoint didn't find\n"; exit();
@@ -587,7 +628,10 @@ Configuration about tests :
 - Mode verbose         : ".($modeVerbose?"ON":"OFF")."
 - Mode debug           : ".($modeDebug?"ON":"OFF")."
 ";
-
+/*
+- Endpoint login       : ".$ENDPOINT->getLogin()."
+- Endpoint password      : ".$ENDPOINT->getPassword()."
+*/
 
 foreach($listTestSuite as $URL => $folder){
 	echo "==================================================================\n";

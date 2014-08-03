@@ -138,7 +138,7 @@ INSERT DATA {
 		sd:supportedLanguage sd:SPARQL11Query ;
 		sd:server <'.$GRAPH_RESULTS_EARL .'/Software> ;
 		sd:testedBy <'.$GRAPH_RESULTS_EARL .'/Tester> ;
-		sd:testedDate "'.$date.'"^^xsd:dateTime ; .
+		sd:testedDate "'.$date.'"^^xsd:dateTime  .
 		
 		<'.$GRAPH_RESULTS_EARL .'/Software> a git:Project ;
 								git:name  "'.addslashes($SOFTWARE_NAME_EARL).'" ;

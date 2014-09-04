@@ -129,6 +129,7 @@ class Tools
                       count(array_diff_assoc($value2,$value1)) == 0 ){
                        unset($clone1[$key1]);
                        unset($clone2[$key2]);
+                       break;
                   }
                }
                //print_r($clone1);

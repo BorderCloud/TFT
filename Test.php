@@ -360,7 +360,7 @@ EOT;
 		$message .=  "<".$nameGraph.">\n".$result;
 		$message .=  "\n================================================================= \n";
 		
-		$sort = ! preg_match("/(?:ORDER|GROUP)/i",$this->URLquery);
+		$sort = preg_match("/(?:ORDER)/i",$this->query);
 				
 		switch($mimetype){
 			/*case "application/rdf+xml":
@@ -380,8 +380,10 @@ EOT;
 				if($sort){
 					$tabResultDataWait = ParserSparqlResult::sortResult($tabResultDataWait);	
 					$tabResultDataset = ParserSparqlResult::sortResult($tabResultDataset);
-				}						
-				$tabDiff = Tools::array_diff_assoc_recursive_with_blanknode($tabResultDataWait, $tabResultDataset);
+                                        $tabDiff = Tools::array_diff_assoc_recursive_with_blanknode($tabResultDataWait, $tabResultDataset);
+				}else{
+                                     $tabDiff = Tools::array_diff_assoc_unordered($tabResultDataWait, $tabResultDataset);
+                                }
 				//$test = true;
 				break;
 			case "text/tab-separated-values; charset=utf-8":

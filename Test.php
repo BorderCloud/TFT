@@ -205,8 +205,8 @@ EOT;
 		global $modeDebug,$modeVerbose,$TESTENDPOINT,$CURL,$TTRIPLESTORE;	
 		$message = "";		
 		$test = false;
-		
-        $TESTENDPOINT->ResetErrors();
+	
+		$TESTENDPOINT->ResetErrors();
 		$this->clearAllTriples();
 		
 		// check if triplestore is empty
@@ -214,7 +214,8 @@ EOT;
 		if($count > 0 || $count == -1){
 			$this->AddFail("Dataset is not clean before the test. (".$count." Triples)");
 			return;
-		}	
+		}
+
 		$t1 = Endpoint::mtime();
 		$this->query = $CURL->fetch_url($this->URLquery);		
 		$this->queryTime = Endpoint::mtime() - $t1 ;
@@ -222,7 +223,7 @@ EOT;
 		if($testResult){
 			$this->importGraphInput();
 		}
-		
+	  
 		$output = $this->URLresultDataDefaultGraphType;
 		if($TTRIPLESTORE == "allegrograph" && $this->URLresultDataDefaultGraphType == "text/turtle") //pffffff
 		{
@@ -542,10 +543,17 @@ EOT;
 					return;
 				}
 				
-				$endpoint = new Endpoint($CONFIG["SERVICE"]["endpoint"][$nameEndpoint],false,$modeDebug);
-				$endpoint->setEndpointQuery($CONFIG["SERVICE"]["endpoint"][$nameEndpoint]);
-				$endpoint->setEndpointUpdate($CONFIG["SERVICE"]["endpoint"][$nameEndpoint]);
-				TestSuite::importData($endpoint ,$data["url"],$name);			
+				$tempEndpoint = $CONFIG["SERVICE"]["endpoint"][$nameEndpoint];
+				
+				$endpoint = new Endpoint($tempEndpoint,false,$modeDebug);
+				$endpoint->setEndpointQuery($tempEndpoint);
+				$endpoint->setEndpointUpdate($tempEndpoint);
+				TestSuite::importData($endpoint ,$data["url"],$name);
+				
+				//Change the query
+				$pattern = '$SERVICE +<'.$nameEndpoint.'>$i';				
+				$replacement = 'SERVICE <'.$tempEndpoint.'>';
+				$this->query = preg_replace($pattern, $replacement, $this->query);
 			}
 				
 			/*echo "importGraphInput\n";

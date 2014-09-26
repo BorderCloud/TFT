@@ -29,3 +29,12 @@ Jenkins will be read the reports Junit/XML with this line :
 ```
 TFT/junit/*junit.xml
 ```
+
+License
+=======
+
+TFT (c)2014 by Karima Rafes - Inria
+
+TFT is licensed under a Creative Commons Attribution-ShareAlike 4.0 International License.
+
+You should have received a copy of the license along with this work. If not, see http://creativecommons.org/licenses/by-sa/4.0/.

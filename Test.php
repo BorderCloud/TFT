@@ -481,34 +481,57 @@ EOT;
 		}
 		return $res["count"]; //todo trycatch //test with sesame */
     }
+    
+    
 	function clearAllTriples() {		
-		global $modeDebug,$modeVerbose,$TESTENDPOINT,$TTRIPLESTORE;	
-		$q = "";			
+		global $modeDebug,$modeVerbose,$TESTENDPOINT,$TTRIPLESTORE,$CONFIG;	
+		$q = "";
 		switch($TTRIPLESTORE){
-			case "virtuoso":		
-				$q = "DELETE WHERE 
-				  {
-					GRAPH ?g 
+				case "virtuoso":		
+					$q = "DELETE WHERE 
 					  {
-						?o ?p ?v . 
-					  }
-				}";
-				
-				$res = $TESTENDPOINT->queryUpdate($q);
-				break;
-			case "4store":		
-				$rows = $TESTENDPOINT->query("SELECT DISTINCT ?g WHERE { GRAPH ?g { ?s ?p ?o } }", 'rows');
-				foreach ($rows["result"]["rows"] as $row){	
-					$q ="CLEAR GRAPH <".$row["g"].">";
+						GRAPH ?g 
+						  {
+							?o ?p ?v . 
+						  }
+					}";
+					
 					$res = $TESTENDPOINT->queryUpdate($q);
-				}
-				break;
-			case "sesame":
-			case "fuseki":
-			default:
-				$q = "CLEAR ALL";
-				$res = $TESTENDPOINT->queryUpdate($q);
-				break;
+					break;
+				case "4store":		
+					$rows = $TESTENDPOINT->query("SELECT DISTINCT ?g WHERE { GRAPH ?g { ?s ?p ?o } }", 'rows');
+					foreach ($rows["result"]["rows"] as $row){	
+						$q ="CLEAR GRAPH <".$row["g"].">";
+						$res = $TESTENDPOINT->queryUpdate($q);
+					}
+					break;
+				case "sesame":
+				case "fuseki":
+				default:
+					$q = "CLEAR ALL";
+					$res = $TESTENDPOINT->queryUpdate($q);
+				      break;
+		}
+		
+		//CLEAN the extern endpoint
+		foreach ($this->ListGraphInput as $name=>$data){
+		    if($this->ListGraphInput[$name]["endpoint"] != ""){
+			// TODO query to identify the software...
+			$nameEndpoint = $this->ListGraphInput[$name]["endpoint"];
+			$tempEndpoint = $CONFIG["SERVICE"]["endpoint"][$nameEndpoint];
+			$endpoint = new Endpoint($tempEndpoint,false,$modeDebug);
+			$endpoint->setEndpointQuery($tempEndpoint);
+			$endpoint->setEndpointUpdate($tempEndpoint);
+			
+			$q = "DELETE WHERE 
+					  {
+						GRAPH ?g 
+						  {
+							?o ?p ?v . 
+						  }
+					}";
+			$res = $endpoint->queryUpdate($q);
+		    }
 		}
     }
 	

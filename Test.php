@@ -196,7 +196,7 @@ EOT;
 		}';
 		$rowsGraph = $ENDPOINT->query($qGraphInput,"rows");
 		foreach ($rowsGraph["result"]["rows"] as $rowGraph){
-			$this->addGraphInput($rowGraph["graphData"],$rowGraph["endpoint"],$rowGraph["endpoint"]);
+			$this->addGraphInput($rowGraph["graphData"],"DEFAULT",$rowGraph["endpoint"]);
 		}
 	}
 	
@@ -230,6 +230,7 @@ EOT;
 			$output = "text/plain";
 		}
 		
+		$this->replaceServiceIRIQuery();
 		$this->ListGraphResult["DEFAULT"] = $TESTENDPOINT->queryRead($this->query , $output);		
 		$errorsQuery = $TESTENDPOINT->getErrors();
 		if ($errorsQuery) {
@@ -285,6 +286,7 @@ EOT;
 				$this->importGraphInput();
 		}
 		
+		$this->replaceServiceIRIQuery();
 		$TESTENDPOINT->queryUpdate($this->query);
 		$errorsQuery = $TESTENDPOINT->getErrors();
 		if ($errorsQuery) {
@@ -570,12 +572,7 @@ EOT;
 				$endpoint = new Endpoint($tempEndpoint,false,$modeDebug);
 				$endpoint->setEndpointQuery($tempEndpoint);
 				$endpoint->setEndpointUpdate($tempEndpoint);
-				TestSuite::importData($endpoint ,$data["url"],$name);
-				
-				//Change the query
-				$pattern = '$SERVICE +<'.$nameEndpoint.'>$i';				
-				$replacement = 'SERVICE <'.$tempEndpoint.'>';
-				$this->query = preg_replace($pattern, $replacement, $this->query);
+				TestSuite::importData($endpoint ,$data["url"],$name);				
 			}
 				
 			/*echo "importGraphInput\n";
@@ -591,9 +588,19 @@ EOT;
 			echo "yo";
 			exit();*/
 		}
-   }
+	}
    
-
+	private function replaceServiceIRIQuery(){   	
+	      	if (preg_match("/SERVICE/i",$this->query)) {
+		    //CLEAN the extern endpoint
+		    foreach ($CONFIG["SERVICE"]["endpoint"] as $nameEndpoint=>$tempEndpoint){
+			    //Change the query
+			$pattern = '$SERVICE +<'.$nameEndpoint.'>$i';				
+			$replacement = 'SERVICE <'.$tempEndpoint.'>';
+			$this->query = preg_replace($pattern, $replacement, $this->query);
+		    }
+		}
+	}
 
 }
 

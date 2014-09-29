@@ -28,7 +28,7 @@ class Tools
 		}else{
 			$q = 'LOAD <'.$urldata.'> INTO GRAPH <'.$graph.'>';
 		}
-			
+		
 		$res = $endpoint->queryUpdate($q);
 		$err = $endpoint->getErrors();
 		 if ($err) {

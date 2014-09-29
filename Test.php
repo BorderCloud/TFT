@@ -71,15 +71,15 @@ EOT;
 			
 		}*/
 		
-		foreach ($this->ListGraphOutput as $nameGraph=>$dataOutput) {		
+		foreach ($this->ListGraphOutput as $name=>$dataOutput) {		
 			$output = $dataOutput["mimetype"];
 			if($TTRIPLESTORE == "allegrograph" && $output == "text/turtle") //pffffff
 				$output = "text/plain";
 			
-			if($nameGraph == "DEFAULT"){
+			if($dataOutput["graphname"] == "DEFAULT"){
 				$this->ListGraphResult["DEFAULT"] = $TESTENDPOINT->queryRead("CONSTRUCT { ?s ?p ?o } WHERE {?s ?p ?o}",$output);
 			}else{
-				$this->ListGraphResult[$nameGraph] = $TESTENDPOINT->queryRead("CONSTRUCT { ?s ?p ?o } WHERE {GRAPH  <".$nameGraph."> {?s ?p ?o}}",$output);
+				$this->ListGraphResult[$dataOutput["graphname"]] = $TESTENDPOINT->queryRead("CONSTRUCT { ?s ?p ?o } WHERE {GRAPH  <".$dataOutput["graphname"]."> {?s ?p ?o}}",$output);
 			}
 				
 			$errorsQuery = $TESTENDPOINT->getErrors();		
@@ -126,13 +126,13 @@ EOT;
 		return $type;
 	}
 	
-	function addGraphInput($url, $name="DEFAULT",$endpoint="")
+	function addGraphInput($url, $name="DEFAULT", $graphname="DEFAULT",$endpoint="DEFAULT")
 	{	
-		$this->ListGraphInput[$name]= array ("url"=>$url,"mimetype"=> $this->getType($url),"endpoint"=>$endpoint);
+		$this->ListGraphInput[$name]= array ("graphname"=>$graphname,"url"=>$url,"mimetype"=> $this->getType($url),"endpoint"=>$endpoint);
 	}
-	function addGraphOutput($url, $name="DEFAULT")
+	function addGraphOutput($url, $name="DEFAULT", $graphname="DEFAULT",$endpoint="DEFAULT")
 	{		
-		$this->ListGraphOutput[$name]= array ("url"=>$url,"mimetype"=> $this->getType($url));
+		$this->ListGraphOutput[$name]= array ("graphname"=>$graphname,"url"=>$url,"mimetype"=> $this->getType($url),"endpoint"=>$endpoint);
 	}
 	
 		
@@ -188,15 +188,15 @@ EOT;
 		 {GRAPH  <'.$graphTest.'>
 				 {
 					<'.$iriTest.'>  	mf:action [ qt:serviceData [
-																   qt:endpoint ?endpoint ;
-																   qt:data     ?graphData
-														   ]
+												 qt:endpoint ?endpoint ;
+												 qt:data     ?graphData
+											  ]
 										].				
 				}
 		}';
 		$rowsGraph = $ENDPOINT->query($qGraphInput,"rows");
 		foreach ($rowsGraph["result"]["rows"] as $rowGraph){
-			$this->addGraphInput($rowGraph["graphData"],"DEFAULT",$rowGraph["endpoint"]);
+			$this->addGraphInput($rowGraph["graphData"],$rowGraph["endpoint"],"DEFAULT",$rowGraph["endpoint"]);
 		}
 	}
 	
@@ -328,7 +328,7 @@ EOT;
 		$message .=  "queryTest :<".$this->URLquery.">\n".$this->query;
 		$message .=  "\n================================================================= \n";
 		$message .=  "dataInput : \n\n";
-		foreach ($this->ListGraphInput as $nameGraph=>$data) {		
+		foreach ($this->ListGraphInput as $name=>$data) {		
 			$message .="<".$data["url"].">\n".$data["content"];
 			$message .=  "\n******************************** \n";
 		}
@@ -340,7 +340,7 @@ EOT;
 	    global $CURL;	
 		
 		$message =  $this->printTestHead();
-		foreach ($this->ListGraphOutput as $nameGraph=>$dataOutput) {		
+		foreach ($this->ListGraphOutput as $name=>$dataOutput) {		
 			//read data			
 			$expected = $CURL->fetch_url($dataOutput["url"]);
 			//$this->ListGraphOutput[$nameGraph]["content"]=$expected;
@@ -348,7 +348,7 @@ EOT;
 			$message .=  "\n================================================================= \n";
 			$message .=  "Data Expected in graph : \n\n";	
 			$message .="<".$dataOutput["url"].">\n".$expected;
-			$message .= $this->checkDataInGraph($nameGraph,$dataOutput["mimetype"],$expected,$this->ListGraphResult[$nameGraph]);
+			$message .= $this->checkDataInGraph($dataOutput["graphname"],$dataOutput["mimetype"],$expected,$this->ListGraphResult[$name]);
 		}
 		return $message;
 	}
@@ -545,7 +545,7 @@ EOT;
 			$content =$CURL->fetch_url($data["url"]);
 			$this->ListGraphInput[$name]["content"]=$content ;
 			
-			if($this->ListGraphInput[$name]["endpoint"] == ""){				
+			if($this->ListGraphInput[$name]["endpoint"] == "DEFAULT"){				
 				switch($TTRIPLESTORE){ 
 					/*case "sesame":		
 						SesameTestSuite::importData($TESTENDPOINT ,$content,$name,$data["mimetype"]);
@@ -558,7 +558,7 @@ EOT;
 						FusekiTestSuite::importData($TESTENDPOINT ,$content,$name,$data["mimetype"]);
 						break;*/
 					default:
-						TestSuite::importData($TESTENDPOINT ,$data["url"],$name);
+						TestSuite::importData($TESTENDPOINT ,$data["url"],$data["graphname"]);
 				}
 			}else{
 				$nameEndpoint = $this->ListGraphInput[$name]["endpoint"];
@@ -572,7 +572,7 @@ EOT;
 				$endpoint = new Endpoint($tempEndpoint,false,$modeDebug);
 				$endpoint->setEndpointQuery($tempEndpoint);
 				$endpoint->setEndpointUpdate($tempEndpoint);
-				TestSuite::importData($endpoint ,$data["url"],$name);				
+				TestSuite::importData($endpoint ,$data["url"],$data["graphname"]);				
 			}
 				
 			/*echo "importGraphInput\n";

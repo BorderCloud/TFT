@@ -513,24 +513,23 @@ EOT;
 				      break;
 		}
 		
-		//CLEAN the extern endpoint
-		foreach ($this->ListGraphInput as $name=>$data){
-		    if($this->ListGraphInput[$name]["endpoint"] != ""){
-			// TODO query to identify the software...
-			$nameEndpoint = $this->ListGraphInput[$name]["endpoint"];
-			$tempEndpoint = $CONFIG["SERVICE"]["endpoint"][$nameEndpoint];
-			$endpoint = new Endpoint($tempEndpoint,false,$modeDebug);
-			$endpoint->setEndpointQuery($tempEndpoint);
-			$endpoint->setEndpointUpdate($tempEndpoint);
-			
-			$q = "DELETE WHERE 
-					  {
-						GRAPH ?g 
-						  {
-							?o ?p ?v . 
-						  }
-					}";
-			$res = $endpoint->queryUpdate($q);
+		if (preg_match("/SERVICE/i",$this->query)) {
+		    //CLEAN the extern endpoint
+		    foreach ($CONFIG["SERVICE"]["endpoint"] as $tempEndpoint){
+			    // TODO query to identify the software...
+			    $endpoint = new Endpoint($tempEndpoint,false,$modeDebug);
+			    $endpoint->setEndpointQuery($tempEndpoint);
+			    $endpoint->setEndpointUpdate($tempEndpoint);
+			    
+			    $q = "DELETE WHERE 
+					      {
+						    GRAPH ?g 
+						      {
+							    ?o ?p ?v . 
+						      }
+					    }";
+			   //echo "t:".$tempEndpoint."\n";
+			    $res = $endpoint->queryUpdate($q);
 		    }
 		}
     }

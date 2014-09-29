@@ -646,13 +646,13 @@ foreach($listTestSuite as $URL => $folder){
 
 	// TODO 
 	//ServiceDescriptionTest::doAllTests();
-
+/*
 	PositiveSyntaxTest::doAllTests();
 
 	NegativeSyntaxTest::doAllTests();
-
+*/
 	QueryEvaluationTest::doAllTests();
-
+/*
 	CSVResultFormatTest::doAllTests();
 
 	UpdateEvaluationTest::doAllTests(); //ok test multi graph
@@ -660,7 +660,7 @@ foreach($listTestSuite as $URL => $folder){
 	PositiveUpdateSyntaxTest::doAllTests();
 
 	NegativeUpdateSyntaxTest::doAllTests();
-
+*/
 	echo "\n END TESTS \n";
 }
 

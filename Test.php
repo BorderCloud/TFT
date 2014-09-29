@@ -590,7 +590,8 @@ EOT;
 		}
 	}
    
-	private function replaceServiceIRIQuery(){   	
+	private function replaceServiceIRIQuery(){
+		global $CONFIG;
 	      	if (preg_match("/SERVICE/i",$this->query)) {
 		    //CLEAN the extern endpoint
 		    foreach ($CONFIG["SERVICE"]["endpoint"] as $nameEndpoint=>$tempEndpoint){

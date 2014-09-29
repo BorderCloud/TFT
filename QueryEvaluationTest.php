@@ -75,9 +75,9 @@ select DISTINCT ?testiri ?name ?queryTest
 		OPTIONAL{
 			?testiri mf:action [ qt:graphData    ?graphInputGraph	]							
 			}		
-		OPTIONAL{
+	#	OPTIONAL{
 			?testiri mf:action [ qt:serviceData    ?serviceInputGraph	]							
-			}	
+	#		}	
 		BIND(BOUND(?graphInputDefault) AS ?ChangeDefaultGraph)
 		BIND(BOUND(?graphInputGraph) AS ?ChangeMultiGraph)		
 		BIND(BOUND(?serviceInputGraph) AS ?ChangeServiceGraph)		

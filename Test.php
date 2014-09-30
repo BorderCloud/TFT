@@ -396,7 +396,7 @@ EOT;
 					$tabResultDataset = ParserSparqlResult::sortResult($tabResultDataset);
                                         $tabDiff = Tools::array_diff_assoc_recursive_with_blanknode($tabResultDataWait, $tabResultDataset);
 				}else{
-                                     $tabDiff = Tools::array_diff_assoc_unordered($tabResultDataWait, $tabResultDataset);
+                                     $tabDiff = ParserSparqlResult::array_diff_assoc_unordered($tabResultDataWait, $tabResultDataset);
                                 }
 				//$test = true;
 				break;
@@ -409,7 +409,7 @@ EOT;
 				}						
 				$tabDiff = Tools::array_diff_assoc_recursive($tabResultDataWait, $tabResultDataset);
 				//$test = true;
-				break;			
+				break;
 			case "text/csv; charset=utf-8":
 				$tabResultDataWait = ParserCSV::csv_to_array($expected);
 				$tabResultDataset = ParserCSV::csv_to_array($result);		
@@ -419,29 +419,31 @@ EOT;
 				}						
 				$tabDiff = Tools::array_diff_assoc_recursive_with_blanknode($tabResultDataWait, $tabResultDataset);
 				//$test = true;
-				break;						
-			case  "text/turtle":		
+				break;
+			case  "text/turtle":
 				$tabResultDataWait = ParserTurtle::turtle_to_array($expected,$nameGraph);	
 				$tabResultDataset = ParserTurtle::turtle_to_array($result,$nameGraph);		
 				if($sort){
 					$tabResultDataWait = ParserTurtle::sortTriples($tabResultDataWait);	
 					$tabResultDataset = ParserTurtle::sortTriples($tabResultDataset);
-				}						
-				$tabDiff = Tools::array_diff_assoc_recursive($tabResultDataWait["triples"], $tabResultDataset["triples"]);		
-				break;							
-			case  "application/sparql-results+json":					
+				        $tabDiff = Tools::array_diff_assoc_recursive($tabResultDataWait["triples"], $tabResultDataset["triples"]);
+				}else{
+                                     $tabDiff = ParserTurtle::array_diff_assoc_unordered($tabResultDataWait,$tabResultDataset);
+                                }
+				break;
+			case  "application/sparql-results+json":
 				$tabResultDataWait = json_decode($expected, true);
 				$tabResultDataset = json_decode($result, true);		
 				$tabDiff = Tools::array_diff_assoc_recursive_with_blanknode($tabResultDataWait, $tabResultDataset);
 				//$test = true;
-				break;		
+				break;
 			default:
 				$this->AddFail("The ckeck result is not yet implemented : ".$mimetype);	
 				print_r($this->_fails);
-				exit();		
+				exit();
 		}
 				
-		$message .=  "resultDataExpected after parsing : <".$nameGraph.">\n";					
+		$message .=  "resultDataExpected after parsing : <".$nameGraph.">\n";
 		$message .= print_r($tabResultDataWait,true);	
 		$message .=  "\n================================================================= \n";
 		$message .=  "result of dataset after parsing : \n";

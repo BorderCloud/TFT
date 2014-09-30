@@ -15,7 +15,8 @@ class PositiveSyntaxTest {
 			return -1;
 		}
 		return $res["count"]; 
-   }
+	}
+	
 	function doAllTests(){ 	
 		global $modeDebug,$modeVerbose,$ENDPOINT,$CURL,$GRAPHTESTS,$GRAPH_RESULTS_EARL,$TAGTESTS;;
 		 //////////////////////////////////////////////////////////////////////

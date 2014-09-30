@@ -1,5 +1,6 @@
 <?php
 require_once 'lib/sparql/Endpoint.php';
+require_once 'lib/sparql/ConversionMimetype.php';
 require_once 'lib/sparql/ParserTurtle.php';
 require_once 'lib/sparql/ParserCSV.php';
 
@@ -96,7 +97,15 @@ EOT;
 
 		preg_match("/^.*\.([^\.]+)$/i", $url, $matches);
 		$extension = $matches[1];
-		switch($extension){
+		$type=  ConversionMimetype::getMimetypeOfFilenameExtensions($extension);
+		
+		if($type === NULL){	    
+		    $this->AddFail("DataResultExpected has an extension unknown : ".$extension." (".$url.")");	
+		    print_r($this->_fails);
+		    exit();	
+		}
+		    
+		/*switch($extension){
 			case "rdf":				
 				$type=  "application/rdf+xml";
 				break;
@@ -119,10 +128,10 @@ EOT;
 				$type = "application/sparql-results+json";
 				break;
 			default :
-				$this->AddFail("DataResultWait has an extension unknown : ".$extension." (".$url.")");	
+				$this->AddFail("DataResultExpected has an extension unknown : ".$extension." (".$url.")");	
 				print_r($this->_fails);
 				exit();					
-		}
+		}*/
 		return $type;
 	}
 	
@@ -224,6 +233,8 @@ EOT;
 			$this->importGraphInput();
 		}
 	  
+	        //TODO clean...
+	        $this->URLresultDataDefaultGraphType = $this->ListGraphOutput["DEFAULT"]["mimetype"];
 		$output = $this->URLresultDataDefaultGraphType;
 		if($TTRIPLESTORE == "allegrograph" && $this->URLresultDataDefaultGraphType == "text/turtle") //pffffff
 		{
@@ -430,7 +441,7 @@ EOT;
 				exit();		
 		}
 				
-		$message .=  "resultDataWait after parsing : <".$nameGraph.">\n";					
+		$message .=  "resultDataExpected after parsing : <".$nameGraph.">\n";					
 		$message .= print_r($tabResultDataWait,true);	
 		$message .=  "\n================================================================= \n";
 		$message .=  "result of dataset after parsing : \n";

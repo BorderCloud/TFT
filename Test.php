@@ -87,8 +87,7 @@ EOT;
 			if ($errorsQuery) {
 				$this->_errors = $errorsQuery;
 			}
-				
-				//TODO : Check nb of graph in Result
+			//TODO : Check nb of graph in Result
 		}
 	}
 	
@@ -163,9 +162,10 @@ EOT;
 		where
 		 {GRAPH  <'.$graphTest.'>
 				 {
-					<'.$iriTest.'>  	mf:action [ '.$prefix.':graphData [ '.$prefix.':graph ?graphData ;
-															rdfs:label ?graphName ]
-										].				
+					<'.$iriTest.'>  	mf:action [ '.$prefix.':graphData 
+										  [ '.$prefix.':graph ?graphData ;
+											rdfs:label ?graphName ]
+									].				
 				}
 		}';
 		$qGraphOutput = Test::PREFIX.' 
@@ -173,18 +173,28 @@ EOT;
 		where
 		 {GRAPH  <'.$graphTest.'>
 				 {
-					<'.$iriTest.'> 	mf:result [ '.$prefix.':graphData [ '.$prefix.':graph ?graphData ;
-															rdfs:label ?graphName ]
-										] .		
+					<'.$iriTest.'> 	mf:result [ '.$prefix.':graphData 
+					                                  [ '.$prefix.':graph ?graphData ;
+										   rdfs:label ?graphName ]
+								] .		
 				}
 		}';
+		
+		/*echo "\n****************************\n";
+		echo $qGraphInput;
+		echo "\n****************************\n";
+		echo $qGraphOutput;
+		echo "\n****************************\n";
+		*/
 		$rowsGraph = $ENDPOINT->query($qGraphInput,"rows");
+		//print_r($rowsGraph);
 		foreach ($rowsGraph["result"]["rows"] as $rowGraph){
-			$this->addGraphInput($rowGraph["graphData"],$rowGraph["graphName"]);
+			$this->addGraphInput($rowGraph["graphData"],$rowGraph["graphName"],$rowGraph["graphName"]);
 		}
 		$rowsGraph = $ENDPOINT->query($qGraphOutput,"rows");
+		//print_r($rowsGraph);
 		foreach ($rowsGraph["result"]["rows"] as $rowGraph){
-			$this->addGraphOutput($rowGraph["graphData"],$rowGraph["graphName"]);
+			$this->addGraphOutput($rowGraph["graphData"],$rowGraph["graphName"],$rowGraph["graphName"]);
 		}
 	}
 	
@@ -280,7 +290,7 @@ EOT;
 		$message = "";		
 		$test = false;
 		
-        $TESTENDPOINT->ResetErrors();
+		$TESTENDPOINT->ResetErrors();
 		$this->clearAllTriples();
 		
 		// check if triplestore is empty
@@ -341,7 +351,7 @@ EOT;
 		$message .=  "dataInput : \n\n";
 		foreach ($this->ListGraphInput as $name=>$data) {		
 			$message .="<".$data["url"].">\n".$data["content"];
-			$message .=  "\n******************************** \n";
+			//$message .=  "\n******************************** \n";
 		}
 	
 		return $message;
@@ -356,10 +366,16 @@ EOT;
 			$expected = $CURL->fetch_url($dataOutput["url"]);
 			//$this->ListGraphOutput[$nameGraph]["content"]=$expected;
 			
+			//print_r($this->ListGraphResult);
 			$message .=  "\n================================================================= \n";
-			$message .=  "Data Expected in graph : \n\n";	
-			$message .="<".$dataOutput["url"].">\n".$expected;
-			$message .= $this->checkDataInGraph($dataOutput["graphname"],$dataOutput["mimetype"],$expected,$this->ListGraphResult[$name]);
+			$message .=  "Expected data in graph : \n\n";	
+			$message .="FILE : <".$dataOutput["url"]."> (".$expected.")\n";
+			$message .= $this->checkDataInGraph($dataOutput["graphname"],
+							    $dataOutput["mimetype"],
+							    $expected,
+							    $this->ListGraphResult[$dataOutput["graphname"]]);
+			$message .=  "\n================================================================= \n";
+			
 		}
 		return $message;
 	}
@@ -369,10 +385,11 @@ EOT;
 		$tabDiff = null;
 		$test = false;
 		$message =  "";
-		$message .=  "\n================================================================= \n";
+		//$message .=  "\n================================================================= \n";
 		$message .=  "Data after query in graph:\n";
-		$message .=  "<".$nameGraph.">\n".$result;
-		$message .=  "\n================================================================= \n";
+		$message .=  "GRAPH : <".$nameGraph.">\n" ;
+		$message .=  "DATA :\n".$result;
+		//$message .=  "\n================================================================= \n";
 		
 		$sort = preg_match("/(?:ORDER)/i",$this->query);
 				
@@ -386,55 +403,72 @@ EOT;
 			case "application/sparql-results+xml":
 				$parserSparqlResult = new ParserSparqlResult();	
 				xml_parse($parserSparqlResult->getParser(),$expected, true);		
-				$tabResultDataWait = $parserSparqlResult->getResult();
+				$tabResultDataExpected = $parserSparqlResult->getResult();
 				
 				xml_parse($parserSparqlResult->getParser(),$result, true);		
 				$tabResultDataset = $parserSparqlResult->getResult();
-					
+				/*	
 				if($sort){
-					$tabResultDataWait = ParserSparqlResult::sortResult($tabResultDataWait);	
+					$tabResultDataExpected = ParserSparqlResult::sortResult($tabResultDataExpected);	
 					$tabResultDataset = ParserSparqlResult::sortResult($tabResultDataset);
-                                        $tabDiff = Tools::array_diff_assoc_recursive_with_blanknode($tabResultDataWait, $tabResultDataset);
+                                        $tabDiff = Tools::array_diff_assoc_recursive_with_blanknode($tabResultDataExpected, $tabResultDataset);
 				}else{
-                                     $tabDiff = ParserSparqlResult::array_diff_assoc_unordered($tabResultDataWait, $tabResultDataset);
-                                }
+                                     $tabDiff = ParserSparqlResult::array_diff_assoc_unordered($tabResultDataExpected, $tabResultDataset);
+                                }*/
+                                $tabDiff = ParserSparqlResult::compare($tabResultDataExpected,$tabResultDataset,$sort);
+                                
 				//$test = true;
 				break;
 			case "text/tab-separated-values; charset=utf-8":
-				$tabResultDataWait = ParserCSV::csv_to_array($expected,"\t");
-				$tabResultDataset = ParserCSV::csv_to_array($result,"\t");		
+				$tabResultDataExpected = ParserCSV::csv_to_array($expected,"\t");
+				$tabResultDataset = ParserCSV::csv_to_array($result,"\t");	
+				/*echo "NNN";
 				if($sort){
-					$tabResultDataWait = ParserCSV::sortTable($tabResultDataWait);	
+				echo "NNN0";
+					$tabResultDataExpected = ParserCSV::sortTable($tabResultDataExpected);	
 					$tabResultDataset = ParserCSV::sortTable($tabResultDataset);
-				}						
-				$tabDiff = Tools::array_diff_assoc_recursive($tabResultDataWait, $tabResultDataset);
-				//$test = true;
+					$tabDiff = Tools::array_diff_assoc_recursive($tabResultDataExpected, $tabResultDataset);
+				}else{
+				echo "NNN1";
+                                     $tabDiff = ParserCSV::array_diff_assoc_unordered($tabResultDataExpected,$tabResultDataset);
+                                }//$test = true;*/
+                                $tabDiff = ParserCSV::compare($tabResultDataExpected,$tabResultDataset,$sort);
+                                
 				break;
 			case "text/csv; charset=utf-8":
-				$tabResultDataWait = ParserCSV::csv_to_array($expected);
+				$tabResultDataExpected = ParserCSV::csv_to_array($expected);
 				$tabResultDataset = ParserCSV::csv_to_array($result);		
-				if($sort){
-					$tabResultDataWait = ParserCSV::sortTable($tabResultDataWait);	
+				/*if($sort){
+					$tabResultDataExpected = ParserCSV::sortTable($tabResultDataExpected);	
 					$tabResultDataset = ParserCSV::sortTable($tabResultDataset);
-				}						
-				$tabDiff = Tools::array_diff_assoc_recursive_with_blanknode($tabResultDataWait, $tabResultDataset);
+					$tabDiff = Tools::array_diff_assoc_recursive_with_blanknode($tabResultDataExpected, $tabResultDataset);
+				}else{
+                                     $tabDiff = ParserCSV::array_diff_assoc_unordered($tabResultDataExpected,$tabResultDataset);
+                                }*/
+                                 $tabDiff = ParserCSV::compare($tabResultDataExpected,$tabResultDataset,$sort);
 				//$test = true;
 				break;
 			case  "text/turtle":
-				$tabResultDataWait = ParserTurtle::turtle_to_array($expected,$nameGraph);	
+				$tabResultDataExpected = ParserTurtle::turtle_to_array($expected,$nameGraph);	
 				$tabResultDataset = ParserTurtle::turtle_to_array($result,$nameGraph);		
-				if($sort){
-					$tabResultDataWait = ParserTurtle::sortTriples($tabResultDataWait);	
+				/*if($sort){
+					$tabResultDataExpected = ParserTurtle::sortTriples($tabResultDataExpected);	
 					$tabResultDataset = ParserTurtle::sortTriples($tabResultDataset);
-				        $tabDiff = Tools::array_diff_assoc_recursive($tabResultDataWait["triples"], $tabResultDataset["triples"]);
+				        $tabDiff = Tools::array_diff_assoc_recursive($tabResultDataExpected["triples"], $tabResultDataset["triples"]);
 				}else{
-                                     $tabDiff = ParserTurtle::array_diff_assoc_unordered($tabResultDataWait,$tabResultDataset);
-                                }
+                                     $tabDiff = ParserTurtle::array_diff_assoc_unordered($tabResultDataExpected,$tabResultDataset);
+                                }*/
+                                $tabDiff = ParserTurtle::compare($tabResultDataExpected,$tabResultDataset,$sort);
 				break;
 			case  "application/sparql-results+json":
-				$tabResultDataWait = json_decode($expected, true);
+				$tabResultDataExpected = json_decode($expected, true);
 				$tabResultDataset = json_decode($result, true);		
-				$tabDiff = Tools::array_diff_assoc_recursive_with_blanknode($tabResultDataWait, $tabResultDataset);
+				//$tabDiff = Tools::array_diff_assoc_recursive_with_blanknode($tabResultDataExpected, $tabResultDataset);
+				if($sort){
+					  $tabDiff =  ToolsBlankNode::array_diff_assoc_recursive($tabResultDataExpected, $tabResultDataset);
+				  }else{
+					  $tabDiff =  ToolsBlankNode::array_diff_assoc_unordered($tabResultDataExpected, $tabResultDataset) ;
+				  }
 				//$test = true;
 				break;
 			default:
@@ -443,10 +477,10 @@ EOT;
 				exit();
 		}
 				
-		$message .=  "resultDataExpected after parsing : <".$nameGraph.">\n";
-		$message .= print_r($tabResultDataWait,true);	
+		$message .=  "Result expected after parsing : <".$nameGraph.">\n";
+		$message .= print_r($tabResultDataExpected,true);	
 		$message .=  "\n================================================================= \n";
-		$message .=  "result of dataset after parsing : \n";
+		$message .=  "Result of dataset after parsing : \n";
 		$message .= print_r($tabResultDataset,true);	
 		$message .=  "\n================================================================= \n";
 		$message .=  "Difference in the result : \n";
@@ -553,6 +587,7 @@ EOT;
 		global $modeDebug,$modeVerbose,$TESTENDPOINT,$TTRIPLESTORE,$CURL,$CONFIG;	
 		//echo "########################################################";
 		//print_r($this->ListGraphInput);
+		//exit();
 		foreach ($this->ListGraphInput as $name=>$data){
 			
 			$content =$CURL->fetch_url($data["url"]);

@@ -37,7 +37,7 @@ class QueryEvaluationTest {
 		
 		$ENDPOINT->ResetErrors();
 		$q = Test::PREFIX.'
-		SELECT (COUNT(?s) AS ?count) WHERE {
+		SELECT (COUNT(DISTINCT ?s) AS ?count) WHERE {
 			GRAPH <'.$GRAPHTESTS .'> { ?s a mf:QueryEvaluationTest ;
 							 dawgt:approval dawgt:Approved .}} '; 
 		$res = $ENDPOINT->query($q, 'row');
@@ -56,10 +56,10 @@ class QueryEvaluationTest {
 TESTS : QueryEvaluationTest";// ( ".QueryEvaluationTest::countApprovedTests()." Approved, ".QueryEvaluationTest::countSkipTests()." Skipped, ".QueryEvaluationTest::countAllTests()." Total\n";
 		$Report = new TestsReport("QueryEvaluationTest",$TAGTESTS.'-QueryEvaluationTest-junit.xml');
 		$q = Test::PREFIX.' 
-select DISTINCT ?testiri ?name ?queryTest  
-?ChangeDefaultGraph ?ChangeMultiGraph ?ChangeServiceGraph
-?graphInputDefault ?graphOutput 
- where
+SELECT DISTINCT ?testiri ?name ?queryTest  
+		?ChangeDefaultGraph ?ChangeMultiGraph ?ChangeServiceGraph
+		?graphInputDefault ?graphOutput 
+WHERE
 {GRAPH <'.$GRAPHTESTS .'>
 	 {
 		?testiri a 			mf:QueryEvaluationTest ;
@@ -115,8 +115,8 @@ ORDER BY ?testiri
 		$iriAssert = $GRAPH_RESULTS_EARL."/QueryEvaluationTest/CountTestsAssert";
 		$labelAssert = "Compare the nb of valid tests with the nb of tests in the dataset.";
 		if($nbTest !=  $nbApprovedTests ){
-			echo "F";
-		  $Report->addTestCaseFailure($iriTest,$iriAssert,$labelAssert,
+			echo "F";	
+		        $Report->addTestCaseFailure($iriTest,$iriAssert,$labelAssert,
 					"NB of tests (".$nbTest."/".$nbApprovedTests ." in theory) is incorrect.\n TODO//220 but there are tests with several names..."	
 					);
 		}else{		
@@ -167,6 +167,8 @@ ORDER BY ?testiri
 			echo "ListGraphOutput";
 			print_r($test->ListGraphOutput);
 			//exit();*/
+			
+			//echo "\nmf:name    	\"".$row["name"]."\" ;\n";
 			
 			$test->doQuery(true);
 			$err = $test->GetErrors();

@@ -660,7 +660,8 @@ foreach($listTestSuite as $URL => $folder){
 	PositiveUpdateSyntaxTest::doAllTests();
 
 	NegativeUpdateSyntaxTest::doAllTests();
-
+	
+	
 	echo "\n END TESTS \n";
 }
 

@@ -6,7 +6,7 @@ class UpdateEvaluationTest {
 		
 		$ENDPOINT->ResetErrors();
 		$q = Test::PREFIX.'
-		SELECT (COUNT(?s) AS ?count) WHERE {
+		SELECT (COUNT(DISTINCT ?s) AS ?count) WHERE {
 			GRAPH <'.$GRAPHTESTS .'> { ?s a mf:UpdateEvaluationTest ;
 							 dawgt:approval dawgt:Approved .}} '; 
 		$res = $ENDPOINT->query($q, 'row');
@@ -25,9 +25,9 @@ class UpdateEvaluationTest {
 		$Report = new TestsReport("UpdateEvaluationTest",$TAGTESTS.'-UpdateEvaluationTest-junit.xml');
 
 		$q = Test::PREFIX.' 
-select DISTINCT ?testiri ?name ?queryTest ?ChangeDefaultGraph ?ChangeMultiGraph ?graphInput ?graphOutput
-		where
-		 {GRAPH <'.$GRAPHTESTS.'>
+SELECT DISTINCT ?testiri ?name ?queryTest ?ChangeDefaultGraph ?ChangeMultiGraph ?graphInput ?graphOutput
+WHERE
+{GRAPH <'.$GRAPHTESTS.'>
 				 {
 					?testiri a 				mf:UpdateEvaluationTest ;
 							 mf:name    	?name ;
@@ -180,7 +180,7 @@ LIMIT 2';
 			}
 			
 			if($row["ChangeMultiGraph"]){
-				$test->readAndAddMultigraph($GRAPHTESTS,$iriTest);
+				$test->readAndAddMultigraph($GRAPHTESTS,$iriTest,false);
 			}	
 
 			

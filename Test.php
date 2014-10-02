@@ -348,10 +348,12 @@ EOT;
 		$message .= "\n================================================================= \n";
 		$message .=  "queryTest :<".$this->URLquery.">\n".$this->query;
 		$message .=  "\n================================================================= \n";
-		$message .=  "dataInput : \n\n";
+		$message .=  "Data in input : \n\n";
 		foreach ($this->ListGraphInput as $name=>$data) {		
-			$message .="<".$data["url"].">\n".$data["content"];
-			//$message .=  "\n******************************** \n";
+			$message .= "FILE <".$data["url"]."> \n";		
+			$message .= "GRAPH <".$data["graphname"]."> :\n";
+			$message .= $data["content"]."\n";
+			$message .= "\n---------------------------\n";
 		}
 	
 		return $message;
@@ -369,7 +371,9 @@ EOT;
 			//print_r($this->ListGraphResult);
 			$message .=  "\n================================================================= \n";
 			$message .=  "Expected data in graph : \n\n";	
-			$message .="FILE : <".$dataOutput["url"]."> (".$expected.")\n";
+			$message .=  "FILE  <".$dataOutput["url"]."> \n";		
+			$message .= "GRAPH <".$dataOutput["graphname"]."> :\n";
+			$message .= $expected."\n";
 			$message .= $this->checkDataInGraph($dataOutput["graphname"],
 							    $dataOutput["mimetype"],
 							    $expected,
@@ -385,11 +389,11 @@ EOT;
 		$tabDiff = null;
 		$test = false;
 		$message =  "";
-		//$message .=  "\n================================================================= \n";
+		$message .=  "\n---------------------------------------------------- \n";
 		$message .=  "Data after query in graph:\n";
 		$message .=  "GRAPH : <".$nameGraph.">\n" ;
 		$message .=  "DATA :\n".$result;
-		//$message .=  "\n================================================================= \n";
+		$message .=  "\n---------------------------------------------------- \n";
 		
 		$sort = preg_match("/(?:ORDER)/i",$this->query);
 				

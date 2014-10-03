@@ -58,7 +58,7 @@ TESTS : QueryEvaluationTest";// ( ".QueryEvaluationTest::countApprovedTests()." 
 		$q = Test::PREFIX.' 
 SELECT DISTINCT ?testiri ?name ?queryTest  
 		?ChangeDefaultGraph ?ChangeMultiGraph ?ChangeServiceGraph
-		?graphInputDefault ?graphOutput 
+		?graphInputDefault ?graphOutput ?graphInputDefaultName
 WHERE
 {GRAPH <'.$GRAPHTESTS .'>
 	 {
@@ -71,9 +71,12 @@ WHERE
 				mf:result  ?graphOutput .		
 		OPTIONAL{
 			?testiri mf:action [ qt:data    ?graphInputDefault	]							
+			}				
+		OPTIONAL{
+			?testiri mf:action [ qt:graphData    ?graphInputDefaultName	]							
 			}		
 		OPTIONAL{
-			?testiri mf:action [ qt:graphData    ?graphInputGraph	]							
+			?testiri mf:action [ qt:graphData    [ qt:graph   ?graphInputGraph ]	]							
 			}		
 		OPTIONAL{
 			?testiri mf:action [ qt:serviceData    ?serviceInputGraph	]							
@@ -85,7 +88,6 @@ WHERE
 }
 ORDER BY ?testiri
 ';
-
 		 
 		//echo $q;
 		$ENDPOINT->ResetErrors();
@@ -149,8 +151,12 @@ ORDER BY ?testiri
 			$test = new Test(trim($row["queryTest"]));
 			
 			if($row["ChangeDefaultGraph"]){
-				$test->addGraphInput(trim($row["graphInputDefault"]));
-				$test->addGraphOutput(trim($row["graphOutput"]));
+			       $GraphName = "DEFAULT";
+			        if (!$row["ChangeMultiGraph"] && array_key_exists('graphInputDefaultName', $row)) {
+				   $GraphName = trim($row["graphInputDefaultName"]);
+				}
+				$test->addGraphInput(trim($row["graphInputDefault"]),"DEFAULT",$GraphName);
+				$test->addGraphOutput(trim($row["graphOutput"]),"DEFAULT",$GraphName);
 			}
 			if($row["ChangeMultiGraph"]){
 				$test->readAndAddMultigraph($GRAPHTESTS,$iriTest); //todo check error http://www.w3.org/2009/sparql/docs/tests/data-sparql11/exists/exists03.rq

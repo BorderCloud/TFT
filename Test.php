@@ -113,6 +113,13 @@ EOT;
 	function addGraphOutput($url, $name="DEFAULT", $graphname="DEFAULT",$endpoint="DEFAULT")
 	{		
 		$this->ListGraphOutput[$name]= array ("graphname"=>$graphname,"url"=>$url,"mimetype"=> $this->getType($url),"endpoint"=>$endpoint);
+		/*
+		echo "\n**************************** INPUT\n";
+		echo print_r($this->ListGraphInput);
+		echo "\n**************************** OUTPUT\n";
+		echo print_r($this->ListGraphOutput);
+		echo "\n**************************** \n";
+		*/
 	}
 	
 		
@@ -151,12 +158,11 @@ EOT;
 								] .		
 				}
 		}';
-		
-		/*echo "\n****************************\n";
+		/*
+		echo "\n****************************\n";
 		echo $qGraphInput;
 		echo "\n****************************\n";
 		echo $qGraphOutput;
-		echo "\n****************************\n";
 		*/
 		$rowsGraph = $ENDPOINT->query($qGraphInput,"rows");
 		//print_r($rowsGraph);
@@ -167,7 +173,7 @@ EOT;
 		//print_r($rowsGraph);
 		foreach ($rowsGraph["result"]["rows"] as $rowGraph){
 			$this->addGraphOutput($rowGraph["graphData"],$rowGraph["graphName"],$rowGraph["graphName"]);
-		}
+		}		
 	}
 	
 	function readAndAddService($graphTest,$iriTest)

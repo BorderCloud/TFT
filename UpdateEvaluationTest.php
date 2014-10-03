@@ -25,28 +25,30 @@ class UpdateEvaluationTest {
 		$Report = new TestsReport("UpdateEvaluationTest",$TAGTESTS.'-UpdateEvaluationTest-junit.xml');
 
 		$q = Test::PREFIX.' 
-SELECT DISTINCT ?testiri ?name ?queryTest ?ChangeDefaultGraph ?ChangeMultiGraph ?graphInput ?graphOutput
+SELECT DISTINCT ?testiri ?name ?queryTest  ?ChangeMultiGraph ?graphInput ?graphOutput
+		# ?ChangeDefaultGraph
 WHERE
 {GRAPH <'.$GRAPHTESTS.'>
 				 {
-					?testiri a 				mf:UpdateEvaluationTest ;
+					?testiri 	a 		mf:UpdateEvaluationTest ;
 							 mf:name    	?name ;
 							 dawgt:approval dawgt:Approved ;
 							 mf:action [ 
 										ut:request ?queryTest;
 										]
 					OPTIONAL{
-							?testiri mf:action [ 
-										ut:data  ?graphInput   	];							
-									mf:result [ ut:data  ?graphOutput ] .
+							?testiri mf:action [ ut:data  ?graphInput   ] .
+							}
+					OPTIONAL{
+							?testiri mf:result [ ut:data  ?graphOutput ] .
 							}
 					OPTIONAL{
 						?testiri	mf:action [ 
 										ut:graphData ?graphListInput	];
-									mf:result [ 
-										ut:graphData ?graphListOutput	]
+								#	mf:result [ 
+								#		ut:graphData ?graphListOutput	]
 						}
-					BIND(BOUND(?graphInput) AS ?ChangeDefaultGraph)
+					#BIND(BOUND(?graphInput) AS ?ChangeDefaultGraph)
 					BIND(BOUND(?graphListInput) AS ?ChangeMultiGraph)					
 			}
 		}
@@ -175,9 +177,15 @@ LIMIT 2';
 						
 			$test = new Test(trim($row["queryTest"]));
 			
-			if($row["ChangeDefaultGraph"]){
+			/*if($row["ChangeDefaultGraph"]){
 				$test->addGraphInput(trim($row["graphInput"]));
 				$test->addGraphOutput(trim($row["graphOutput"]));
+			}*/
+			if (array_key_exists('graphInput', $row)) {
+				$test->addGraphInput(trim($row["graphInput"]));;
+			}
+			if (array_key_exists('graphOutput', $row)) {
+				$test->addGraphInput(trim($row["graphOutput"]));;
 			}
 			
 			if($row["ChangeMultiGraph"]){

@@ -103,34 +103,6 @@ EOT;
 		    print_r($this->_fails);
 		    exit();	
 		}
-		    
-		/*switch($extension){
-			case "rdf":				
-				$type=  "application/rdf+xml";
-				break;
-			case "nt":				
-				$type=  "text/plain";
-				break;
-			case "csv":
-				$type =  "text/csv; charset=utf-8";
-				break;
-			case "tsv":
-				$type =  "text/tab-separated-values; charset=utf-8";
-				break;
-			case "ttl":
-				$type =  "text/turtle";
-				break;
-			case "srx":
-				$type = "application/sparql-results+xml";
-				break;
-			case "srj":
-				$type = "application/sparql-results+json";
-				break;
-			default :
-				$this->AddFail("DataResultExpected has an extension unknown : ".$extension." (".$url.")");	
-				print_r($this->_fails);
-				exit();					
-		}*/
 		return $type;
 	}
 	
@@ -377,14 +349,15 @@ EOT;
 			$message .= $this->checkDataInGraph($dataOutput["graphname"],
 							    $dataOutput["mimetype"],
 							    $expected,
-							    $this->ListGraphResult[$dataOutput["graphname"]]);
+							    $this->ListGraphResult[$dataOutput["graphname"]],
+							    $dataOutput["url"]);
 			$message .=  "\n================================================================= \n";
 			
 		}
 		return $message;
 	}
 	
-	private function checkDataInGraph($nameGraph,$mimetype,$expected,$result)
+	private function checkDataInGraph($nameGraph,$mimetype,$expected,$result,$url)
 	{
 		$tabDiff = null;
 		$test = false;
@@ -411,63 +384,33 @@ EOT;
 				
 				xml_parse($parserSparqlResult->getParser(),$result, true);		
 				$tabResultDataset = $parserSparqlResult->getResult();
-				/*	
-				if($sort){
-					$tabResultDataExpected = ParserSparqlResult::sortResult($tabResultDataExpected);	
-					$tabResultDataset = ParserSparqlResult::sortResult($tabResultDataset);
-                                        $tabDiff = Tools::array_diff_assoc_recursive_with_blanknode($tabResultDataExpected, $tabResultDataset);
-				}else{
-                                     $tabDiff = ParserSparqlResult::array_diff_assoc_unordered($tabResultDataExpected, $tabResultDataset);
-                                }*/
                                 $tabDiff = ParserSparqlResult::compare($tabResultDataExpected,$tabResultDataset,$sort);
                                 
 				//$test = true;
 				break;
 			case "text/tab-separated-values; charset=utf-8":
 				$tabResultDataExpected = ParserCSV::csv_to_array($expected,"\t");
-				$tabResultDataset = ParserCSV::csv_to_array($result,"\t");	
-				/*echo "NNN";
-				if($sort){
-				echo "NNN0";
-					$tabResultDataExpected = ParserCSV::sortTable($tabResultDataExpected);	
-					$tabResultDataset = ParserCSV::sortTable($tabResultDataset);
-					$tabDiff = Tools::array_diff_assoc_recursive($tabResultDataExpected, $tabResultDataset);
-				}else{
-				echo "NNN1";
-                                     $tabDiff = ParserCSV::array_diff_assoc_unordered($tabResultDataExpected,$tabResultDataset);
-                                }//$test = true;*/
+				$tabResultDataset = ParserCSV::csv_to_array($result,"\t");
                                 $tabDiff = ParserCSV::compare($tabResultDataExpected,$tabResultDataset,$sort);
                                 
 				break;
 			case "text/csv; charset=utf-8":
 				$tabResultDataExpected = ParserCSV::csv_to_array($expected);
-				$tabResultDataset = ParserCSV::csv_to_array($result);		
-				/*if($sort){
-					$tabResultDataExpected = ParserCSV::sortTable($tabResultDataExpected);	
-					$tabResultDataset = ParserCSV::sortTable($tabResultDataset);
-					$tabDiff = Tools::array_diff_assoc_recursive_with_blanknode($tabResultDataExpected, $tabResultDataset);
-				}else{
-                                     $tabDiff = ParserCSV::array_diff_assoc_unordered($tabResultDataExpected,$tabResultDataset);
-                                }*/
+				$tabResultDataset = ParserCSV::csv_to_array($result);
                                  $tabDiff = ParserCSV::compare($tabResultDataExpected,$tabResultDataset,$sort);
 				//$test = true;
 				break;
 			case  "text/turtle":
-				$tabResultDataExpected = ParserTurtle::turtle_to_array($expected,$nameGraph);	
-				$tabResultDataset = ParserTurtle::turtle_to_array($result,$nameGraph);		
-				/*if($sort){
-					$tabResultDataExpected = ParserTurtle::sortTriples($tabResultDataExpected);	
-					$tabResultDataset = ParserTurtle::sortTriples($tabResultDataset);
-				        $tabDiff = Tools::array_diff_assoc_recursive($tabResultDataExpected["triples"], $tabResultDataset["triples"]);
-				}else{
-                                     $tabDiff = ParserTurtle::array_diff_assoc_unordered($tabResultDataExpected,$tabResultDataset);
-                                }*/
+				$nameGraphTemp = $nameGraph;
+				if ($nameGraphTemp = "DEFAULT") //default graph is by default the url of source ttl
+				   $nameGraphTemp = $url;
+				$tabResultDataExpected = ParserTurtle::turtle_to_array($expected,$nameGraphTemp);	
+				$tabResultDataset = ParserTurtle::turtle_to_array($result,$nameGraphTemp);
                                 $tabDiff = ParserTurtle::compare($tabResultDataExpected,$tabResultDataset,$sort);
 				break;
 			case  "application/sparql-results+json":
 				$tabResultDataExpected = json_decode($expected, true);
-				$tabResultDataset = json_decode($result, true);		
-				//$tabDiff = Tools::array_diff_assoc_recursive_with_blanknode($tabResultDataExpected, $tabResultDataset);
+				$tabResultDataset = json_decode($result, true);
 				if($sort){
 					  $tabDiff =  ToolsBlankNode::array_diff_assoc_recursive($tabResultDataExpected, $tabResultDataset);
 				  }else{
@@ -631,14 +574,6 @@ EOT;
 			echo $name."\n";
 			echo $content;
 			*/
-			
-			/*$output = $data["mimetype"];
-			if($TTRIPLESTORE == "allegrograph" && $output == "text/turtle") //pffffff
-				$output = "text/plain";
-			$this->readGraphResult($output);
-			print_r($this->ListGraphResult);
-			echo "yo";
-			exit();*/
 		}
 	}
    

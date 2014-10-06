@@ -80,7 +80,7 @@ $SOFTWARE_DESCRIBE_TAG_EARL="v0.0";
 
 $TFT_NAME_EARL ="TFT";
 $TFT_DESCRIBE_EARL="";
-$TFT_DESCRIBE_TAG_EARL="v0.2";
+$TFT_DESCRIBE_TAG_EARL="v0.9";
 
 //Constant
 $folderTests = 'sparql11-test-suite/';

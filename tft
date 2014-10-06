@@ -193,7 +193,7 @@ $SOFTWARE_DESCRIBE_TAG_EARL="v0.0";
 
 $TFT_NAME_EARL ="TFT";
 $TFT_DESCRIBE_EARL="";
-$TFT_DESCRIBE_TAG_EARL="v0.2";
+$TFT_DESCRIBE_TAG_EARL="v0.9";
 
 $DATETEST = date("c", time());
 
@@ -660,7 +660,6 @@ foreach($listTestSuite as $URL => $folder){
 	PositiveUpdateSyntaxTest::doAllTests();
 
 	NegativeUpdateSyntaxTest::doAllTests();
-	
 	
 	echo "\n END TESTS \n";
 }

@@ -113,13 +113,13 @@ EOT;
 	function addGraphOutput($url, $name="DEFAULT", $graphname="DEFAULT",$endpoint="DEFAULT")
 	{		
 		$this->ListGraphOutput[$name]= array ("graphname"=>$graphname,"url"=>$url,"mimetype"=> $this->getType($url),"endpoint"=>$endpoint);
-		/*
-		echo "\n**************************** INPUT\n";
+		
+		/*echo "\n**************************** INPUT\n";
 		echo print_r($this->ListGraphInput);
 		echo "\n**************************** OUTPUT\n";
 		echo print_r($this->ListGraphOutput);
 		echo "\n**************************** \n";
-		*/
+		exit();*/
 	}
 	
 		

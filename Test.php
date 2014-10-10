@@ -366,6 +366,7 @@ EOT;
 	private function checkDataInGraph($nameGraph,$mimetype,$expected,$result,$url)
 	{
 		$sort = false;
+		$distinct = false;
 		$tabDiff = null;
 		$test = false;
 		$message =  "";
@@ -379,6 +380,8 @@ EOT;
 		if ( ! preg_match("/CONSTRUCT/i", $this->query)) {
 		      $sort = preg_match("/(?:ORDER)/i",$this->query);
 		}
+		//Check if the results have to respect the duplicates
+		$distinct = preg_match("/(?:DISTINCT)/i",$this->query);
 				
 		switch($mimetype){
 			/*case "application/rdf+xml":
@@ -394,20 +397,19 @@ EOT;
 				
 				xml_parse($parserSparqlResult->getParser(),$result, true);		
 				$tabResultDataset = $parserSparqlResult->getResult();
-                                $tabDiff = ParserSparqlResult::compare($tabResultDataExpected,$tabResultDataset,$sort);
-                                
+                                $tabDiff = ParserSparqlResult::compare($tabResultDataExpected,$tabResultDataset,$sort,$distinct);                                
 				//$test = true;
 				break;
 			case "text/tab-separated-values; charset=utf-8":
 				$tabResultDataExpected = ParserCSV::csv_to_array($expected,"\t");
 				$tabResultDataset = ParserCSV::csv_to_array($result,"\t");
-                                $tabDiff = ParserCSV::compare($tabResultDataExpected,$tabResultDataset,$sort);
+                                $tabDiff = ParserCSV::compare($tabResultDataExpected,$tabResultDataset,$sort,$distinct);
                                 
 				break;
 			case "text/csv; charset=utf-8":
 				$tabResultDataExpected = ParserCSV::csv_to_array($expected);
 				$tabResultDataset = ParserCSV::csv_to_array($result);
-                                 $tabDiff = ParserCSV::compare($tabResultDataExpected,$tabResultDataset,$sort);
+                                 $tabDiff = ParserCSV::compare($tabResultDataExpected,$tabResultDataset,$sort,$distinct);
 				//$test = true;
 				break;
 			case  "text/turtle":
@@ -416,7 +418,7 @@ EOT;
 				   $nameGraphTemp = $url;
 				$tabResultDataExpected = ParserTurtle::turtle_to_array($expected,$nameGraphTemp);	
 				$tabResultDataset = ParserTurtle::turtle_to_array($result,$nameGraphTemp);
-                                $tabDiff = ParserTurtle::compare($tabResultDataExpected,$tabResultDataset,$sort);
+                                $tabDiff = ParserTurtle::compare($tabResultDataExpected,$tabResultDataset,$sort,$distinct);
 				break;
 			case  "application/sparql-results+json":
 				$tabResultDataExpected = json_decode($expected, true);

@@ -365,6 +365,7 @@ EOT;
 	
 	private function checkDataInGraph($nameGraph,$mimetype,$expected,$result,$url)
 	{
+		$sort = false;
 		$tabDiff = null;
 		$test = false;
 		$message =  "";
@@ -374,7 +375,10 @@ EOT;
 		$message .=  "DATA :\n".$result;
 		$message .=  "\n---------------------------------------------------- \n";
 		
-		$sort = preg_match("/(?:ORDER)/i",$this->query);
+		//Check if the results have to respect the order
+		if ( ! preg_match("/CONSTRUCT/i", $this->query)) {
+		      $sort = preg_match("/(?:ORDER)/i",$this->query);
+		}
 				
 		switch($mimetype){
 			/*case "application/rdf+xml":

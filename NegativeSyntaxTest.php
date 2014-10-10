@@ -96,7 +96,7 @@ TESTS : NegativeSyntaxTest\n";
 			}else{
 					echo "F";//"\n".$nameTestQueryPassed." PASSED";	
 					$error = "ERROR : Server cannot see this wrong query.\n Query :\n".$test->query;
-					$error .= "Response of server :\n".
+					$error .= "Response of server :\n";
 					$error .= print_r($test->ListGraphResult,true);
 					$Report->addTestCaseFailure($iriTest,$iriAssertSyntax,$labelAssertSyntax,		
 						$error);

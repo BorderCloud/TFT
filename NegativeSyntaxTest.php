@@ -89,14 +89,18 @@ TESTS : NegativeSyntaxTest\n";
 			$test->doQuery();				
 			$err = $test->GetErrors();
 			$fail = $test->GetFails();
+			
 			if (count($err) > 0 || count($fail) > 0) {	
 					    echo ".";
 					$Report->addTestCasePassed($iriTest,$iriAssertSyntax,$labelAssertSyntax);
 			}else{
 					echo "F";//"\n".$nameTestQueryPassed." PASSED";	
-						echo "F";
+					$error = "ERROR : Server cannot see this wrong query.\n Query :\n".$test->query;
+					$error .= "Response of server :\n".
+					$error .= print_r($test->ListGraphResult,true);
 					$Report->addTestCaseFailure($iriTest,$iriAssertSyntax,$labelAssertSyntax,		
-						"Server cannot see this wrong query");
+						$error);
+					//echo $error;
 			}
 		}
 		echo "\n";

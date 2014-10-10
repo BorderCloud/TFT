@@ -218,11 +218,10 @@ EOT;
 		$this->queryTime = Endpoint::mtime() - $t1 ;
 		//init Dataset for the test
 		if($testResult){
-			$this->importGraphInput();
+		   $this->importGraphInput();
+		   $this->URLresultDataDefaultGraphType = $this->ListGraphOutput["DEFAULT"]["mimetype"];
 		}
-	  
-	        //TODO clean...
-	        $this->URLresultDataDefaultGraphType = $this->ListGraphOutput["DEFAULT"]["mimetype"];
+		   
 		$output = $this->URLresultDataDefaultGraphType;
 		if($TTRIPLESTORE == "allegrograph" && $this->URLresultDataDefaultGraphType == "text/turtle") //pffffff
 		{

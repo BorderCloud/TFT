@@ -284,6 +284,7 @@ EOT;
 				$this->importGraphInput();
 		}
 		
+		$this->replaceExampleRDFIRIQuery();
 		$this->replaceServiceIRIQuery();
 		$TESTENDPOINT->queryUpdate($this->query);
 		$errorsQuery = $TESTENDPOINT->getErrors();
@@ -594,6 +595,18 @@ EOT;
 			    //Change the query
 			$pattern = '$SERVICE +<'.$nameEndpoint.'>$i';				
 			$replacement = 'SERVICE <'.$tempEndpoint.'>';
+			$this->query = preg_replace($pattern, $replacement, $this->query);
+		    }
+		}
+	}
+	private function replaceExampleRDFIRIQuery(){
+		global $CONFIG;
+	      	if (preg_match("/LOAD/i",$this->query)) {
+		    //CLEAN the extern endpoint
+		    foreach ($CONFIG["LOAD"]["file"] as $nameEndpoint=>$tempEndpoint){
+			    //Change the query
+			$pattern = '$LOAD +<'.$nameEndpoint.'>$i';				
+			$replacement = 'LOAD <'.$tempEndpoint.'>';
 			$this->query = preg_replace($pattern, $replacement, $this->query);
 		    }
 		}

@@ -155,6 +155,8 @@ USAGE : tft [-l|--list] [-t|--triplestore=NAME]
     --testnameParameterUpdate=PARAMETER     Change the name of parameter in 
                                         the request http to write.
                                         (by default : update)
+     -tl, --testlogin=LOGIN             Test server login
+     -tp, --testpassword=PASSWORD       Test server password
 										
     -v, --verbose                       Mode verbose
     -d, --debug                         Mode debug
@@ -180,6 +182,8 @@ $tendpointQueryOnly = "";
 $tendpointUpdateOnly = "";
 $tnameParameterQuery = "query";
 $tnameParameterUpdate = "update";
+$tendpointLogin = "";
+$tendpointPassword = "";
 // Variables
 $listFileTTL = null;
 
@@ -556,6 +560,37 @@ for($i = 1; $i < count($argv); $i++)  {
 			}
 			$tnameParameterUpdate  = $param[1];
 			break;
+		
+		case "-tl":
+			if(! array_key_exists($i + 1, $argv)){	
+				echo "ERROR : forget parameter after -tl (see --help)\n";
+				exit();
+			}
+			$tendpointLogin = $argv[$i + 1];
+			$i++;
+			break;
+		case "--testlogin":			
+			if(! array_key_exists(1, $param)){	
+				echo "ERROR : forget parameter after --testlogin (see --help)\n";
+				exit();
+			}
+			$tendpointLogin = $param[1];
+			break;		
+		case "-tp":
+			if(! array_key_exists($i + 1, $argv)){	
+				echo "ERROR : forget parameter after -tp (see --help)\n";
+				exit();
+			}
+			$tendpointPassword = $argv[$i + 1];
+			$i++;
+			break;
+		case "--testpassword":			
+			if(! array_key_exists(1, $param)){	
+				echo "ERROR : forget parameter after --testpassword (see --help)\n";
+				exit();
+			}
+			$tendpointPassword = $param[1];
+			break;
 ////////////////////////////////////////////////////////
 		default:
 			//echo $usage; exit();
@@ -612,6 +647,11 @@ if($tendpointQueryOnly == "" && $tendpointUpdateOnly == "" && $tendpointQueryAnd
 	$TESTENDPOINT->setEndpointUpdate($tendpointUpdateOnly);
 	$TESTENDPOINT->setNameParameterQueryRead($tnameParameterQuery);
 	$TESTENDPOINT->setNameParameterQueryWrite($tnameParameterUpdate);
+}
+
+if($tendpointLogin != "" && $tendpointPassword != ""){
+	$TESTENDPOINT->setLogin($tendpointLogin);
+	$TESTENDPOINT->setPassword($tendpointPassword);
 }
 ///////// PRINT CONFIG
 

@@ -34,6 +34,8 @@ require_once 'lib/sparql/Endpoint.php';
 require_once 'Tools.php';
 require_once 'TestSuite.php';
 require_once 'fuseki/FusekiTestSuite.php';
+require_once 'sesame/SesameTestSuite.php';
+
 
 //List of servers available that you can test with this script
 $listTriplestore =  array("standardSparql11","4store","sesame","fuseki","virtuoso","allegrograph");
@@ -391,7 +393,6 @@ function importTestSuite($testsuiteURL,$testsuiteFolder){
 		case "sesame":		
 			$success = false;
 			$messageError = "Not support LOAD SPARQL";
-			ECHO "AAAAAAAAAAAAAAAAAAAATTTTTTTTTTTTTTTTTTTTTTTTEEEEEEEEEEEEEEEEEEEEEESSSSSSSSSSSSSSSSTER";
 			$testsuite = new SesameTestSuite($ENDPOINT,$testsuiteURL,$testsuiteFolder);	
 			break;
 		case "4store":		

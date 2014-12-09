@@ -1,6 +1,6 @@
 <?php
 
-class SesameToolsTestSuite  extends TestSuite {
+class SesameTestSuite extends TestSuite {
 
 /*
 FIX for sesame :
@@ -14,9 +14,10 @@ curl -X POST http://dev.grid-observatory.org:8080/openrdf-sesame/repositories/sp
 */
 	
   function install(){  
-		global $modeDebug,$modeVerbose;//global $output,$modeDebug,$modeVerbose,$ENDPOINT,$listFileTTL,$this->graph,$folderTests;		
+		global $modeDebug,$modeVerbose,$endpointLogin,$endpointPassword;;//global $output,$modeDebug,$modeVerbose,$ENDPOINT,$listFileTTL,$this->graph,$folderTests;		
 		$nb = 0;		
-		$success = true;	
+		$success = true;
+		$listFileTTL = $this->listFileTTL();
 		
 		foreach ($listFileTTL as $value) {		
 			$path = "SESAME_sparql11-test-suite/".$value[0];
@@ -29,7 +30,7 @@ curl -X POST http://dev.grid-observatory.org:8080/openrdf-sesame/repositories/sp
 				}
 			}
 			$fp = fopen($path, 'w');
-					fwrite($fp,SesameTools::fixTTL(file_get_contents($value[0]),$value[0]));
+					fwrite($fp,$this->fixTTL(file_get_contents($value[0]),$value[0]));
 					fflush($fp);
 					fclose($fp);
 			echo ".";
@@ -43,7 +44,12 @@ curl -X POST http://dev.grid-observatory.org:8080/openrdf-sesame/repositories/sp
 
 		$header = array("Content-Type:application/x-turtle");
 		foreach ($listFileTTL as $value) {
-		$curl = new Curl($modeDebug);
+		   $curl = new Curl($modeDebug);
+		   
+		    if($endpointLogin != "" && $endpointPassword != ""){
+		      $curl->set_credentials($endpointLogin,$endpointPassword);
+		    }
+		    
 			$path = getcwd()."/SESAME_sparql11-test-suite/".$value[0];	
 			//$path = "/home/rafes/projects/gridobs3/tools/testsparql11/SESAME_sparql11-test-suite/sparql11-test-suite/entailment/manifest.ttl";
 			$content = file_get_contents($path);
@@ -106,7 +112,7 @@ curl -X POST http://dev.grid-observatory.org:8080/openrdf-sesame/repositories/sp
 	}
 	
 	function importData($endpoint,$content,$graph = "DEFAULT",$contentType){				
-		global $output,$modeDebug,$modeVerbose,$TESTENDPOINT;		
+		global $output,$modeDebug,$modeVerbose,$TESTENDPOINT,$endpointLogin,$endpointPassword;		
 		$len = strlen($endpoint->getEndpointUpdate());
 		$urlGraphData = substr($endpoint->getEndpointUpdate(), 0, strrpos ( $endpoint->getEndpointUpdate(), "statements"))."rdf-graphs/service?";
 		if($graph == "DEFAULT"){
@@ -135,8 +141,13 @@ curl -X POST http://dev.grid-observatory.org:8080/openrdf-sesame/repositories/sp
 					exit();			
 			}*/
 		$header = array("Content-Type:".$contentType);
+		
 		$curl = new Curl($modeDebug);
-		$contentFinal = SesameTools::fixTTL($content,$graph);
+		if($endpointLogin != "" && $endpointPassword != ""){
+		   $curl->set_credentials($endpointLogin,$endpointPassword);
+		}
+		   
+		$contentFinal = $this->fixTTL($content,$graph);
 		
 		$url = $urlGraphData.$graph ;
 

@@ -229,6 +229,7 @@ EOT;
 		}
 		
 		$this->replaceServiceIRIQuery();
+		$this->checkBaseQuery();
 		$this->ListGraphResult["DEFAULT"] = $TESTENDPOINT->queryRead($this->query , $output);		
 		$errorsQuery = $TESTENDPOINT->getErrors();
 		if ($errorsQuery) {
@@ -285,7 +286,8 @@ EOT;
 		}
 		
 		$this->replaceExampleRDFIRIQuery();
-		$this->replaceServiceIRIQuery();
+		$this->replaceServiceIRIQuery();	
+		$this->checkBaseQuery();
 		$TESTENDPOINT->queryUpdate($this->query);
 		$errorsQuery = $TESTENDPOINT->getErrors();
 		if ($errorsQuery) {
@@ -614,6 +616,15 @@ EOT;
 		}
 	}
 
+	private function checkBaseQuery(){
+		global $CONFIG;
+	      	if (! preg_match("/BASE/i",$this->query)) {
+		    $urlTab = parse_url($this->URLquery);
+		    $pathParts = pathinfo($urlTab['path']);
+		    $base = "BASE <".$urlTab['scheme']."://".$urlTab['host'].$pathParts['dirname']."/>";
+		    $this->query = $base."\n".$this->query;
+		}
+	}
 }
 
 

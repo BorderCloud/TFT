@@ -380,7 +380,7 @@ EOT;
 		
 		//Check if the results have to respect the order
 		if ( ! preg_match("/CONSTRUCT/i", $this->query)) {
-		      $sort = preg_match("/(?:ORDER)/i",$this->query);
+		      $sort = preg_match("/(?:ORDER +BY)/i",$this->query);
 		}
 		//Check if the results have to respect the duplicates
 		$distinct = preg_match("/(?:DISTINCT)/i",$this->query);

@@ -28,10 +28,14 @@ class ServiceDescriptionTest {
 		 select DISTINCT ?testiri ?name ?approval ?approvedBy  where
 		 {GRAPH <'.$GRAPHTESTS.'>
 				 {
-					?testiri a 				mf:ServiceDescriptionTest ;
-							 mf:name    	?name ;
-							 dawgt:approval ?approval ;
-							 dawgt:approvedBy ?approvedBy.
+					?manifest a 		mf:Manifest ;
+						  mf:entries  	?collection .
+						  ?collection 	rdf:rest*/rdf:first  ?testiri .
+						  
+					?testiri a 		mf:ServiceDescriptionTest ;
+						 mf:name    	?name ;
+						 dawgt:approval ?approval ;
+						 dawgt:approvedBy ?approvedBy.
 				 }
 		}
 		 ORDER BY ?testiri

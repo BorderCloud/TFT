@@ -30,6 +30,10 @@ SELECT DISTINCT ?testiri ?name ?queryTest  ?ChangeMultiGraph ?graphInput ?graphO
 WHERE
 {GRAPH <'.$GRAPHTESTS.'>
 				 {
+					?manifest a mf:Manifest ;
+						  mf:entries  ?collection .
+						  ?collection rdf:rest*/rdf:first  ?testiri .
+						  
 					?testiri 	a 		mf:UpdateEvaluationTest ;
 							 mf:name    	?name ;
 							 dawgt:approval dawgt:Approved ;

@@ -27,7 +27,11 @@ class CSVResultFormatTest {
 		 select DISTINCT ?testiri ?name ?queryTest  ?graphInput ?graphOutput where
 		 {GRAPH <'.$GRAPHTESTS.'>
 				 {
-					?testiri a 				mf:CSVResultFormatTest ;
+					?manifest a 		mf:Manifest ;
+						  mf:entries    ?collection .
+						  ?collection   rdf:rest*/rdf:first  ?testiri .
+						  
+					?testiri  a 	mf:CSVResultFormatTest ;
 							 mf:name    	?name ;
 							 dawgt:approval dawgt:Approved ;
 							 mf:action

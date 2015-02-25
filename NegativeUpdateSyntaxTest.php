@@ -26,11 +26,15 @@ class NegativeUpdateSyntaxTest {
 		$q = Test::PREFIX.' 
 		 select DISTINCT ?testiri ?name ?queryTest where
 		 {GRAPH <'.$GRAPHTESTS.'>
-				 {
-					?testiri a 				mf:NegativeUpdateSyntaxTest11 ;
-							 mf:name    	?name ;
-							 dawgt:approval dawgt:Approved ;
-							 mf:action 	?queryTest .
+				 {				 
+					?manifest a 		mf:Manifest ;
+						  mf:entries  	?collection .
+						  ?collection 	rdf:rest*/rdf:first  ?testiri .
+						  
+					?testiri  a 		 mf:NegativeUpdateSyntaxTest11 ;
+						  mf:name    	 ?name ;
+						  dawgt:approval dawgt:Approved ;
+						  mf:action 	 ?queryTest .
 				 }
 		}
 		 ORDER BY ?testiri

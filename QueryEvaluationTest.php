@@ -62,6 +62,10 @@ SELECT DISTINCT ?testiri ?name ?queryTest
 WHERE
 {GRAPH <'.$GRAPHTESTS .'>
 	 {
+                ?manifest a 		mf:Manifest ;
+                          mf:entries  	?collection .
+			  ?collection 	rdf:rest*/rdf:first  ?testiri .
+			  
 		?testiri a 			mf:QueryEvaluationTest ;
 				 mf:name    	?name ;
 				 dawgt:approval dawgt:Approved ;

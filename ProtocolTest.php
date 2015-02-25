@@ -28,9 +28,13 @@ class ProtocolTest {
 		 select DISTINCT ?testiri ?name ?approval where
 		 {GRAPH <'.$GRAPHTESTS.'>
 				 {
-					?testiri a 				mf:ProtocolTest ;
-							 mf:name    	?name ;
-							 dawgt:approval ?approval .
+					?manifest a 		mf:Manifest ;
+						  mf:entries  	?collection .
+						  ?collection 	rdf:rest*/rdf:first  ?testiri .
+						  
+					?testiri a 		mf:ProtocolTest ;
+						 mf:name    	?name ;
+						 dawgt:approval ?approval .
 				 }
 		}
 		 ORDER BY ?testiri

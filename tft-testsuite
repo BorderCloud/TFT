@@ -36,16 +36,16 @@ require_once 'TestSuite.php';
 require_once 'fuseki/FusekiTestSuite.php';
 require_once 'sesame/SesameTestSuite.php';
 
+// Parse with sections
+$CONFIG = parse_ini_file("config.ini", true);
+//print_r($CONFIG);
+//exit();
 
 //List of servers available that you can test with this script
-$listTriplestore =  array("standardSparql11","4store","sesame","fuseki","virtuoso","allegrograph");
+$listTriplestore =  $CONFIG["CONFIG"]["listTriplestore"];
 
-//List of test suite available that you can pass by default
-$listTestSuite =  array(
-"http://bordercloud.github.io/TFT-tests/sparql11-test-suite/" => "tests/TFT-tests/sparql11-test-suite/"
-,
-"http://bordercloud.github.io/TFT-tests/GO3/" => "tests/TFT-tests/GO3/"
-);
+//List of test suite available that you can pass
+$listTestSuite =  $CONFIG["CONFIG"]["listTestSuite"];
 
 $usage = "
 USAGE : tft-testsuite

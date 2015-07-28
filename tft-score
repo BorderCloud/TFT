@@ -506,19 +506,19 @@ prefix sd: <http://www.w3.org/ns/sparql-service-description#>
 prefix git: <http://www.w3.org/ns/git#> 
 prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> 
 CONSTRUCT {
-	?categoryIRI rdf:label ?categoryName.
+	?categoryIRI rdfs:label ?categoryName.
 	?categoryIRI earl:test ?test.
 	?categoryIRI sq:totalTest ?totalTest.
 	?categoryIRI sq:scoreTest ?score.
-	?test rdf:label ?testName.
+	?test rdfs:label ?testName.
 	?test earl:assertions _:x.
-	_:x  rdf:label ?assertionName.
+	_:x  rdfs:label ?assertionName.
 	_:x  earl:outcome ?outcome.
 } WHERE {
 	GRAPH <https://ci.inria.fr/go3/job/BenchmarkSPARQL11_Virtuoso/73/> {
 		?assertion a earl:Assertion.
 		?assertion earl:test ?test.
-		?assertion rdf:label ?assertionName.
+		?assertion rdfs:label ?assertionName.
 		?assertion earl:result ?result.
 		?result earl:date ?date.
 		OPTIONAL {?result earl:duration ?duration.}

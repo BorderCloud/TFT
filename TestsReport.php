@@ -182,13 +182,14 @@ $q .= '	.
 			//prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> 
 			$q = '
 prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> 
+prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> 
 prefix xsd:  <http://www.w3.org/2001/XMLSchema#>
 prefix earl: <http://www.w3.org/ns/earl#>
 INSERT DATA {  
 	 GRAPH <'.$GRAPH_RESULTS_EARL .'> {
 		<'.$iriAssert.'> a earl:Assertion ;
 						earl:test <'.$iriTest.'> ;
-						rdf:label "'.addslashes($labelAssert).'";
+						rdfs:label "'.addslashes($labelAssert).'";
 						earl:result <'.$iriAssertResultId.'>.
 		<'.$iriAssertResultId.'>	a earl:TestResult ;
 						earl:date "'.$date.'"^^xsd:dateTime ;
@@ -208,13 +209,14 @@ INSERT DATA {
 			/*			
 C'est beau .... pt etre un jour
 prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> 
 PREFIX xsd:  <http://www.w3.org/2001/XMLSchema#>
 prefix earl: <http://www.w3.org/ns/earl#>
                         INSERT DATA {
                              GRAPH <http://dev.grid-observatory.org/testsVirtuoso> {
                                         <http://dev.grid-observatory.org/testsVirtuoso/dfd> a earl:Assertion ;
                                         earl:test <http://dev.grid-observatory.org/testsVirtuoso/dfdfdf>  ;
-                                        rdf:label "sdfsdfds sf sfsd fs";
+                                        rdfs:label "sdfsdfds sf sfsd fs";
 										BIND(UUID() AS ?iriResult)
                                         earl:result ?iriResult.
 										?iriResult a earl:TestResult ;
@@ -236,13 +238,14 @@ prefix earl: <http://www.w3.org/ns/earl#>
 			//prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> 
 			$q = '
 prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> 
+prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> 
 prefix xsd:  <http://www.w3.org/2001/XMLSchema#>
 prefix earl: <http://www.w3.org/ns/earl#>
 INSERT DATA {  
 	 GRAPH <'.$GRAPH_RESULTS_EARL .'> {
 		<'.$iriAssert.'> a earl:Assertion ;
 						earl:test <'.$iriTest.'> ;
-						rdf:label "'.addslashes($labelAssert).'";
+						rdfs:label "'.addslashes($labelAssert).'";
 						earl:result <'.$iriAssertResultId.'>.
 		<'.$iriAssertResultId.'>	a earl:TestResult ;
 						earl:date "'.$date.'"^^xsd:dateTime ;
@@ -270,13 +273,14 @@ INSERT DATA {
 			//prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> 
 			$q = '
 prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> 
+prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> 
 prefix xsd:  <http://www.w3.org/2001/XMLSchema#>
 prefix earl: <http://www.w3.org/ns/earl#>
 INSERT DATA {  
 	 GRAPH <'.$GRAPH_RESULTS_EARL .'> {
 		<'.$iriAssert.'> a earl:Assertion ;
 						earl:test <'.$iriTest.'> ;
-						rdf:label "'.addslashes($labelAssert).'";
+						rdfs:label "'.addslashes($labelAssert).'";
 						earl:result <'.$iriAssertResultId.'>.
 		<'.$iriAssertResultId.'>	a earl:TestResult ;
 						earl:date "'.$date.'"^^xsd:dateTime ;
@@ -304,13 +308,14 @@ INSERT DATA {
 			//prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> 
 			$q = '
 prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> 
+prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> 
 prefix xsd:  <http://www.w3.org/2001/XMLSchema#>
 prefix earl: <http://www.w3.org/ns/earl#>
 INSERT DATA {  
 	 GRAPH <'.$GRAPH_RESULTS_EARL .'> {
 		<'.$iriAssert.'> a earl:Assertion ;
 						earl:test <'.$iriTest.'> ;
-						rdf:label "'.addslashes($labelAssert).'";
+						rdfs:label "'.addslashes($labelAssert).'";
 						earl:result <'.$iriAssertResultId.'>.
 		<'.$iriAssertResultId.'>	a earl:TestResult ;
 						earl:date "'.$date.'"^^xsd:dateTime ;

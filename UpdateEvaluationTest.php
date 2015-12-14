@@ -48,7 +48,7 @@ WHERE
 							}
 					OPTIONAL{
 						?testiri	mf:action [ 
-										ut:graphData ?graphListInput	];
+										ut:graphData ?graphListInput	].
 								#	mf:result [ 
 								#		ut:graphData ?graphListOutput	]
 						}

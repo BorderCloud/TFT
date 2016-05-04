@@ -498,13 +498,7 @@ EOT;
 		$q = "";
 		switch($TTRIPLESTORE){
 				case "virtuoso":		
-					$q = "DELETE WHERE 
-					  {
-						GRAPH ?g 
-						  {
-							?o ?p ?v . 
-						  }
-					}";
+					$q = "DELETE { GRAPH ?g  { ?s ?p ?o } } WHERE  { GRAPH ?g  { ?o ?p ?v . } }";
 					
 					$res = $TESTENDPOINT->queryUpdate($q);
 					break;
@@ -531,13 +525,7 @@ EOT;
 			    $endpoint->setEndpointQuery($tempEndpoint);
 			    $endpoint->setEndpointUpdate($tempEndpoint);
 			    
-			    $q = "DELETE WHERE 
-					      {
-						    GRAPH ?g 
-						      {
-							    ?o ?p ?v . 
-						      }
-					    }";
+			    $q = "DELETE { GRAPH ?g  { ?s ?p ?o } } WHERE  { GRAPH ?g  { ?o ?p ?v . } }";
 			   //echo "t:".$tempEndpoint."\n";
 			    $res = $endpoint->queryUpdate($q);
 		    }

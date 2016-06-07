@@ -497,11 +497,11 @@ EOT;
 		global $modeDebug,$modeVerbose,$TESTENDPOINT,$TTRIPLESTORE,$CONFIG;	
 		$q = "";
 		switch($TTRIPLESTORE){
-				case "virtuoso":		
-					$q = "DELETE { GRAPH ?g  { ?o ?p ?v } } WHERE  { GRAPH ?g  { ?o ?p ?v . } }";
-					
-					$res = $TESTENDPOINT->queryUpdate($q);
-					break;
+//				case "virtuoso":		
+//					$q = "DELETE { GRAPH ?g  { ?o ?p ?v } } WHERE  { GRAPH ?g  { ?o ?p ?v . } }";
+//					
+//					$res = $TESTENDPOINT->queryUpdate($q);
+//					break;
 				case "4store":		
 					$rows = $TESTENDPOINT->query("SELECT DISTINCT ?g WHERE { GRAPH ?g { ?s ?p ?o } }", 'rows');
 					foreach ($rows["result"]["rows"] as $row){	

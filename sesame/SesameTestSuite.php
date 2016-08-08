@@ -60,7 +60,8 @@ curl -X POST http://dev.grid-observatory.org:8080/openrdf-sesame/repositories/sp
 			} else {
 				$graph = str_replace($this->folder,$this->graph,$value[0]);
 			}
-			$url = $urlGraphData.$graph ;
+
+			$url = $urlGraphData.$this->graph ;
 			 $curl->send_post_content(
 				 $url,
 				 $header,

@@ -26,11 +26,11 @@ curl -X POST http://dev.grid-observatory.org:8080/openrdf-sesame/repositories/sp
 			{
 				if(!mkdir($dirname, 0755, true))
 				{
-					die('Erreur dans la création du répertoire.');
+					die('Erreur dans la crÃ©ation du rÃ©pertoire.');
 				}
 			}
 			$fp = fopen($path, 'w');
-					fwrite($fp,$this->fixTTL(file_get_contents($value[0]),$value[0]));
+					fwrite($fp,$this->fixTTL(file_get_contents($value[0]),$this->graph));
 					fflush($fp);
 					fclose($fp);
 			echo ".";

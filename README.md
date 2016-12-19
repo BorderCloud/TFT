@@ -84,6 +84,31 @@ cd TFT
       -l LOGIN -p 'PASSWORD'
 ```
 
+Read the last score with SPARQL
+===============================
+
+Example :
+```
+SELECT *
+WHERE
+{
+	GRAPH ?graph {
+       ?service a sd:Service ;
+               sd:server ?server ;
+               sd:testedBy ?tester ;
+               sd:testedDate ?LastDate.
+       ?server git:name ?serverName ;
+               git:describeTag ?serverVersion ;
+               git:describe ?serverVersionBuild .
+       ?tester  git:name ?testerName ;
+               git:describeTag ?testerVersion  .
+			   ?service sq:scoreTest ?score .
+			   ?service sq:totalTest ?total .
+       }
+FILTER(STR(xsd:date(?LastDate)) = STR(xsd:date(NOW())))
+}
+```
+
 License
 =======
 

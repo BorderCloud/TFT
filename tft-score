@@ -5,11 +5,15 @@
 ./tft-score -d -v -t fuseki \
 -q http://dev.grid-observatory.org:3030/tests/query \
 -u http://dev.grid-observatory.org:3030/tests/update \
--r http://dev.grid-observatory.org/testsVirtuoso10  
+-r http://dev.grid-observatory.org/testsVirtuoso10
 
 */
+require_once __DIR__ . '/vendor/autoload.php';
 
-require_once 'lib/sparql/Endpoint.php';
+use BorderCloud\SPARQL\Curl;
+use BorderCloud\SPARQL\SparqlClient;
+//todo replace endpoint
+//require_once 'lib/sparql/Endpoint.php';
 
 //List of servers available that you can test with this script
 $listTriplestore =  array("standardSparql11","4store","sesame","fuseki","virtuoso","allegrograph");
@@ -97,11 +101,11 @@ if(count($argv) < 2){
 
 for($i = 1; $i < count($argv); $i++)  {
 	$param=explode("=",$argv[$i]);
-	
+
 	switch($param[0]){
 		case "-h":
 		case "--help":
-			echo $usage; 
+			echo $usage;
 			exit();
 		case "-v":
 		case "--verbose":
@@ -113,12 +117,12 @@ for($i = 1; $i < count($argv); $i++)  {
 			break;
 		case "--list":
 			echo "List of servers available that you can test with this script :\n";
-			foreach ($listTriplestore as $ts) {				
+			foreach ($listTriplestore as $ts) {
 				echo $ts."\n";
 			}
-			exit();	
+			exit();
 		case "-r":
-			if(! array_key_exists($i + 1, $argv)){	
+			if(! array_key_exists($i + 1, $argv)){
 				echo "ERROR : forget parameter after -r (see --help)\n";
 				exit();
 			}
@@ -140,11 +144,11 @@ for($i = 1; $i < count($argv); $i++)  {
 				exit();
 			}
 			break;
-			
+
 			/*
 --softwareName=NAME                      Save name in the results EARL.
 --softwareDescribeTag=TAG           Save last tag in the results EARL.
---softwareDescribe=DESCRIBE 
+--softwareDescribe=DESCRIBE
 			*/
 		case "--softwareName":
 			if(! array_key_exists(1, $param)){
@@ -152,140 +156,140 @@ for($i = 1; $i < count($argv); $i++)  {
 				exit();
 			}
 			$SOFTWARE_NAME_EARL = $param[1];
-			break;	
+			break;
 		case "--softwareDescribeTag":
 			if(! array_key_exists(1, $param)){
 				echo "ERROR : forget parameter after --output (see --help)\n";
 				exit();
 			}
 			$SOFTWARE_DESCRIBE_TAG_EARL = $param[1];
-			break;	
+			break;
 		case "--softwareDescribe":
 			if(! array_key_exists(1, $param)){
 				echo "ERROR : forget parameter after --output (see --help)\n";
 				exit();
 			}
 			$SOFTWARE_DESCRIBE_EARL = $param[1];
-			break;	
+			break;
 //////////////////////////////////////////////////////////////////////////////////
 		case "-t":
-			if(! array_key_exists($i + 1, $argv)){	
+			if(! array_key_exists($i + 1, $argv)){
 				echo "ERROR : forget parameter after -t (see --help)\n";
 				exit();
 			}
-			$triplestore = $argv[$i + 1];			
-			if(! in_array($triplestore, $listTriplestore)){	
+			$triplestore = $argv[$i + 1];
+			if(! in_array($triplestore, $listTriplestore)){
 				echo "ERROR : This triplestore is not available\n";
 				exit();
 			}
 			$i++;
 			break;
-		case "--triplestore":			
-			if(! array_key_exists(1, $param)){	
+		case "--triplestore":
+			if(! array_key_exists(1, $param)){
 				echo "ERROR : forget parameter after --triplestore (see --help)\n";
 				exit();
 			}
-			$triplestore = $param[1];			
-			if(! in_array($triplestore, $listTriplestore)){	
+			$triplestore = $param[1];
+			if(! in_array($triplestore, $listTriplestore)){
 				echo "ERROR : This triplestore is not available\n";
 				exit();
 			}
 			break;
 		case "-l":
-			if(! array_key_exists($i + 1, $argv)){	
+			if(! array_key_exists($i + 1, $argv)){
 				echo "ERROR : forget parameter after -l (see --help)\n";
 				exit();
 			}
 			$endpointLogin = $argv[$i + 1];
 			$i++;
 			break;
-		case "--login":			
-			if(! array_key_exists(1, $param)){	
+		case "--login":
+			if(! array_key_exists(1, $param)){
 				echo "ERROR : forget parameter after --login (see --help)\n";
 				exit();
 			}
 			$endpointLogin = $param[1];
-			break;		
+			break;
 		case "-p":
-			if(! array_key_exists($i + 1, $argv)){	
+			if(! array_key_exists($i + 1, $argv)){
 				echo "ERROR : forget parameter after -p (see --help)\n";
 				exit();
-			}			
+			}
 			$endpointPassword = $argv[$i + 1];
 			$i++;
 			break;
-		case "--password":			
-			if(! array_key_exists(1, $param)){	
+		case "--password":
+			if(! array_key_exists(1, $param)){
 				echo "ERROR : forget parameter after --password (see --help)\n";
 				exit();
 			}
 			$endpointPassword = $param[1];
 			break;
 		case "-e":
-			if(! array_key_exists($i + 1, $argv)){	
+			if(! array_key_exists($i + 1, $argv)){
 				echo "ERROR : forget parameter after -e (see --help)\n";
 				exit();
 			}
-			$endpointQueryAndUpdate = $argv[$i + 1];	
-			if(! filter_var($endpointQueryAndUpdate, FILTER_VALIDATE_URL)){	
+			$endpointQueryAndUpdate = $argv[$i + 1];
+			if(! filter_var($endpointQueryAndUpdate, FILTER_VALIDATE_URL)){
 				echo "ERROR : The URL of endpoint is not valid\n";
 				exit();
 			}
 			$i++;
 			break;
-		case "--endpointQueryAndUpdate":			
-			if(! array_key_exists(1, $param)){	
+		case "--endpointQueryAndUpdate":
+			if(! array_key_exists(1, $param)){
 				echo "ERROR : forget parameter after --endpointQueryAndUpdate (see --help)\n";
 				exit();
 			}
-			$endpointQueryAndUpdate = $param[1];			
-			if(! filter_var($endpointQueryAndUpdate, FILTER_VALIDATE_URL)){	
+			$endpointQueryAndUpdate = $param[1];
+			if(! filter_var($endpointQueryAndUpdate, FILTER_VALIDATE_URL)){
 				echo "ERROR : The URL of endpoint is not valid\n";
 				exit();
 			}
-			break;	
+			break;
 		case "-q":
-			if(! array_key_exists($i + 1, $argv)){	
+			if(! array_key_exists($i + 1, $argv)){
 				echo "ERROR : forget parameter after -q (see --help)\n";
 				exit();
 			}
-			$endpointQueryOnly = $argv[$i + 1];			
-			if(! filter_var($endpointQueryOnly, FILTER_VALIDATE_URL)){	
+			$endpointQueryOnly = $argv[$i + 1];
+			if(! filter_var($endpointQueryOnly, FILTER_VALIDATE_URL)){
 				echo "ERROR : The URL of endpoint is not valid\n";
 				exit();
 			}
 			$i++;
 			break;
-		case "--endpointQueryOnly":			
-			if(! array_key_exists(1, $param)){	
+		case "--endpointQueryOnly":
+			if(! array_key_exists(1, $param)){
 				echo "ERROR : forget parameter after --endpointQueryOnly (see --help)\n";
 				exit();
 			}
-			$endpointQueryOnly = $param[1];				
-			if(! filter_var($endpointQueryOnly, FILTER_VALIDATE_URL)){	
+			$endpointQueryOnly = $param[1];
+			if(! filter_var($endpointQueryOnly, FILTER_VALIDATE_URL)){
 				echo "ERROR : The URL of endpoint is not valid\n";
 				exit();
 			}
-			break;	
+			break;
 		case "-u":
-			if(! array_key_exists($i + 1, $argv)){	
+			if(! array_key_exists($i + 1, $argv)){
 				echo "ERROR : forget parameter after -u (see --help)\n";
 				exit();
 			}
-			$endpointUpdateOnly = $argv[$i + 1];			
-			if(! filter_var($endpointUpdateOnly, FILTER_VALIDATE_URL)){	
+			$endpointUpdateOnly = $argv[$i + 1];
+			if(! filter_var($endpointUpdateOnly, FILTER_VALIDATE_URL)){
 				echo "ERROR : The URL of endpoint is not valid\n";
 				exit();
 			}
 			$i++;
 			break;
-		case "--endpointUpdateOnly":			
-			if(! array_key_exists(1, $param)){	
+		case "--endpointUpdateOnly":
+			if(! array_key_exists(1, $param)){
 				echo "ERROR : forget parameter after --endpointUpdateOnly (see --help)\n";
 				exit();
 			}
-			$endpointUpdateOnly = $param[1];			
-			if(! filter_var($endpointUpdateOnly, FILTER_VALIDATE_URL)){	
+			$endpointUpdateOnly = $param[1];
+			if(! filter_var($endpointUpdateOnly, FILTER_VALIDATE_URL)){
 				echo "ERROR : The URL of endpoint is not valid\n";
 				exit();
 			}
@@ -327,23 +331,26 @@ if($modeDebug){
 /////////////// INIT ENDPOINT
 $readonly = false;
 $ENDPOINT = null;
-if($endpointQueryOnly == "" && $endpointUpdateOnly == "" && $endpointQueryAndUpdate == ""){	
-	echo "ERROR : The endpoint didn't find\n"; exit();
-}elseif($endpointQueryAndUpdate != ""){
-	$ENDPOINT = new Endpoint($endpointQueryAndUpdate,$readonly,$modeDebug);
-}elseif($endpointQueryOnly == "" || $endpointUpdateOnly == ""){	
-	echo "ERROR : The endpoint SPARQL query or update didn't find\n"; exit();
-}else{
-	$ENDPOINT = new Endpoint($endpointQueryOnly,$readonly,$modeDebug);
-	$ENDPOINT->setEndpointQuery($endpointQueryOnly);
-	$ENDPOINT->setEndpointUpdate($endpointUpdateOnly);
-	$ENDPOINT->setNameParameterQueryRead($nameParameterQuery);
-	$ENDPOINT->setNameParameterQueryWrite($nameParameterUpdate);
+if ($endpointQueryOnly == "" && $endpointUpdateOnly == "" && $endpointQueryAndUpdate == "") {
+    echo "ERROR : The endpoint didn't find\n";
+    exit();
+} elseif ($endpointQueryAndUpdate != "") {
+    $ENDPOINT = new SparqlClient($modeDebug);
+    $ENDPOINT->setEndpointRead($endpointQueryAndUpdate);
+    $ENDPOINT->setEndpointWrite($endpointQueryAndUpdate);
+} elseif ($endpointQueryOnly == "" || $endpointUpdateOnly == "") {
+    echo "ERROR : The endpoint SPARQL query or update didn't find\n";
+    exit();
+} else {
+    $ENDPOINT = new SparqlClient($modeDebug);
+    $ENDPOINT->setEndpointRead($endpointQueryOnly);
+    $ENDPOINT->setEndpointWrite($endpointUpdateOnly);
+    $ENDPOINT->setNameParameterQueryRead($nameParameterQuery);
+    $ENDPOINT->setNameParameterQueryWrite($nameParameterUpdate);
 }
-
-if($endpointLogin != "" && $endpointPassword != ""){
-	$ENDPOINT->setLogin($endpointLogin);
-	$ENDPOINT->setPassword($endpointPassword);
+if ($endpointLogin != "" && $endpointPassword != "") {
+    $ENDPOINT->setLogin($endpointLogin);
+    $ENDPOINT->setPassword($endpointPassword);
 }
 
 ///////// PRINT CONFIG
@@ -352,8 +359,8 @@ echo "
 Configuration about tests :
 - Graph of output EARL : ".$GRAPH_RESULTS_EARL."
 - Endpoint type        : ".$triplestore."
-- Endpoint query       : ".$ENDPOINT->getEndpointQuery()."
-- Endpoint update      : ".$ENDPOINT->getEndpointUpdate()."
+- Endpoint query       : ".$ENDPOINT->getEndpointRead()."
+- Endpoint update      : ".$ENDPOINT->getEndpointWrite()."
 - Endpoint login       : ".$ENDPOINT->getLogin()."
 - Endpoint password      : ".$ENDPOINT->getPassword()."
 - Endpoint type        : ".$TTRIPLESTORE."
@@ -361,11 +368,11 @@ Configuration about tests :
 - Mode debug           : ".($modeDebug?"ON":"OFF")."
 ";
 
-	
+
 		$ENDPOINT->ResetErrors();
-		// bug 
-		//SELECT ?g ?categoryIRI ?categoryName (COUNT(DISTINCT ?test) AS ?NBTest) (COUNT(DISTINCT ?test2) AS ?NBTestKO) (?NBTest-?NBTestKO AS ?SCORE) WHERE 
-		
+		// bug
+		//SELECT ?g ?categoryIRI ?categoryName (COUNT(DISTINCT ?test) AS ?NBTest) (COUNT(DISTINCT ?test2) AS ?NBTestKO) (?NBTest-?NBTestKO AS ?SCORE) WHERE
+
 		$q = "
 		prefix earl: <http://www.w3.org/ns/earl#>
 prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> 
@@ -393,18 +400,18 @@ SELECT ?g ?categoryIRI ?categoryName (COUNT(DISTINCT ?test) AS ?NBTest) (COUNT(D
 	}
 } GROUP BY ?g ?categoryIRI ?categoryName
 ORDER BY ?categoryName
-		"; 
+		";
 		$rows = $ENDPOINT->query($q, 'rows');
 		$err = $ENDPOINT->getErrors();
 		if ($err) {
 			echo "Error (see mode debug)";
 			exit();
 		 }
-		
+
 
 	foreach ($rows["result"]["rows"] as $row){
 		echo $row["g"] . " : " . $row["categoryName"] . " : " .$row["SCORE"]."/".$row["NBTest"]."\n";//."(".$row["NBTestKO"].")\n";
-		
+
 		$q = '
 prefix sq: <http://sparqlscore.net/Score#> 
 prefix sd: <http://www.w3.org/ns/sparql-service-description#> 
@@ -421,15 +428,15 @@ INSERT DATA {
 ';
 //echo $q;
 		$rows = $ENDPOINT->queryUpdate($q);
-		$err = $ENDPOINT->getErrors(); 
-		if ($err) {			
+		$err = $ENDPOINT->getErrors();
+		if ($err) {
 			echo "Error (see mode debug)";
 			exit();
 		}
 	}
-	
-	//SELECT (COUNT(DISTINCT ?test) AS ?NBTest) (COUNT(DISTINCT ?test2) AS ?NBTestKO) (?NBTest-?NBTestKO AS ?SCORE)  WHERE 
-	
+
+	//SELECT (COUNT(DISTINCT ?test) AS ?NBTest) (COUNT(DISTINCT ?test2) AS ?NBTestKO) (?NBTest-?NBTestKO AS ?SCORE)  WHERE
+
 		$ENDPOINT->ResetErrors();
 		$q = "
 prefix earl: <http://www.w3.org/ns/earl#>
@@ -487,8 +494,8 @@ INSERT DATA {
 ';
 //echo $q;
 		$rows = $ENDPOINT->queryUpdate($q);
-		$err = $ENDPOINT->getErrors(); 
-		if ($err) {			
+		$err = $ENDPOINT->getErrors();
+		if ($err) {
 			echo "Error (see mode debug)";
 			exit();
 		}

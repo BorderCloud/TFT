@@ -1,5 +1,6 @@
 #!/usr/bin/php
 <?php
+
 /*
 
 Tests :
@@ -29,8 +30,12 @@ Tests :
 
 
 */
+require_once __DIR__ . '/vendor/autoload.php';
 
-require_once 'lib/sparql/Endpoint.php';
+use BorderCloud\SPARQL\Curl;
+use BorderCloud\SPARQL\SparqlClient;
+
+//require_once 'lib/sparql/Endpoint.php';
 require_once 'Tools.php';
 require_once 'TestSuite.php';
 require_once 'fuseki/FusekiTestSuite.php';
@@ -116,11 +121,11 @@ if(count($argv) < 2){
 
 for($i = 1; $i < count($argv); $i++)  {
 	$param=explode("=",$argv[$i]);
-	
+
 	switch($param[0]){
 		case "-h":
 		case "--help":
-			echo $usage; 
+			echo $usage;
 			exit();
 		case "-v":
 		case "--verbose":
@@ -132,40 +137,40 @@ for($i = 1; $i < count($argv); $i++)  {
 			break;
 		case "--list":
 			echo "List of servers available that you can test with this script :\n";
-			foreach ($listTriplestore as $ts) {				
+			foreach ($listTriplestore as $ts) {
 				echo $ts."\n";
 			}
-			exit();		
+			exit();
 		case "-s":
 		case "--listtestsuite":
-			echo "List of test suite by default :\n";			
+			echo "List of test suite by default :\n";
 			echo "URL\tPATH\n";
-			foreach ($listTestSuite as $URL => $PATH) {				
+			foreach ($listTestSuite as $URL => $PATH) {
 				echo $URL."\t".$PATH."\n";
 			}
-			exit();		
-		case "-a":
-		case "--installall":
-			$modeAll = true;
-			break;
-	 
+			exit();
 		case "-a":
 		case "--installall":
 			$modeAll = true;
 			break;
 
-		case "--testsuiteURL":			
-			if(! array_key_exists(1, $param)){	
+		case "-a":
+		case "--installall":
+			$modeAll = true;
+			break;
+
+		case "--testsuiteURL":
+			if(! array_key_exists(1, $param)){
 				echo "ERROR : forget parameter after --testsuiteURL (see --help)\n";
 				exit();
 			}
-			$testsuiteURL = $param[1];				
-			if(! filter_var($testsuiteURL, FILTER_VALIDATE_URL)){	
+			$testsuiteURL = $param[1];
+			if(! filter_var($testsuiteURL, FILTER_VALIDATE_URL)){
 				echo "ERROR : The URL of endpoint is not valid\n";
 				exit();
 			}
-			break;	
-			
+			break;
+
 		case "--testsuiteFolder":
 			if(! array_key_exists(1, $param)){
 				echo "ERROR : forget parameter after --testsuiteFolder (see --help)\n";
@@ -176,126 +181,126 @@ for($i = 1; $i < count($argv); $i++)  {
 				echo "ERROR : The path of test suite didn't find\n";
 				exit();
 			}
-			break;	
+			break;
 //////////////////////////////////////////////////////////////////////////////////
 		case "-t":
-			if(! array_key_exists($i + 1, $argv)){	
+			if(! array_key_exists($i + 1, $argv)){
 				echo "ERROR : forget parameter after -t (see --help)\n";
 				exit();
 			}
-			$triplestore = $argv[$i + 1];			
-			if(! in_array($triplestore, $listTriplestore)){	
+			$triplestore = $argv[$i + 1];
+			if(! in_array($triplestore, $listTriplestore)){
 				echo "ERROR : This triplestore is not available\n";
 				exit();
 			}
 			$i++;
 			break;
-		case "--triplestore":			
-			if(! array_key_exists(1, $param)){	
+		case "--triplestore":
+			if(! array_key_exists(1, $param)){
 				echo "ERROR : forget parameter after --triplestore (see --help)\n";
 				exit();
 			}
-			$triplestore = $param[1];			
-			if(! in_array($triplestore, $listTriplestore)){	
+			$triplestore = $param[1];
+			if(! in_array($triplestore, $listTriplestore)){
 				echo "ERROR : This triplestore is not available\n";
 				exit();
 			}
 			break;
 		case "-l":
-			if(! array_key_exists($i + 1, $argv)){	
+			if(! array_key_exists($i + 1, $argv)){
 				echo "ERROR : forget parameter after -l (see --help)\n";
 				exit();
 			}
 			$endpointLogin = $argv[$i + 1];
 			$i++;
 			break;
-		case "--login":			
-			if(! array_key_exists(1, $param)){	
+		case "--login":
+			if(! array_key_exists(1, $param)){
 				echo "ERROR : forget parameter after --login (see --help)\n";
 				exit();
 			}
 			$endpointLogin = $param[1];
-			break;		
+			break;
 		case "-p":
-			if(! array_key_exists($i + 1, $argv)){	
+			if(! array_key_exists($i + 1, $argv)){
 				echo "ERROR : forget parameter after -p (see --help)\n";
 				exit();
-			}			
+			}
 			$endpointPassword = $argv[$i + 1];
 			$i++;
 			break;
-		case "--password":			
-			if(! array_key_exists(1, $param)){	
+		case "--password":
+			if(! array_key_exists(1, $param)){
 				echo "ERROR : forget parameter after --password (see --help)\n";
 				exit();
 			}
 			$endpointPassword = $param[1];
 			break;
 		case "-e":
-			if(! array_key_exists($i + 1, $argv)){	
+			if(! array_key_exists($i + 1, $argv)){
 				echo "ERROR : forget parameter after -e (see --help)\n";
 				exit();
 			}
-			$endpointQueryAndUpdate = $argv[$i + 1];	
-			if(! filter_var($endpointQueryAndUpdate, FILTER_VALIDATE_URL)){	
+			$endpointQueryAndUpdate = $argv[$i + 1];
+			if(! filter_var($endpointQueryAndUpdate, FILTER_VALIDATE_URL)){
 				echo "ERROR : The URL of endpoint is not valid\n";
 				exit();
 			}
 			$i++;
 			break;
-		case "--endpointQueryAndUpdate":			
-			if(! array_key_exists(1, $param)){	
+		case "--endpointQueryAndUpdate":
+			if(! array_key_exists(1, $param)){
 				echo "ERROR : forget parameter after --endpointQueryAndUpdate (see --help)\n";
 				exit();
 			}
-			$endpointQueryAndUpdate = $param[1];			
-			if(! filter_var($endpointQueryAndUpdate, FILTER_VALIDATE_URL)){	
+			$endpointQueryAndUpdate = $param[1];
+			if(! filter_var($endpointQueryAndUpdate, FILTER_VALIDATE_URL)){
 				echo "ERROR : The URL of endpoint is not valid\n";
 				exit();
 			}
-			break;	
+			break;
 		case "-q":
-			if(! array_key_exists($i + 1, $argv)){	
+			if(! array_key_exists($i + 1, $argv)){
 				echo "ERROR : forget parameter after -q (see --help)\n";
 				exit();
 			}
-			$endpointQueryOnly = $argv[$i + 1];			
-			if(! filter_var($endpointQueryOnly, FILTER_VALIDATE_URL)){	
+			$endpointQueryOnly = $argv[$i + 1];
+			if(! filter_var($endpointQueryOnly, FILTER_VALIDATE_URL)){
 				echo "ERROR : The URL of endpoint is not valid\n";
 				exit();
 			}
 			$i++;
 			break;
-		case "--endpointQueryOnly":			
-			if(! array_key_exists(1, $param)){	
+		case "--endpointQueryOnly":
+			if(! array_key_exists(1, $param)){
 				echo "ERROR : forget parameter after --endpointQueryOnly (see --help)\n";
 				exit();
 			}
-			$endpointQueryOnly = $param[1];				
-			if(! filter_var($endpointQueryOnly, FILTER_VALIDATE_URL)){	
+			$endpointQueryOnly = $param[1];
+			if(! filter_var($endpointQueryOnly, FILTER_VALIDATE_URL)){
 				echo "ERROR : The URL of endpoint is not valid\n";
 				exit();
 			}
-			break;	
+			break;
 		case "-u":
-			if(! array_key_exists($i + 1, $argv)){	
+			if(! array_key_exists($i + 1, $argv)){
 				echo "ERROR : forget parameter after -u (see --help)\n";
 				exit();
 			}
-			$endpointUpdateOnly = $argv[$i + 1];			
-			if(! filter_var($endpointUpdateOnly, FILTER_VALIDATE_URL)){	
+			$endpointUpdateOnly = $argv[$i + 1];
+			if(! filter_var($endpointUpdateOnly, FILTER_VALIDATE_URL)){
 				echo "ERROR : The URL of endpoint is not valid\n";
 				exit();
 			}
 			$i++;
 			break;
-		case "--endpointUpdateOnly":			
-			if(! array_key_exists(1, $param)){	
+		case "--endpointUpdateOnly":
+			if(! array_key_exists(1, $param)){
 				echo "ERROR : forget parameter after --endpointUpdateOnly (see --help)\n";
 				exit();
 			}
-			$endpointUpdateOnly = $param[1];			
-			if(! filter_var($endpointUpdateOnly, FILTER_VALIDATE_URL)){	
+			$endpointUpdateOnly = $param[1];
+			if(! filter_var($endpointUpdateOnly, FILTER_VALIDATE_URL)){
 				echo "ERROR : The URL of endpoint is not valid\n";
 				exit();
 			}
@@ -314,7 +319,7 @@ for($i = 1; $i < count($argv); $i++)  {
 			}
 			$nameParameterUpdate  = $param[1];
 			break;
-////////////////////////////////////////////////////////		
+////////////////////////////////////////////////////////
 		default:
 			//echo $usage; exit();
 			echo "ERROR usage ! (".$param[0]."?)";
@@ -333,24 +338,27 @@ if($modeDebug){
 	ini_set('display_errors','Off');
 }
 /////////////// INIT ENDPOINT
-$readonly = false;
-if($endpointQueryOnly == "" && $endpointUpdateOnly == "" && $endpointQueryAndUpdate == ""){	
-	echo "ERROR : The endpoint didn't find\n"; exit();
-}elseif($endpointQueryAndUpdate != ""){
-	$ENDPOINT = new Endpoint($endpointQueryAndUpdate,$readonly,$modeDebug);
-}elseif($endpointQueryOnly == "" || $endpointUpdateOnly == ""){	
-	echo "ERROR : The endpoint SPARQL query or update didn't find\n"; exit();
-}else{
-	$ENDPOINT = new Endpoint($endpointQueryOnly,$readonly,$modeDebug);
-	$ENDPOINT->setEndpointQuery($endpointQueryOnly);
-	$ENDPOINT->setEndpointUpdate($endpointUpdateOnly);
-	$ENDPOINT->setNameParameterQueryRead($nameParameterQuery);
-	$ENDPOINT->setNameParameterQueryWrite($nameParameterUpdate);
+$ENDPOINT = null;
+if ($endpointQueryOnly == "" && $endpointUpdateOnly == "" && $endpointQueryAndUpdate == "") {
+    echo "ERROR : The endpoint didn't find\n";
+    exit();
+} elseif ($endpointQueryAndUpdate != "") {
+    $ENDPOINT = new SparqlClient($modeDebug);
+    $ENDPOINT->setEndpointRead($endpointQueryAndUpdate);
+    $ENDPOINT->setEndpointWrite($endpointQueryAndUpdate);
+} elseif ($endpointQueryOnly == "" || $endpointUpdateOnly == "") {
+    echo "ERROR : The endpoint SPARQL query or update didn't find\n";
+    exit();
+} else {
+    $ENDPOINT = new SparqlClient($modeDebug);
+    $ENDPOINT->setEndpointRead($endpointQueryOnly);
+    $ENDPOINT->setEndpointWrite($endpointUpdateOnly);
+    $ENDPOINT->setNameParameterQueryRead($nameParameterQuery);
+    $ENDPOINT->setNameParameterQueryWrite($nameParameterUpdate);
 }
-
-if($endpointLogin != "" && $endpointPassword != ""){
-	$ENDPOINT->setLogin($endpointLogin);
-	$ENDPOINT->setPassword($endpointPassword);
+if ($endpointLogin != "" && $endpointPassword != "") {
+    $ENDPOINT->setLogin($endpointLogin);
+    $ENDPOINT->setPassword($endpointPassword);
 }
 
 //////// PRINT CONFIG
@@ -358,8 +366,8 @@ if($endpointLogin != "" && $endpointPassword != ""){
 echo "
 Configuration about tests :
 - Endpoint type        : ".$triplestore."
-- Endpoint query       : ".$ENDPOINT->getEndpointQuery()."
-- Endpoint update      : ".$ENDPOINT->getEndpointUpdate()."
+- Endpoint query       : ".$ENDPOINT->getEndpointRead()."
+- Endpoint update      : ".$ENDPOINT->getEndpointWrite()."
 - Mode install all     : ".($modeAll?"ON":"OFF")."
 - Test suite : URL     : ".$testsuiteURL."
 - Test suite : folder  : ".$testsuiteFolder."
@@ -385,21 +393,21 @@ if ($modeAll){
 
 function importTestSuite($testsuiteURL,$testsuiteFolder){
     global $ENDPOINT,$triplestore;
-	
+
 	$testsuite = null;
 	$success = true ;
 	$messageError = "";
 	switch($triplestore){
-		case "sesame":		
+		case "sesame":
 			$success = false;
 			$messageError = "Not support LOAD SPARQL";
-			$testsuite = new SesameTestSuite($ENDPOINT,$testsuiteURL,$testsuiteFolder);	
+			$testsuite = new SesameTestSuite($ENDPOINT,$testsuiteURL,$testsuiteFolder);
 			break;
-		case "4store":		
+		case "4store":
 			$success = false;
-			$messageError = "Not LOAD TTL with the good default URI";		
+			$messageError = "Not LOAD TTL with the good default URI";
 			ECHO "AAAAAAAAAAAAAAAAAAAATTTTTTTTTTTTTTTTTTTTTTTTEEEEEEEEEEEEEEEEEEEEEESSSSSSSSSSSSSSSSTER";
-			$testsuite = new FourStoreTestSuite($ENDPOINT,$testsuiteURL,$testsuiteFolder);		
+			$testsuite = new FourStoreTestSuite($ENDPOINT,$testsuiteURL,$testsuiteFolder);
 			break;
 		case "fuseki":
 			$success = false;
@@ -413,7 +421,7 @@ function importTestSuite($testsuiteURL,$testsuiteFolder){
 
 	echo "============ CLEAN GRAPH <".$testsuiteURL."> \n";
 	echo "Before to clean : ".Tools::printNbTriples(). "\n";
-	$testsuite->clear(); 
+	$testsuite->clear();
 	echo "After to clean : ".Tools::printNbTriples(). "\n";
 	echo "================================================================= \n";
 

@@ -1,0 +1,15 @@
+{
+    "name": "bordercloud/tft",
+    "description": "TFT (Tester for Triplestore) is a script PHP to pass tests through a sparql endpoint.",
+    "type": "project",
+    "require": {
+        "bordercloud/sparql": "dev-master"
+    },
+    "license": "CC-BY-SA-4.0",
+    "authors": [
+        {
+            "name": "Karima Rafes",
+            "email": "karima.rafes@bordercloud.com"
+        }
+    ]
+}

@@ -1,54 +1,54 @@
 <?php
 
-class QueryEvaluationTest { 
- 
-	function countAllTests(){ 	
+class QueryEvaluationTest {
+
+	function countAllTests(){
 		global $modeDebug,$modeVerbose,$ENDPOINT,$GRAPHTESTS ;
-		
+
 		$ENDPOINT->ResetErrors();
 		$q = Test::PREFIX.'
 		SELECT (COUNT(?s) AS ?count) WHERE {
 			GRAPH <'.$GRAPHTESTS.'> { ?s a mf:QueryEvaluationTest ;
-							 dawgt:approval dawgt:Approved.}} '; 
+							 dawgt:approval dawgt:Approved.}} ';
 		$res = $ENDPOINT->query($q, 'row');
 		$err = $ENDPOINT->getErrors();
 		if ($err) {
 			return -1;
 		}
-		return $res["count"]; 
+		return $res["count"];
 	}
-	function countSkipTests(){ 	
+	function countSkipTests(){
 		global $modeDebug,$modeVerbose,$ENDPOINT,$GRAPHTESTS;
-		
+
 		$ENDPOINT->ResetErrors();
 		$q = Test::PREFIX.'
 		SELECT (COUNT(?s) AS ?count) WHERE {
 			GRAPH <'.$GRAPHTESTS .'> { ?s a mf:QueryEvaluationTest ;
-							 dawgt:approval dawgt:NotClassified .}} '; 
+							 dawgt:approval dawgt:NotClassified .}} ';
 		$res = $ENDPOINT->query($q, 'row');
 		$err = $ENDPOINT->getErrors();
 		if ($err) {
 			return -1;
 		}
-		return $res["count"]; 
+		return $res["count"];
 	}
-	function countApprovedTests(){   
+	function countApprovedTests(){
 		global $modeDebug,$modeVerbose,$ENDPOINT,$GRAPHTESTS;
-		
+
 		$ENDPOINT->ResetErrors();
 		$q = Test::PREFIX.'
 		SELECT (COUNT(DISTINCT ?s) AS ?count) WHERE {
 			GRAPH <'.$GRAPHTESTS .'> { ?s a mf:QueryEvaluationTest ;
-							 dawgt:approval dawgt:Approved .}} '; 
+							 dawgt:approval dawgt:Approved .}} ';
 		$res = $ENDPOINT->query($q, 'row');
 		$err = $ENDPOINT->getErrors();
 		if ($err) {
 			return -1;
 		}
-		return $res["count"]; 
+		return $res["count"];
    }
 
-	function doAllTests(){ 	
+	function doAllTests(){
 		global $modeDebug,$modeVerbose,$ENDPOINT,$CURL,$GRAPHTESTS,$GRAPH_RESULTS_EARL,$TAGTESTS;
 		 //////////////////////////////////////////////////////////////////////
 		echo "
@@ -92,31 +92,31 @@ WHERE
 }
 ORDER BY ?testiri
 ';
-		 
+
 		//echo $q;
 		$ENDPOINT->ResetErrors();
 		$rows = $ENDPOINT->query($q, 'rows');
 		$err = $ENDPOINT->getErrors();
-		
+
 		$iriTest = $GRAPH_RESULTS_EARL."/QueryEvaluationTest/select";
 		$iriAssert = $GRAPH_RESULTS_EARL."/QueryEvaluationTest/selectAssert";
 		$labelAssert = "Select the QueryEvaluationTest";
 		 if ($err) {
-			echo "F => Cannot ".$labelAssert;		 
+			echo "F => Cannot ".$labelAssert;
 			$Report->addTestCaseFailure($iriTest,$iriAssert,$labelAssert,print_r($err,true));
 			return;
-		 }else{			
+		 }else{
 			echo ".";
 			$Report->addTestCasePassed($iriTest,$iriAssert,$labelAssert);
 		 }
-		
+
 		//Check the nb of tests
 		//print_r($rows);
 		$nbTest = count($rows["result"]["rows"]);
 		echo "Nb tests : ".$nbTest."\n";
 		//exit();
 		$nbApprovedTests = QueryEvaluationTest::countApprovedTests();
-		
+
 		$iriTest = $GRAPH_RESULTS_EARL."/QueryEvaluationTest/CountTests";
 		$iriAssert = $GRAPH_RESULTS_EARL."/QueryEvaluationTest/CountTestsAssert";
 		$labelAssert = "Compare the nb of valid tests with the nb of tests in the dataset.";
@@ -124,40 +124,40 @@ ORDER BY ?testiri
 //			echo "F";
 			echo "NB of tests (".$nbTest."/".$nbApprovedTests ." in theory) is incorrect.\n";
 // 		        $Report->addTestCaseFailure($iriTest,$iriAssert,$labelAssert,
-// 					"NB of tests (".$nbTest."/".$nbApprovedTests ." in theory) is incorrect.\n TODO//220 but there are tests with several names..."	
+// 					"NB of tests (".$nbTest."/".$nbApprovedTests ." in theory) is incorrect.\n TODO//220 but there are tests with several names..."
 // 					);
-		}else{		
+		}else{
 //			echo ".";
 //			$Report->addTestCasePassed($iriTest,$iriAssert,$labelAssert);
 		}
-		
+
 		foreach ($rows["result"]["rows"] as $row){
 			$iriTest = trim($row["testiri"]);
-			
+
 			/*
 			echo $iriTest;
 			//exit();
 			if(! preg_match("/exists03/i", $iriTest))
-				continue;				
-			
+				continue;
+
 			if(! preg_match("/service/i", $iriTest))
 				continue;
 			*/
-				
-			$iriAssertProtocol =$row["testiri"]."/"."Protocol";			
+
+			$iriAssertProtocol =$row["testiri"]."/"."Protocol";
 			$labelAssertProtocol = trim($row["name"])." : Test the protocol.";
-			$iriAssertResponse =$row["testiri"]."/"."Response";			
+			$iriAssertResponse =$row["testiri"]."/"."Response";
 			$labelAssertResponse = trim($row["name"])." : Test the response.";
-			
+
 			if($modeVerbose){
 				echo "\n".$iriTest.":".trim($row["name"]).":" ;
 			}
-			
+
 			$test = new Test(trim($row["queryTest"]));
-			
+
+            $GraphName = "DEFAULT";
 			if($row["ChangeDefaultGraph"]){
-			       $GraphName = "DEFAULT";
-			        if (!$row["ChangeMultiGraph"] && array_key_exists('graphInputDefaultName', $row)) {
+			    if (!$row["ChangeMultiGraph"] && array_key_exists('graphInputDefaultName', $row)) {
 				   $GraphName = trim($row["graphInputDefaultName"]);
 				}
 				$test->addGraphInput(trim($row["graphInputDefault"]),"DEFAULT",$GraphName);
@@ -165,12 +165,12 @@ ORDER BY ?testiri
 			}
 			if($row["ChangeMultiGraph"]){
 				$test->readAndAddMultigraph($GRAPHTESTS,$iriTest); //todo check error http://www.w3.org/2009/sparql/docs/tests/data-sparql11/exists/exists03.rq
-			}	
-			
+			}
+
 			if($row["ChangeServiceGraph"]){
 				$test->readAndAddService($GRAPHTESTS,$iriTest);
-			}	
-			
+			}
+
 			/*echo "ListGraphInput";
 			echo $iriTest;
 			echo "ListGraphInput";
@@ -178,34 +178,33 @@ ORDER BY ?testiri
 			echo "ListGraphOutput";
 			print_r($test->ListGraphOutput);
 			//exit();*/
-			
+
 			//echo "\nmf:name    	\"".$row["name"]."\" ;\n";
-			
-			$test->doQuery(true);
+
+			$test->doQuery(true,$GraphName);
 			$err = $test->GetErrors();
 			$fail = $test->GetFails();
-			if (count($err) != 0) {	
-					echo "E";//echo "\n".$nameTestQueryPassed." ERROR";
-					$Report->addTestCaseError($iriTest,$iriAssertProtocol,$labelAssertProtocol,			
-						print_r($err,true));						
-						
-					echo "S";//echo "\n".$nameTestQueryDataPassed." SKIP";
-					$Report->addTestCaseSkipped($iriTest,$iriAssertResponse,$labelAssertResponse,
-					"Cannot read result because test:" . $iriAssertProtocol . " is failed."
-					);
+			if (count($err) != 0) {
+                echo "E";//echo "\n".$nameTestQueryPassed." ERROR";
+                $Report->addTestCaseError($iriTest,$iriAssertProtocol,$labelAssertProtocol,
+                    print_r($err,true));
+                echo "S";//echo "\n".$nameTestQueryDataPassed." SKIP";
+                $Report->addTestCaseSkipped($iriTest,$iriAssertResponse,$labelAssertResponse,
+                "Cannot read result because test:" . $iriAssertProtocol . " is failed."
+                );
 			}else{
-					echo ".";//echo "\n".$nameTestQueryPassed." PASSED";
-					$Report->addTestCasePassed($iriTest,$iriAssertProtocol,$labelAssertProtocol);
-						
-					if(count($fail) != 0){		
-						echo "F";					
-						$Report->addTestCaseFailure($iriTest,$iriAssertResponse,$labelAssertResponse,			
-							print_r($fail,true));
-					}else{
-					    echo ".";
-						$Report->addTestCasePassed($iriTest,$iriAssertResponse,$labelAssertResponse, 			
-							$test->queryTime);
-					}
+                echo ".";//echo "\n".$nameTestQueryPassed." PASSED";
+                $Report->addTestCasePassed($iriTest,$iriAssertProtocol,$labelAssertProtocol);
+
+                if(count($fail) != 0){
+                    echo "F";
+                    $Report->addTestCaseFailure($iriTest,$iriAssertResponse,$labelAssertResponse,
+                        print_r($fail,true));
+                }else{
+                    echo ".";
+                    $Report->addTestCasePassed($iriTest,$iriAssertResponse,$labelAssertResponse,
+                        $test->queryTime);
+                }
 			}
 		}
 		echo "\n";

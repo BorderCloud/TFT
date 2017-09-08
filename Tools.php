@@ -1,34 +1,34 @@
 <?php
 
-class Tools 
-{ 
-	function count(){   
+class Tools
+{
+    public static function count(){
 		global $modeDebug,$modeVerbose,$ENDPOINT;
-		
+
 		$ENDPOINT->ResetErrors();
-		$q = 'SELECT (COUNT(?s) AS ?count) WHERE {GRAPH ?g {  ?s ?p ?v .}} '; 
+		$q = 'SELECT (COUNT(?s) AS ?count) WHERE {GRAPH ?g {  ?s ?p ?v .}} ';
 		$res = $ENDPOINT->query($q, 'row');
 		$err = $ENDPOINT->getErrors();
 		if ($err) {
 			return -1;
 		}
 		return $res["count"]; //todo trycatch //test with sesame */
-   }	
-   
-   function printNbTriples(){
+   }
+
+    public static function printNbTriples(){
 		$nbTriples = Tools::count();
 		return ($nbTriples < 0)? "Error read the number of triples(see Debug)":$nbTriples." triples";
    }
-   
-    function loadData($endpoint,$urldata,$graph = "DEFAULT"){
-		global $modeDebug,$modeVerbose;	
+
+    public static function loadData($endpoint,$urldata,$graph = "DEFAULT"){
+		global $modeDebug,$modeVerbose;
 		$endpoint->ResetErrors();
 		if($graph == "DEFAULT"){
 			$q = 'LOAD <'.$urldata.'>';
 		}else{
 			$q = 'LOAD <'.$urldata.'> INTO GRAPH <'.$graph.'>';
 		}
-		
+
 		$res = $endpoint->queryUpdate($q);
 		$err = $endpoint->getErrors();
 		 if ($err) {
@@ -37,7 +37,7 @@ class Tools
 			$endpoint->ResetErrors();
 		 }
 	}
-	
-        
+
+
 
 }

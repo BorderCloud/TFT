@@ -554,20 +554,24 @@ EOT;
 			$content =$CURL->fetchUrl($data["url"]);
 			$this->ListGraphInput[$name]["content"]=$content ;
 
+            $testsuite = null;
 			if($this->ListGraphInput[$name]["endpoint"] == "DEFAULT"){
 				switch($TTRIPLESTORE){
 					/*case "sesame":
-						SesameTestSuite::importData($TESTENDPOINT ,$content,$name,$data["mimetype"]);
+                        $testsuite = new SesameTestSuite($TESTENDPOINT,,);
+                        $testsuite->importData($content,$name,$data["mimetype"]);
 						break;
 					case "4store":
 						TestSuite::importData($TESTENDPOINT ,$data["url"],$name);
 						//FourStoreTestSuite::importData($TESTENDPOINT ,$content,$name);
 						break;
 					case "fuseki":
-						FusekiTestSuite::importData($TESTENDPOINT ,$content,$name,$data["mimetype"]);
+                        $testsuite = new FusekiTestSuite($TESTENDPOINT,"","");
+                        $testsuite->importData($data["url"],$data["graphname"]);
 						break;*/
 					default:
-						TestSuite::importData($TESTENDPOINT ,$data["url"],$data["graphname"]);
+                        $testsuite = new TestSuite($TESTENDPOINT,"","");
+                        $testsuite->importData($data["url"],$data["graphname"]);
 				}
 			}else{
 				$nameEndpoint = $this->ListGraphInput[$name]["endpoint"];
@@ -581,7 +585,9 @@ EOT;
 				$endpoint = new SparqlClient($tempEndpoint,false,$modeDebug);
 				$endpoint->setEndpointRead($tempEndpoint);
 				$endpoint->setEndpointWrite($tempEndpoint);
-				TestSuite::importData($endpoint ,$data["url"],$data["graphname"]);
+
+                $testsuite = new TestSuite($endpoint,"","");
+                $testsuite->importData($data["url"],$data["graphname"]);
 			}
 
 			/*echo "importGraphInput\n";

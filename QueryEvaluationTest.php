@@ -48,7 +48,7 @@ class QueryEvaluationTest {
 		return $res["count"];
    }
 
-	function doAllTests(){
+	static function doAllTests(){
 		global $modeDebug,$modeVerbose,$ENDPOINT,$CURL,$GRAPHTESTS,$GRAPH_RESULTS_EARL,$TAGTESTS;
 		 //////////////////////////////////////////////////////////////////////
 		echo "

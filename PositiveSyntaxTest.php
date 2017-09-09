@@ -1,23 +1,23 @@
 <?php
 
-class PositiveSyntaxTest { 
-	function countApprovedTests(){   
+class PositiveSyntaxTest {
+	function countApprovedTests(){
 		global $modeDebug,$modeVerbose,$ENDPOINT,$GRAPHTESTS;
-		
+
 		$ENDPOINT->ResetErrors();
 		$q = Test::PREFIX.'
 		SELECT (COUNT(?s) AS ?count) WHERE {
 			GRAPH <'.$GRAPHTESTS .'> { ?s a mf:PositiveSyntaxTest11 ;
-							 dawgt:approval dawgt:Approved .}} '; 
+							 dawgt:approval dawgt:Approved .}} ';
 		$res = $ENDPOINT->query($q, 'row');
 		$err = $ENDPOINT->getErrors();
 		if ($err) {
 			return -1;
 		}
-		return $res["count"]; 
+		return $res["count"];
 	}
-	
-	function doAllTests(){ 	
+
+	static function doAllTests(){
 		global $modeDebug,$modeVerbose,$ENDPOINT,$CURL,$GRAPHTESTS,$GRAPH_RESULTS_EARL,$TAGTESTS;;
 		 //////////////////////////////////////////////////////////////////////
 		echo "
@@ -44,7 +44,7 @@ TESTS : PositiveSyntaxTest\n";
 		 ORDER BY ?testiri
 		';
 		 /*
-		 
+
 		 				  OPTIONAL{
 					 ?queryTest  rdf:resource ?queryTestHref.
 					  ?queryTestHref rdfs:member ?queryTestBase.
@@ -58,10 +58,10 @@ TESTS : PositiveSyntaxTest\n";
 		$iriAssert = $GRAPH_RESULTS_EARL."/PositiveSyntaxTest11/selectAssert";
 		$labelAssert = "Select the PositiveSyntaxTest11";
 		 if ($err) {
-			echo "F => Cannot ".$labelAssert;		 
+			echo "F => Cannot ".$labelAssert;
 			$Report->addTestCaseFailure($iriTest,$iriAssert,$labelAssert,print_r($err,true));
 			return;
-		 }else{			
+		 }else{
 			echo ".";
 			$Report->addTestCasePassed($iriTest,$iriAssert,$labelAssert);
 		 }
@@ -71,7 +71,7 @@ TESTS : PositiveSyntaxTest\n";
 		//exit();
 		//Check the nb of tests
 		$nbApprovedTests = PositiveSyntaxTest::countApprovedTests();
-		
+
 		$iriTest = $GRAPH_RESULTS_EARL."/PositiveSyntaxTest11/CountTests";
 		$iriAssert = $GRAPH_RESULTS_EARL."/PositiveSyntaxTest11/CountTestsAssert";
 		$labelAssert = "Compare the nb of valid tests with the nb of tests in the dataset.";
@@ -80,17 +80,17 @@ TESTS : PositiveSyntaxTest\n";
 
 // 			echo "F";
 // 			$Report->addTestCaseFailure($iriTest,$iriAssert,$labelAssert,
-// 					"NB of tests (".$nbTest."/".$nbApprovedTests ." in theory) is incorrect.\n"	
+// 					"NB of tests (".$nbTest."/".$nbApprovedTests ." in theory) is incorrect.\n"
 // 					);
-		}else{		
+		}else{
 // 			echo ".";
 // 			$Report->addTestCasePassed($iriTest,$iriAssert,$labelAssert);
 		}
-		
+
 		foreach ($rows["result"]["rows"] as $row){
-			$iriTest = trim($row["testiri"]);			
-			
-			$iriAssertSyntax =$row["testiri"]."/"."Syntax";			
+			$iriTest = trim($row["testiri"]);
+
+			$iriAssertSyntax =$row["testiri"]."/"."Syntax";
 			$labelAssertSyntax = trim($row["name"])." : Test the syntax.";
 			$nameTestQueryPassed = trim($row["name"])." TestProtocol";
 			$nameTestQueryDataPassed = trim($row["name"])." TestData";
@@ -100,7 +100,7 @@ TESTS : PositiveSyntaxTest\n";
 				$class = trim(str_replace(array("http://www.w3.org/2009/sparql/docs/tests/","/","#"),array("PositiveSyntaxTest.",".","."),$row["testiri"]));
 				echo "\n".$class.":".$nameTestQueryDataPassed." Tests :";
 			}
-			
+
 			$test = new Test(trim($row["queryTest"]));
 			$test->doQuery();
 			$err = $test->GetErrors();
@@ -117,4 +117,4 @@ TESTS : PositiveSyntaxTest\n";
 		echo "\n";
 	}
 }
- 
+

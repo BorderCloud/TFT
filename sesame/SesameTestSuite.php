@@ -1,132 +1,137 @@
 <?php
+require_once __DIR__ . '/../vendor/autoload.php';
 
-class SesameTestSuite extends TestSuite {
+use BorderCloud\SPARQL\Curl;
+use BorderCloud\SPARQL\SparqlClient;
 
-/*
-FIX for sesame :
-curl -X POST dev.grid-observatory.org:8080/openrdf-sesame/repositories/rep/rdf-graphs/yourNewGraph
-     -H "Content-Type:application/x-turtle"
-     -T your.ttl
+class SesameTestSuite extends TestSuite
+{
 
-curl -X POST http://dev.grid-observatory.org:8080/openrdf-sesame/repositories/sparql/rdf-graphs/service?graph=http://dev.grid-observatory.org/sparql11-test-suite/ \
--H "Content-Type:application/x-turtle"  \
--T SESAME_sparql11-test-suite/sparql11-test-suite/syntax-fed/manifest.ttl  --trace-ascii /dev/stdout
-*/
+    /*
+    FIX for sesame :
+    curl -X POST dev.grid-observatory.org:8080/openrdf-sesame/repositories/rep/rdf-graphs/yourNewGraph
+         -H "Content-Type:application/x-turtle"
+         -T your.ttl
 
-  function install(){
-		global $modeDebug,$modeVerbose,$endpointLogin,$endpointPassword;;//global $output,$modeDebug,$modeVerbose,$ENDPOINT,$listFileTTL,$this->graph,$folderTests;
-		$nb = 0;
-		$success = true;
-		$listFileTTL = $this->listFileTTL();
+    curl -X POST http://dev.grid-observatory.org:8080/openrdf-sesame/repositories/sparql/rdf-graphs/service?graph=http://dev.grid-observatory.org/sparql11-test-suite/ \
+    -H "Content-Type:application/x-turtle"  \
+    -T SESAME_sparql11-test-suite/sparql11-test-suite/syntax-fed/manifest.ttl  --trace-ascii /dev/stdout
+    */
 
-		foreach ($listFileTTL as $value) {
-			$path = "SESAME_sparql11-test-suite/".$value[0];
-			$dirname = dirname($path);
-			if (!is_dir($dirname))
-			{
-				if(!mkdir($dirname, 0755, true))
-				{
-					die('Erreur dans la création du répertoire.');
-				}
-			}
-			$fp = fopen($path, 'w');
-					fwrite($fp,$this->fixTTL(file_get_contents($value[0]),$this->graph));
-					fflush($fp);
-					fclose($fp);
-			echo ".";
-		}
+    function install()
+    {
+        global $modeDebug, $modeVerbose, $endpointLogin, $endpointPassword;;//global $output,$modeDebug,$modeVerbose,$ENDPOINT,$listFileTTL,$this->graph,$folderTests;
+        $nb = 0;
+        $success = true;
+        $listFileTTL = $this->listFileTTL();
 
-		$nb = 0;
+        foreach ($listFileTTL as $value) {
+            $path = "SESAME_sparql11-test-suite/" . $value[0];
+            $dirname = dirname($path);
+            if (!is_dir($dirname)) {
+                if (!mkdir($dirname, 0755, true)) {
+                    die('Erreur dans la création du répertoire.');
+                }
+            }
+            $fp = fopen($path, 'w');
+            fwrite($fp, $this->fixTTL(file_get_contents($value[0]), $this->graph));
+            fflush($fp);
+            fclose($fp);
+            echo ".";
+        }
 
-		////http://openrdf.callimachus.net/sesame/2.7/docs/system.docbook?view
-		$len = strlen($this->endpoint->getEndpointWrite());
-		$urlGraphData = substr($this->endpoint->getEndpointWrite(), 0, $len - ($len  - strrpos ( $this->endpoint->getEndpointWrite(), "statements")))."rdf-graphs/service?graph="; //test without len
+        $nb = 0;
 
-		$header = array("Content-Type:application/x-turtle");
-		foreach ($listFileTTL as $value) {
-		   $curl = new Curl($modeDebug);
+        ////http://openrdf.callimachus.net/sesame/2.7/docs/system.docbook?view
+        $len = strlen($this->endpoint->getEndpointWrite());
+        $urlGraphData = substr($this->endpoint->getEndpointWrite(), 0, $len - ($len - strrpos($this->endpoint->getEndpointWrite(), "statements"))) . "rdf-graphs/service?graph="; //test without len
 
-		    if($endpointLogin != "" && $endpointPassword != ""){
-		      $curl->set_credentials($endpointLogin,$endpointPassword);
-		    }
+        $header = array("Content-Type:application/x-turtle");
+        foreach ($listFileTTL as $value) {
+            $curl = new Curl($modeDebug);
 
-			$path = getcwd()."/SESAME_sparql11-test-suite/".$value[0];
-			//$path = "/home/rafes/projects/gridobs3/tools/testsparql11/SESAME_sparql11-test-suite/sparql11-test-suite/entailment/manifest.ttl";
-			$content = file_get_contents($path);
+            if ($endpointLogin != "" && $endpointPassword != "") {
+                $curl->set_credentials($endpointLogin, $endpointPassword);
+            }
 
-			$graph = "";
-			if (is_string($value[1]) &&  preg_match("/manifest[^\.]*\.ttl$/i", $value[1])) {
-				$graph = $this->graph;
-			} else {
-				$graph = str_replace($this->folder,$this->graph,$value[0]);
-			}
+            $path = getcwd() . "/SESAME_sparql11-test-suite/" . $value[0];
+            //$path = "/home/rafes/projects/gridobs3/tools/testsparql11/SESAME_sparql11-test-suite/sparql11-test-suite/entailment/manifest.ttl";
+            $content = file_get_contents($path);
 
-			$url = $urlGraphData.$this->graph ;
-			 $curl->sendPostContent(
-				 $url,
-				 $header,
-				 array(),
-				 $content);
+            $graph = "";
+            if (is_string($value[1]) && preg_match("/manifest[^\.]*\.ttl$/i", $value[1])) {
+                $graph = $this->graph;
+            } else {
+                $graph = str_replace($this->folder, $this->graph, $value[0]);
+            }
 
-			$code = $curl->getHttpResponseCode();
-			if($code<200 || $code >= 300)
-			{
-				echo "\n".$path."\n";
-				echo "ERROR ".$code." : cannot import files TTL in Sesame!!";
+            $url = $urlGraphData . $this->graph;
+            $curl->sendPostContent(
+                $url,
+                $header,
+                array(),
+                $content);
 
-				$success = false;
-				exit();
-			}
-			echo ".";
-			$nb++;
-		}
+            $code = $curl->getHttpResponseCode();
+            if ($code < 200 || $code >= 300) {
+                echo "\n" . $path . "\n";
+                echo "ERROR " . $code . " : cannot import files TTL in Sesame!!";
 
-		echo "\n";
-		echo $nb." new graphs\n";
-		return $success ;
-   }
+                $success = false;
+                exit();
+            }
+            echo ".";
+            $nb++;
+        }
 
-   function fixTTL($contentTTL,$path){
-		global $modeDebug,$modeVerbose;
-		$resultContent = $contentTTL;
+        echo "\n";
+        echo $nb . " new graphs\n";
+        return $success;
+    }
 
-		$patternDetectBlankNodeWithoutSpace = '/(_:[^ ]+)\./im';
-		$replacement = '$1 .';
-		$resultContent = preg_replace($patternDetectBlankNodeWithoutSpace, $replacement, $resultContent);
+    function fixTTL($contentTTL, $path)
+    {
+        global $modeDebug, $modeVerbose;
+        $resultContent = $contentTTL;
 
-		$patternDetectBlankNodeWithoutSpace = '/(_:[^ ]+),/im';
-		$replacement = '$1 ,';
-		$resultContent = preg_replace($patternDetectBlankNodeWithoutSpace, $replacement, $resultContent);
+        $patternDetectBlankNodeWithoutSpace = '/(_:[^ ]+)\./im';
+        $replacement = '$1 .';
+        $resultContent = preg_replace($patternDetectBlankNodeWithoutSpace, $replacement, $resultContent);
 
-		$URI = str_replace($folderTests,$this->graph,$path);
-		$patternDetectNotUri = '/<>/im';
-		$replacementNotUri = '<'.$URI.'>';
-		$resultContent = preg_replace($patternDetectNotUri, $replacementNotUri, $resultContent);
+        $patternDetectBlankNodeWithoutSpace = '/(_:[^ ]+),/im';
+        $replacement = '$1 ,';
+        $resultContent = preg_replace($patternDetectBlankNodeWithoutSpace, $replacement, $resultContent);
 
-		$len = strlen($URI);
-		$prefix = substr($URI, 0, $len - ($len  - strrpos ( $URI , "/")));
-		$patternDetectNotUri = '/<([^:<>]+)>/im';
-		$replacementNotUri = '<'.$prefix .'/$1>';
-		$resultContent = preg_replace($patternDetectNotUri, $replacementNotUri, $resultContent);
+        $URI = str_replace($folderTests, $this->graph, $path);
+        $patternDetectNotUri = '/<>/im';
+        $replacementNotUri = '<' . $URI . '>';
+        $resultContent = preg_replace($patternDetectNotUri, $replacementNotUri, $resultContent);
 
-		return $resultContent;
-	}
+        $len = strlen($URI);
+        $prefix = substr($URI, 0, $len - ($len - strrpos($URI, "/")));
+        $patternDetectNotUri = '/<([^:<>]+)>/im';
+        $replacementNotUri = '<' . $prefix . '/$1>';
+        $resultContent = preg_replace($patternDetectNotUri, $replacementNotUri, $resultContent);
 
-    function importData($endpoint,$content,$graph = "DEFAULT"){
-        global $modeDebug,$modeVerbose,$TESTENDPOINT;
+        return $resultContent;
+    }
+
+    function importData($endpoint, $content, $graph = "DEFAULT")
+    {
+        global $modeDebug, $modeVerbose, $TESTENDPOINT;
         $len = strlen($TESTENDPOINT->getEndpointWrite());
         //$url = substr($TESTENDPOINT->getEndpointUpdate(), 0, strrpos( $TESTENDPOINT->getEndpointUpdate(),
         // "update/"))."data/";
-        $urlGraphData = substr($endpoint->getEndpointWrite(), 0, strrpos ( $endpoint->getEndpointWrite(), "statements"))."rdf-graphs/service?";
+        $urlGraphData = substr($endpoint->getEndpointWrite(), 0, strrpos($endpoint->getEndpointWrite(), "statements")) . "rdf-graphs/service?";
 
-        if($graph == "DEFAULT"){
+        if ($graph == "DEFAULT") {
             $postdata = array();
-        }else{
+        } else {
             $postdata = array("graph" => $graph);
         }
         $headerdata = array("Content-Type: application/x-www-form-urlencoded");
         $curl = new Curl($modeDebug);
-        $contentFinal = $this->fixTTL($content,$graph);
+        $contentFinal = $this->fixTTL($content, $graph);
 
         $curl->sendPostContent(
             $urlGraphData,
@@ -136,47 +141,46 @@ curl -X POST http://dev.grid-observatory.org:8080/openrdf-sesame/repositories/sp
 
         $code = $curl->getHttpResponseCode();
 
-        if($code<200 || $code >= 300)
-        {
-            echo "ERROR ".$code." : cannot import files TTL in 4store!!";
+        if ($code < 200 || $code >= 300) {
+            echo "ERROR " . $code . " : cannot import files TTL in 4store!!";
             exit();
         }
     }
 
-	/*function importData($endpoint,$content,$graph = "DEFAULT",$contentType){
-		global $output,$modeDebug,$modeVerbose,$TESTENDPOINT,$endpointLogin,$endpointPassword;
-		$len = strlen($endpoint->getEndpointUpdate());
-		$urlGraphData = substr($endpoint->getEndpointUpdate(), 0, strrpos ( $endpoint->getEndpointUpdate(), "statements"))."rdf-graphs/service?";
-		if($graph == "DEFAULT"){
-			$urlGraphData .= "graph=";
-		}else{
-			$urlGraphData .= "default";
-		}
+    /*function importData($endpoint,$content,$graph = "DEFAULT",$contentType){
+        global $output,$modeDebug,$modeVerbose,$TESTENDPOINT,$endpointLogin,$endpointPassword;
+        $len = strlen($endpoint->getEndpointUpdate());
+        $urlGraphData = substr($endpoint->getEndpointUpdate(), 0, strrpos ( $endpoint->getEndpointUpdate(), "statements"))."rdf-graphs/service?";
+        if($graph == "DEFAULT"){
+            $urlGraphData .= "graph=";
+        }else{
+            $urlGraphData .= "default";
+        }
 
-		$header = array("Content-Type:".$contentType);
+        $header = array("Content-Type:".$contentType);
 
-		$curl = new Curl($modeDebug);
-		if($endpointLogin != "" && $endpointPassword != ""){
-		   $curl->set_credentials($endpointLogin,$endpointPassword);
-		}
+        $curl = new Curl($modeDebug);
+        if($endpointLogin != "" && $endpointPassword != ""){
+           $curl->set_credentials($endpointLogin,$endpointPassword);
+        }
 
-		$contentFinal = $this->fixTTL($content,$graph);
+        $contentFinal = $this->fixTTL($content,$graph);
 
-		$url = $urlGraphData.$graph ;
+        $url = $urlGraphData.$graph ;
 
-		 $curl->send_post_content(
-			 $url,
-			 $header,
-			 array(),
-			 $contentFinal);
+         $curl->send_post_content(
+             $url,
+             $header,
+             array(),
+             $contentFinal);
 
-		$code = $curl->get_http_response_code();
+        $code = $curl->get_http_response_code();
 
-		if($code<200 || $code >= 300)
-		{
-			echo "\n".$graph."\n";
-			echo "ERROR ".$code." : cannot import files TTL in sesame!!";
-			echo $contentFinal;
-		}
-	}*/
+        if($code<200 || $code >= 300)
+        {
+            echo "\n".$graph."\n";
+            echo "ERROR ".$code." : cannot import files TTL in sesame!!";
+            echo $contentFinal;
+        }
+    }*/
 }

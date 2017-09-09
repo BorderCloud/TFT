@@ -5,159 +5,161 @@
  use BorderCloud\SPARQL\Curl;
  use BorderCloud\SPARQL\SparqlClient;
 
-class FusekiTestSuite extends TestSuite {
+class FusekiTestSuite extends TestSuite
+{
 
-/*
-FIX for fuseki :
+    /*
+    FIX for fuseki :
 
-curl -v -H "Content-type: application/x-www-form-urlencoded" \
--H "Accept: application/sparql-results+xml" -X POST \
---data-urlencode \
-'update=prefix hc: <http://www.hebrideanconnections.com/hebridean.owl#>
-insert data { hc:633 hc:associatedWith hc:633 }' \
-http://dev.grid-observatory.org:3030/tests/update
+    curl -v -H "Content-type: application/x-www-form-urlencoded" \
+    -H "Accept: application/sparql-results+xml" -X POST \
+    --data-urlencode \
+    'update=prefix hc: <http://www.hebrideanconnections.com/hebridean.owl#>
+    insert data { hc:633 hc:associatedWith hc:633 }' \
+    http://dev.grid-observatory.org:3030/tests/update
 
-curl -v -H "Accept: application/sparql-results+xml" \
---data-urlencode \
-'query=select * where { GRAPH ?g  { ?s ?p ?o }} LIMIT 10' \
-http://dev.grid-observatory.org:3030/tests/query
+    curl -v -H "Accept: application/sparql-results+xml" \
+    --data-urlencode \
+    'query=select * where { GRAPH ?g  { ?s ?p ?o }} LIMIT 10' \
+    http://dev.grid-observatory.org:3030/tests/query
 
-curl -v -X POST http://dev.grid-observatory.org:3030/tests/data?graph=locale:manifest.ttl \
--H "Content-Type:application/x-turtle" \
--T sparql11-test-suite/syntax-update-1/manifest.ttl
+    curl -v -X POST http://dev.grid-observatory.org:3030/tests/data?graph=locale:manifest.ttl \
+    -H "Content-Type:application/x-turtle" \
+    -T sparql11-test-suite/syntax-update-1/manifest.ttl
 
-****************************************** BUG
-curl -v -H "Content-type: application/x-www-form-urlencoded" \
--H "Accept: application/sparql-results+xml" -X POST \
---data-urlencode \
-'update=
-prefix rdf:    <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
-prefix rdfs:    <http://www.w3.org/2000/01/rdf-schema#>
-INSERT DATA {  GRAPH <locale:s> {
-<locale:syntax-service-01.rq> rdf:resource  <http://example.com/sparql11-test-suite/syntax-fed/syntax-service-01.rq> .
-<http://example.com/sparql11-test-suite/syntax-fed/syntax-service-01.rq> rdfs:member <http://example.com/sparql11-test-suite/syntax-fed> .
-}}' \
-http://localhost:3030/tests/update
+    ****************************************** BUG
+    curl -v -H "Content-type: application/x-www-form-urlencoded" \
+    -H "Accept: application/sparql-results+xml" -X POST \
+    --data-urlencode \
+    'update=
+    prefix rdf:    <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+    prefix rdfs:    <http://www.w3.org/2000/01/rdf-schema#>
+    INSERT DATA {  GRAPH <locale:s> {
+    <locale:syntax-service-01.rq> rdf:resource  <http://example.com/sparql11-test-suite/syntax-fed/syntax-service-01.rq> .
+    <http://example.com/sparql11-test-suite/syntax-fed/syntax-service-01.rq> rdfs:member <http://example.com/sparql11-test-suite/syntax-fed> .
+    }}' \
+    http://localhost:3030/tests/update
 
-curl -v -H "Accept: application/sparql-results+xml" \
---data-urlencode \
-'query=prefix rdf:    <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
-prefix rdfs:    <http://www.w3.org/2000/01/rdf-schema#>
-select * where {
-GRAPH ?g  { ?queryTest  rdf:resource ?queryTestHref.
-OPTIONAL {
-?queryTestHref rdfs:member ?queryTestBase.
-}}}' \
-http://localhost:3030/tests/query
+    curl -v -H "Accept: application/sparql-results+xml" \
+    --data-urlencode \
+    'query=prefix rdf:    <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+    prefix rdfs:    <http://www.w3.org/2000/01/rdf-schema#>
+    select * where {
+    GRAPH ?g  { ?queryTest  rdf:resource ?queryTestHref.
+    OPTIONAL {
+    ?queryTestHref rdfs:member ?queryTestBase.
+    }}}' \
+    http://localhost:3030/tests/query
 
-curl -v -H "Accept: application/sparql-results+xml" \
---data-urlencode \
-'query=prefix rdf:    <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
-prefix rdfs:    <http://www.w3.org/2000/01/rdf-schema#>
-select * where { GRAPH ?g  {
- ?queryTestHref rdfs:member ?queryTestBase.
-OPTIONAL {?queryTest  rdf:resource ?queryTestHref.
-}}}' \
-http://localhost:3030/tests/query
+    curl -v -H "Accept: application/sparql-results+xml" \
+    --data-urlencode \
+    'query=prefix rdf:    <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+    prefix rdfs:    <http://www.w3.org/2000/01/rdf-schema#>
+    select * where { GRAPH ?g  {
+     ?queryTestHref rdfs:member ?queryTestBase.
+    OPTIONAL {?queryTest  rdf:resource ?queryTestHref.
+    }}}' \
+    http://localhost:3030/tests/query
 
-**********************************************************
+    **********************************************************
 
-curl -v -X POST http://dev.grid-observatory.org:3030/tests/data?graph=locale:my2 \
--H "Content-Type:application/x-turtle" \
--T sparql11-test-suite/bind/manifest.ttl
+    curl -v -X POST http://dev.grid-observatory.org:3030/tests/data?graph=locale:my2 \
+    -H "Content-Type:application/x-turtle" \
+    -T sparql11-test-suite/bind/manifest.ttl
 
-curl -v -H "Accept: application/sparql-results+xml" \
---data-urlencode \
-'query= select * where { GRAPH <locale:my2> {
- ?o ?p ?v.
-}}' \
-http://localhost:3030/tests/query
+    curl -v -H "Accept: application/sparql-results+xml" \
+    --data-urlencode \
+    'query= select * where { GRAPH <locale:my2> {
+     ?o ?p ?v.
+    }}' \
+    http://localhost:3030/tests/query
 
 
 
-curl -v -H "Accept: application/sparql-results+xml" \
---data-urlencode \
-'query=prefix ex:	<http://www.example.org/schema#>
-prefix in:	<http://www.example.org/instance#>
+    curl -v -H "Accept: application/sparql-results+xml" \
+    --data-urlencode \
+    'query=prefix ex:	<http://www.example.org/schema#>
+    prefix in:	<http://www.example.org/instance#>
 
-select  ?x ?p where {
-graph ?g {
-{select * where {?x ?p ?y}}
-}
-}' \
-http://localhost:3030/tests/query
+    select  ?x ?p where {
+    graph ?g {
+    {select * where {?x ?p ?y}}
+    }
+    }' \
+    http://localhost:3030/tests/query
 
-(~nauroy/jena/jena-fuseki-1.0.0)
-clear :
-ps aux | grep fuseki
-kill X
+    (~nauroy/jena/jena-fuseki-1.0.0)
+    clear :
+    ps aux | grep fuseki
+    kill X
 
-cd ~nauroy/jena/jena-fuseki-1.0.0
-nohup ./fuseki-server --update --mem /tests &
+    cd ~nauroy/jena/jena-fuseki-1.0.0
+    nohup ./fuseki-server --update --mem /tests &
 
-	*/
-   function install(){
-		global $modeDebug,$modeVerbose;//,$this->endpoint,$listFileTTL,$this->graph,$folderTests;
-		$nb = 0;
+        */
+    function install()
+    {
+        global $modeDebug, $modeVerbose;//,$this->endpoint,$listFileTTL,$this->graph,$folderTests;
+        $nb = 0;
 
-		$listFileTTL = $this->listFileTTL();
+        $listFileTTL = $this->listFileTTL();
 
-		$nb = 0;
-		$len = strlen($this->endpoint->getEndpointWrite());
-		$urlGraphData = substr($this->endpoint->getEndpointWrite(), 0, $len - ($len  - strrpos ( $this->endpoint->getEndpointWrite(), "update")))."data?graph=";
-		//$urlGraphManifest = substr($this->endpoint->getEndpointUpdate(), 0, $len - ($len  - strrpos ( $this->endpoint->getEndpointUpdate(), "update")))."data?graph=".$this->graph;
+        $nb = 0;
+        $len = strlen($this->endpoint->getEndpointWrite());
+        $urlGraphData = substr($this->endpoint->getEndpointWrite(), 0, $len - ($len - strrpos($this->endpoint->getEndpointWrite(), "update"))) . "data?graph=";
+        //$urlGraphManifest = substr($this->endpoint->getEndpointUpdate(), 0, $len - ($len  - strrpos ( $this->endpoint->getEndpointUpdate(), "update")))."data?graph=".$this->graph;
 
-		$header = array("Content-Type:application/x-turtle");
-		foreach ($listFileTTL as $value) {
-		$curl = new Curl($modeDebug);
-			$path = $value[0];
+        $header = array("Content-Type:application/x-turtle");
+        foreach ($listFileTTL as $value) {
+            $curl = new Curl($modeDebug);
+            $path = $value[0];
 
-			$content = FusekiTestSuite::fixTTL(file_get_contents($path),$path);
+            $content = FusekiTestSuite::fixTTL(file_get_contents($path), $path);
 
-			$graph = "";
-			if (is_string($value[1]) &&  preg_match("/manifest[^\.]*\.ttl$/i", $value[1])) {
-				$graph = $this->graph;
-			} else {
-				$graph = str_replace($this->folder,$this->graph,$value[0]);
-			}
-			$url = $urlGraphData.$graph ;
+            $graph = "";
+            if (is_string($value[1]) && preg_match("/manifest[^\.]*\.ttl$/i", $value[1])) {
+                $graph = $this->graph;
+            } else {
+                $graph = str_replace($this->folder, $this->graph, $value[0]);
+            }
+            $url = $urlGraphData . $graph;
 
-			 $curl->sendPostContent(
-				 $url,
-				 $header,
-				 array(),
-				 $content);
+            $curl->sendPostContent(
+                $url,
+                $header,
+                array(),
+                $content);
 
-			$code = $curl->getHttpResponseCode();
+            $code = $curl->getHttpResponseCode();
 
-			if($code<200 && $code >= 300)
-			{
-				echo "\n".$path."\n";
-				echo "ERROR ".$code." : cannot import files TTL in Sesame!!";
-				exit();
-			}
+            if ($code < 200 && $code >= 300) {
+                echo "\n" . $path . "\n";
+                echo "ERROR " . $code . " : cannot import files TTL in Sesame!!";
+                exit();
+            }
 
-			echo ".";
-			$nb++;
-		}
+            echo ".";
+            $nb++;
+        }
 
-		echo "\n";
-		echo $nb." File imported \n";
-   }
+        echo "\n";
+        echo $nb . " File imported \n";
+    }
 
-    function importData($endpoint,$content,$graph = "DEFAULT"){
-        global $modeDebug,$modeVerbose,$TESTENDPOINT;
+    function importData($endpoint, $content, $graph = "DEFAULT")
+    {
+        global $modeDebug, $modeVerbose, $TESTENDPOINT;
         $len = strlen($TESTENDPOINT->getEndpointWrite());
-        $urlGraphData = substr($endpoint->getEndpointWrite(), 0,  strrpos ( $endpoint->getEndpointWrite(), "update"))."data?";
+        $urlGraphData = substr($endpoint->getEndpointWrite(), 0, strrpos($endpoint->getEndpointWrite(), "update")) . "data?";
 
-        if($graph == "DEFAULT"){
+        if ($graph == "DEFAULT") {
             $postdata = array();
-        }else{
+        } else {
             $postdata = array("graph" => $graph);
         }
         $headerdata = array("Content-Type: application/x-www-form-urlencoded");
         $curl = new Curl($modeDebug);
-        $contentFinal = $this->fixTTL($content,$graph);
+        $contentFinal = $this->fixTTL($content, $graph);
 
         $curl->sendPostContent(
             $urlGraphData,
@@ -167,61 +169,61 @@ nohup ./fuseki-server --update --mem /tests &
 
         $code = $curl->getHttpResponseCode();
 
-        if($code<200 || $code >= 300)
-        {
-            echo "ERROR ".$code." : cannot import files TTL in 4store!!";
+        if ($code < 200 || $code >= 300) {
+            echo "ERROR " . $code . " : cannot import files TTL in 4store!!";
             exit();
         }
     }
 
-/*    function importData($endpoint,$content,$graph = "DEFAULT",$contentType){
-		global $modeDebug,$modeVerbose;
-		$len = strlen($endpoint->getEndpointUpdate());
-		$urlGraphData = substr($endpoint->getEndpointUpdate(), 0,  strrpos ( $endpoint->getEndpointUpdate(), "update"))."data?";
-		if($graph == "DEFAULT"){
-			$urlGraphData .= "graph=";
-		}else{
-			$urlGraphData .= "default";
-		}
-		//$header = array("Content-Type:application/x-turtle");
-		$header = array("Content-Type:".$contentType);
-		$curl = new Curl($modeDebug);
+    /*    function importData($endpoint,$content,$graph = "DEFAULT",$contentType){
+            global $modeDebug,$modeVerbose;
+            $len = strlen($endpoint->getEndpointUpdate());
+            $urlGraphData = substr($endpoint->getEndpointUpdate(), 0,  strrpos ( $endpoint->getEndpointUpdate(), "update"))."data?";
+            if($graph == "DEFAULT"){
+                $urlGraphData .= "graph=";
+            }else{
+                $urlGraphData .= "default";
+            }
+            //$header = array("Content-Type:application/x-turtle");
+            $header = array("Content-Type:".$contentType);
+            $curl = new Curl($modeDebug);
 
-		//$this-> ???
-		$contentFinal = FusekiTestSuite::fixTTL($content,$graph);
+            //$this-> ???
+            $contentFinal = FusekiTestSuite::fixTTL($content,$graph);
 
-		$url = $urlGraphData.$graph ;
+            $url = $urlGraphData.$graph ;
 
-		 $curl->send_post_content(
-			 $url,
-			 $header,
-			 array(),
-			 $contentFinal);
+             $curl->send_post_content(
+                 $url,
+                 $header,
+                 array(),
+                 $contentFinal);
 
-		$code = $curl->get_http_response_code();
+            $code = $curl->get_http_response_code();
 
-		if($code<200 || $code >= 300)
-		{
-			echo "\n".$path."\n";
-			echo "ERROR ".$code." : cannot import files TTL in fuseki!!";
-		}
-	}*/
+            if($code<200 || $code >= 300)
+            {
+                echo "\n".$path."\n";
+                echo "ERROR ".$code." : cannot import files TTL in fuseki!!";
+            }
+        }*/
 
-   function fixTTL($contentTTL,$path){
-		global $modeDebug,$modeVerbose;
-		$resultContent = $contentTTL;
+    function fixTTL($contentTTL, $path)
+    {
+        global $modeDebug, $modeVerbose;
+        $resultContent = $contentTTL;
 
-		$URI = str_replace($this->folder,$this->graph,$path);
-		$patternDetectNotUri = '/<>/im';
-		$replacementNotUri = '<'.$URI.'>';
-		$resultContent = preg_replace($patternDetectNotUri, $replacementNotUri, $resultContent);
+        $URI = str_replace($this->folder, $this->graph, $path);
+        $patternDetectNotUri = '/<>/im';
+        $replacementNotUri = '<' . $URI . '>';
+        $resultContent = preg_replace($patternDetectNotUri, $replacementNotUri, $resultContent);
 
-		$len = strlen($URI);
-		$prefix = substr($URI, 0, $len - ($len  - strrpos ( $URI , "/")));
-		$patternDetectNotUri = '/<([^:<>]+)>/im';
-		$replacementNotUri = '<'.$prefix .'/$1>';
-		$resultContent = preg_replace($patternDetectNotUri, $replacementNotUri, $resultContent);
+        $len = strlen($URI);
+        $prefix = substr($URI, 0, $len - ($len - strrpos($URI, "/")));
+        $patternDetectNotUri = '/<([^:<>]+)>/im';
+        $replacementNotUri = '<' . $prefix . '/$1>';
+        $resultContent = preg_replace($patternDetectNotUri, $replacementNotUri, $resultContent);
 
-		return $resultContent;
-	}
+        return $resultContent;
+    }
 }

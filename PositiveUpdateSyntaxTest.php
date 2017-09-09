@@ -1,23 +1,23 @@
 <?php
 
-class PositiveUpdateSyntaxTest { 
-	function countApprovedTests(){   
+class PositiveUpdateSyntaxTest {
+	function countApprovedTests(){
 		global $modeDebug,$modeVerbose,$ENDPOINT,$GRAPHTESTS;
-		
+
 		$ENDPOINT->ResetErrors();
 		$q = Test::PREFIX.'
 		SELECT (COUNT(?s) AS ?count) WHERE {
 			GRAPH <'.$GRAPHTESTS .'> { ?s a mf:PositiveUpdateSyntaxTest11 ;
-							 dawgt:approval dawgt:Approved .}} '; 
+							 dawgt:approval dawgt:Approved .}} ';
 		$res = $ENDPOINT->query($q, 'row');
 		$err = $ENDPOINT->getErrors();
 		if ($err) {
 			return -1;
 		}
-		return $res["count"]; 
+		return $res["count"];
    }
-   
-	function doAllTests(){ 	
+
+	static function doAllTests(){
 		global $modeDebug,$modeVerbose,$ENDPOINT,$CURL,$GRAPHTESTS,$GRAPH_RESULTS_EARL,$TAGTESTS;;
 		 //////////////////////////////////////////////////////////////////////
 		echo "
@@ -41,7 +41,7 @@ class PositiveUpdateSyntaxTest {
 		}
 		 ORDER BY ?testiri
 		';
-				 
+
 		//echo $q;
 		$ENDPOINT->ResetErrors();
 		$rows = $ENDPOINT->query($q, 'rows');
@@ -50,10 +50,10 @@ class PositiveUpdateSyntaxTest {
 		$iriAssert = $GRAPH_RESULTS_EARL."/PositiveUpdateSyntaxTest11/selectAssert";
 		$labelAssert = "Select the PositiveUpdateSyntaxTest11";
 		 if ($err) {
-			echo "F => Cannot ".$labelAssert;		 
+			echo "F => Cannot ".$labelAssert;
 			$Report->addTestCaseFailure($iriTest,$iriAssert,$labelAssert,print_r($err,true));
 			return;
-		 }else{			
+		 }else{
 			echo ".";
 			$Report->addTestCasePassed($iriTest,$iriAssert,$labelAssert);
 		 }
@@ -62,7 +62,7 @@ class PositiveUpdateSyntaxTest {
 		echo "Nb tests : ".$nbTest."\n";
 		//exit();
 		$nbApprovedTests = PositiveUpdateSyntaxTest::countApprovedTests();
-		
+
 		$iriTest = $GRAPH_RESULTS_EARL."/PositiveUpdateSyntaxTest11/CountTests";
 		$iriAssert = $GRAPH_RESULTS_EARL."/PositiveUpdateSyntaxTest11/CountTestsAssert";
 		$labelAssert = "Compare the nb of valid tests with the nb of tests in the dataset.";
@@ -71,21 +71,21 @@ class PositiveUpdateSyntaxTest {
 
 // 			echo "F";
 // 			$Report->addTestCaseFailure($iriTest,$iriAssert,$labelAssert,
-// 					"NB of tests (".$nbTest."/".$nbApprovedTests ." in theory) is incorrect.\n"	
+// 					"NB of tests (".$nbTest."/".$nbApprovedTests ." in theory) is incorrect.\n"
 // 					);
-		}else{		
+		}else{
 // 			echo ".";
 // 			$Report->addTestCasePassed($iriTest,$iriAssert,$labelAssert);
 		}
 		//exit();
 		foreach ($rows["result"]["rows"] as $row){
 			$iriTest = trim($row["testiri"]);
-			
-			$iriAssertProtocol =$row["testiri"]."/"."Protocol";			
+
+			$iriAssertProtocol =$row["testiri"]."/"."Protocol";
 			$labelAssertProtocol = trim($row["name"])." : Test the protocol.";
-			$iriAssertResponse =$row["testiri"]."/"."Response";			
+			$iriAssertResponse =$row["testiri"]."/"."Response";
 			$labelAssertResponse = trim($row["name"])." : Test the response.";
-			
+
 			if($modeVerbose){
 				echo "\n".$iriTest.":".trim($row["name"]).":" ;
 			}
@@ -94,13 +94,13 @@ class PositiveUpdateSyntaxTest {
 			$test->doUpdate(false);
 			$err = $test->GetErrors();
 			$fail = $test->GetFails();
-			if (count($err) != 0 || count($fail) != 0  ) {	
+			if (count($err) != 0 || count($fail) != 0  ) {
 					echo "F";//echo "\n".$nameTestQueryPassed." ERROR";
 					$Report->addTestCaseFailure($iriTest,$iriAssertResponse,$labelAssertResponse,
-						print_r($err,true)."\n".print_r($fail,true));		
+						print_r($err,true)."\n".print_r($fail,true));
 			}else{
 					echo ".";
-					$Report->addTestCasePassed($iriTest,$iriAssertResponse,$labelAssertResponse, 					
+					$Report->addTestCasePassed($iriTest,$iriAssertResponse,$labelAssertResponse,
 						$test->queryTime);
 			}
 

@@ -146,7 +146,7 @@ class FusekiTestSuite extends TestSuite
         echo $nb . " File imported \n";
     }
 
-    function importData($endpoint, $content, $graph = "DEFAULT")
+    function importData($content, $graph = "DEFAULT")
     {
         global $modeDebug, $modeVerbose, $TESTENDPOINT;
         $len = strlen($TESTENDPOINT->getEndpointWrite());

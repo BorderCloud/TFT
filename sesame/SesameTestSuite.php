@@ -116,7 +116,7 @@ class SesameTestSuite extends TestSuite
         return $resultContent;
     }
 
-    function importData($endpoint, $content, $graph = "DEFAULT")
+    function importData($content, $graph = "DEFAULT")
     {
         global $modeDebug, $modeVerbose, $TESTENDPOINT;
         $len = strlen($TESTENDPOINT->getEndpointWrite());

@@ -3,7 +3,7 @@
     "description": "TFT (Tester for Triplestore) is a script PHP to pass tests through a sparql endpoint.",
     "type": "project",
     "require": {
-        "bordercloud/sparql": "dev-master"
+        "bordercloud/sparql": "2.0.5"
     },
     "license": "CC-BY-SA-4.0",
     "authors": [

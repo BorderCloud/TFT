@@ -1,0 +1,22 @@
+FROM genji/tomcat
+
+USER root
+
+ENV RDF4J_VERSION="2.2.4" 
+ENV RDF4J_DATA="/opt/eclipse-rdf4j-${RDF4J_VERSION}/data" 
+ENV JVM_PARAMS="-Xmx4g" 
+
+RUN yum install zip unzip -y
+
+RUN curl -sS -o /tmp/rdf4j.zip -L http://download.eclipse.org/rdf4j/eclipse-rdf4j-${RDF4J_VERSION}-sdk.zip && \
+    cd /opt && \ 
+    unzip /tmp/rdf4j.zip && \
+    rm /tmp/rdf4j.zip
+
+RUN mv /opt/eclipse-rdf4j-${RDF4J_VERSION}/war/*.war $CATALINA_HOME/webapps
+
+RUN echo "CATALINA_OPTS=\"\$CATALINA_OPTS \$JVM_PARAMS -Dorg.eclipse.rdf4j.appdata.basedir=\$RDF4J_DATA\"" >> $CATALINA_HOME/bin/setenv.sh
+
+VOLUME ${RDF4J_DATA}
+
+EXPOSE 8080

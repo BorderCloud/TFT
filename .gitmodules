@@ -4,6 +4,3 @@
 [submodule "lib/sparql"]
 	path = lib/sparql
 	url = https://github.com/BorderCloud/SPARQL.git
-[submodule "tests/rdf-tests"]
-	path = tests/rdf-tests
-	url = https://github.com/w3c/rdf-tests.git

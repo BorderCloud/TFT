@@ -4,3 +4,6 @@
 [submodule "lib/sparql"]
 	path = lib/sparql
 	url = https://github.com/BorderCloud/SPARQL.git
+[submodule "myrepohttpJmeter"]
+	path = tests/rdf-tests
+	url = https://github.com/BorderCloud/rdf-tests.git

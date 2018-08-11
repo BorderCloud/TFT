@@ -102,7 +102,7 @@ class SesameTestSuite extends TestSuite
         $replacement = '$1 ,';
         $resultContent = preg_replace($patternDetectBlankNodeWithoutSpace, $replacement, $resultContent);
 
-        $URI = str_replace($folderTests, $this->graph, $path);
+        $URI = str_replace($this->folder, $this->graph, $path);
         $patternDetectNotUri = '/<>/im';
         $replacementNotUri = '<' . $URI . '>';
         $resultContent = preg_replace($patternDetectNotUri, $replacementNotUri, $resultContent);
@@ -122,7 +122,7 @@ class SesameTestSuite extends TestSuite
         $len = strlen($TESTENDPOINT->getEndpointWrite());
         //$url = substr($TESTENDPOINT->getEndpointUpdate(), 0, strrpos( $TESTENDPOINT->getEndpointUpdate(),
         // "update/"))."data/";
-        $urlGraphData = substr($endpoint->getEndpointWrite(), 0, strrpos($endpoint->getEndpointWrite(), "statements")) . "rdf-graphs/service?";
+        $urlGraphData = substr($TESTENDPOINT->getEndpointWrite(), 0, strrpos($TESTENDPOINT->getEndpointWrite(), "statements")) . "rdf-graphs/service?";
 
         if ($graph == "DEFAULT") {
             $postdata = array();

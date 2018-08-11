@@ -1,7 +1,7 @@
 <?php
 
 class PositiveUpdateSyntaxTest {
-	function countApprovedTests(){
+    static function countApprovedTests(){
 		global $modeDebug,$modeVerbose,$ENDPOINT,$GRAPHTESTS;
 
 		$ENDPOINT->ResetErrors();
@@ -101,7 +101,7 @@ class PositiveUpdateSyntaxTest {
 			}else{
 					echo ".";
 					$Report->addTestCasePassed($iriTest,$iriAssertResponse,$labelAssertResponse,
-						$test->queryTime);
+                        $test->GetTime());
 			}
 
 		}

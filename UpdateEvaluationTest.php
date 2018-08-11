@@ -1,7 +1,7 @@
 <?php
 
 class UpdateEvaluationTest {
-	function countApprovedTests(){
+    static function countApprovedTests(){
 		global $modeDebug,$modeVerbose,$ENDPOINT,$GRAPHTESTS;
 
 		$ENDPOINT->ResetErrors();
@@ -226,7 +226,7 @@ LIMIT 2';
 					}else{
 					    echo ".";
 						$Report->addTestCasePassed($iriTest,$iriAssertResponse,$labelAssertResponse,
-						$test->queryTime);
+                            $test->GetTime());
 					}
 
 			}

@@ -32,7 +32,7 @@ class QueryEvaluationTest {
 		}
 		return $res["count"];
 	}
-	function countApprovedTests(){
+    static function countApprovedTests(){
 		global $modeDebug,$modeVerbose,$ENDPOINT,$GRAPHTESTS;
 
 		$ENDPOINT->ResetErrors();
@@ -203,7 +203,7 @@ ORDER BY ?testiri
                 }else{
                     echo ".";
                     $Report->addTestCasePassed($iriTest,$iriAssertResponse,$labelAssertResponse,
-                        $test->queryTime);
+                        $test->GetTime());
                 }
 			}
 		}

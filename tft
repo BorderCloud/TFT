@@ -72,6 +72,8 @@ use BorderCloud\SPARQL\Curl;
 use BorderCloud\SPARQL\SparqlClient;
 
 //require_once 'lib/sparql/Endpoint.php';
+
+require_once 'AbstractTest.php';
 require_once 'Tools.php';
 require_once 'TestSuite.php';
 require_once 'TestsReport.php';
@@ -87,6 +89,8 @@ require_once 'NegativeUpdateSyntaxTest.php';
 require_once 'UpdateEvaluationTest.php';
 require_once 'CSVResultFormatTest.php';
 require_once 'ServiceDescriptionTest.php';
+
+require_once 'TestJmeter.php';
 require_once 'ProtocolTest.php';
 //require_once 'Test.php';
 
@@ -619,6 +623,7 @@ if($modeDebug){
 $CURL = new Curl($modeDebug);
 /////////////// INIT ENDPOINT
 $readonly = false;
+
 $ENDPOINT = null;
 if ($endpointQueryOnly == "" && $endpointUpdateOnly == "" && $endpointQueryAndUpdate == "") {
     echo "ERROR : The endpoint didn't find\n";
@@ -642,11 +647,24 @@ if ($endpointLogin != "" && $endpointPassword != "") {
     $ENDPOINT->setPassword($endpointPassword);
 }
 
+
+
 $TESTENDPOINT = null;
+$TESTENDPOINT_HOSTNAME = null;
+$TESTENDPOINT_PORT = null;
+$TESTENDPOINT_PATH = null;
 if($tendpointQueryOnly == "" && $tendpointUpdateOnly == "" && $tendpointQueryAndUpdate == ""){
 	echo "ERROR : The endpoint didn't find\n"; exit();
 }elseif($tendpointQueryAndUpdate != ""){
 	$TESTENDPOINT = new SparqlClient($modeDebug);
+    $TESTENDPOINT->setEndpointRead($tendpointQueryAndUpdate);
+    $TESTENDPOINT->setEndpointWrite($tendpointQueryAndUpdate);
+
+    $TESTENDPOINT_HOSTNAME = parse_url($tendpointQueryAndUpdate, PHP_URL_HOST);
+    $TESTENDPOINT_PORT = parse_url($tendpointQueryAndUpdate, PHP_URL_PORT);
+    $path = parse_url($tendpointQueryAndUpdate, PHP_URL_PATH);
+    $lastpos = strrpos($path, "/");
+    $TESTENDPOINT_PATH = substr($path,0,$lastpos+1);
 }elseif($tendpointQueryOnly == "" || $tendpointUpdateOnly == ""){
 	echo "ERROR : The endpoint SPARQL query or update didn't find\n"; exit();
 }else{
@@ -655,6 +673,16 @@ if($tendpointQueryOnly == "" && $tendpointUpdateOnly == "" && $tendpointQueryAnd
 	$TESTENDPOINT->setEndpointWrite($tendpointUpdateOnly);
 	$TESTENDPOINT->setNameParameterQueryRead($tnameParameterQuery);
 	$TESTENDPOINT->setNameParameterQueryWrite($tnameParameterUpdate);
+
+    $TESTENDPOINT_HOSTNAME = parse_url($endpointQueryOnly, PHP_URL_HOST);
+    $TESTENDPOINT_PORT = parse_url($endpointQueryOnly, PHP_URL_PORT);
+    $path = parse_url($endpointQueryOnly, PHP_URL_PATH);
+    $lastpos = strrpos($path, "/");
+    $TESTENDPOINT_PATH = substr($path,0,$lastpos+1);
+}
+
+if(empty($TESTENDPOINT_PORT)){
+    $TESTENDPOINT_PORT = "80";
 }
 
 if($tendpointLogin != "" && $tendpointPassword != ""){
@@ -689,10 +717,9 @@ foreach($listTestSuite as $URL => $folder){
 	$TAGTESTS =  str_replace("/", "", $folder);;
 	//////////////////////////// TESTS
 
-	// TODO
-	//ProtocolTest::doAllTests();
+	ProtocolTest::doAllTests();
 
-	// TODO
+	// TODO ?
 	//ServiceDescriptionTest::doAllTests();
 
 	PositiveSyntaxTest::doAllTests();

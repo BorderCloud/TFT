@@ -403,10 +403,10 @@ function importTestSuite($testsuiteURL,$testsuiteFolder){
 			$messageError = "Not support LOAD SPARQL";
 			$testsuite = new SesameTestSuite($ENDPOINT,$testsuiteURL,$testsuiteFolder);
 			break;
-		case "4store":
+		case "4store": //OBSOLETE ?
 			$success = false;
 			$messageError = "Not LOAD TTL with the good default URI";
-			ECHO "AAAAAAAAAAAAAAAAAAAATTTTTTTTTTTTTTTTTTTTTTTTEEEEEEEEEEEEEEEEEEEEEESSSSSSSSSSSSSSSSTER";
+			// TODO TEST
 			$testsuite = new FourStoreTestSuite($ENDPOINT,$testsuiteURL,$testsuiteFolder);
 			break;
 		case "fuseki":

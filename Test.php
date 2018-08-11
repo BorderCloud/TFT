@@ -13,7 +13,7 @@ use BorderCloud\SPARQL\ParserSparqlResult;
 use BorderCloud\SPARQL\ToolsBlankNode;
 
 
-class Test {
+class Test extends AbstractTest  {
 
     const  PREFIX = <<<'EOT'
 prefix rdf:    <http://www.w3.org/1999/02/22-rdf-syntax-ns#> 
@@ -40,23 +40,16 @@ EOT;
 	public $URLresultDataDefaultGraphType = "application/sparql-results+xml";
 	//public $resultQuery = null;
 
-	private $_errors;
-	private $_fails;
-
-	public $queryTime = 0;
-
 	public $_tabDiff = null;
 
 	function __construct($URLquery)
 	{
+        parent::__construct();
 		$this->URLquery = $URLquery;
 
 		$this->ListGraphInput = array();
 		$this->ListGraphOutput = array();
 		$this->ListGraphResult = array();
-
-		$this->_errors = array();
-		$this->_fails = array();
 	}
 
 	private function readGraphResult()
@@ -223,8 +216,17 @@ EOT;
 		}
 
 		$t1 = SparqlClient::mtime();
-		$this->query = $CURL->fetchUrl($this->URLquery);
-		$this->queryTime = SparqlClient::mtime() - $t1 ;
+
+		// Read the query
+		//$this->query = $CURL->fetchUrl($this->URLquery);
+        $queryContent = $this->LoadContentFile($this->URLquery)		;
+        if(empty($queryContent)){
+            //LoadContentFile has already insert AddFail
+            return;
+        }
+        $this->query =$queryContent;
+
+		$this->_time = SparqlClient::mtime() - $t1 ;
 		//init Dataset for the test
 		if($testResult){
 		   $this->importGraphInput();
@@ -279,7 +281,7 @@ EOT;
 
 	function doUpdate($testResult=false)
 	{
-		global $modeDebug,$modeVerbose,$TESTENDPOINT,$CURL,$TTRIPLESTORE;
+		global $modeDebug,$modeVerbose,$TESTENDPOINT,$CURL,$TTRIPLESTORE,$listTestSuite;
 		$message = "";
 		$test = false;
 
@@ -293,8 +295,15 @@ EOT;
 			return;
 		}
 		$t1 = SparqlClient::mtime();
-		$this->query = $CURL->fetchUrl($this->URLquery);
-		$this->queryTime = SparqlClient::mtime() - $t1 ;
+		//$this->query = $CURL->fetchUrl($this->URLquery);
+        $queryContent = $this->LoadContentFile($this->URLquery)		;
+        if(empty($queryContent)){
+            //LoadContentFile has already insert AddFail
+            return;
+        }
+        $this->query =$queryContent;
+
+        $this->_time = SparqlClient::mtime() - $t1 ;
 		//init Dataset for the test
 		if($testResult){
             $this->importGraphInput();
@@ -360,7 +369,9 @@ EOT;
 		$message =  $this->printTestHead();
 		foreach ($this->ListGraphOutput as $name=>$dataOutput) {
 			//read data
-			$expected = $CURL->fetchUrl($dataOutput["url"]);
+			//$expected = $CURL->fetchUrl($dataOutput["url"]);
+            $expected = $this->LoadContentFile($dataOutput["url"]);
+
 			//$this->ListGraphOutput[$nameGraph]["content"]=$expected;
 
 			//print_r($this->ListGraphResult);
@@ -551,7 +562,8 @@ EOT;
 		//exit();
 		foreach ($this->ListGraphInput as $name=>$data){
 
-			$content =$CURL->fetchUrl($data["url"]);
+			//$content =$CURL->fetchUrl($data["url"]);
+            $content = $this->LoadContentFile($data["url"]);
 			$this->ListGraphInput[$name]["content"]=$content ;
 
             $testsuite = null;

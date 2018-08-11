@@ -1,7 +1,7 @@
 <?php
 
 class PositiveSyntaxTest {
-	function countApprovedTests(){
+    static function countApprovedTests(){
 		global $modeDebug,$modeVerbose,$ENDPOINT,$GRAPHTESTS;
 
 		$ENDPOINT->ResetErrors();

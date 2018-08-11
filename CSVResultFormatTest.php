@@ -1,7 +1,7 @@
   <?php
 
 class CSVResultFormatTest {
-	function countApprovedTests()
+    static function countApprovedTests()
     {
         global $modeDebug, $modeVerbose, $ENDPOINT, $GRAPHTESTS;
 
@@ -108,7 +108,7 @@ class CSVResultFormatTest {
 
 					echo "S";//echo "\n".$nameTestQueryDataPassed." SKIP";
 					$Report->addTestCaseSkipped($iriTest,$iriAssertResponse,$labelAssertResponse,
-					"Cannot read result because test:" . $nameTestQueryPassed . " is failed."
+					"Cannot read result because test:" . $iriTest . " is failed."
 					);
 			}else{
 					echo ".";//echo "\n".$nameTestQueryPassed." PASSED";
@@ -121,7 +121,7 @@ class CSVResultFormatTest {
 					}else{
 					    echo ".";
 						$Report->addTestCasePassed($iriTest,$iriAssertResponse,$labelAssertResponse,
-						$test->queryTime);
+						$test->GetTime());
 					}
 
 			}

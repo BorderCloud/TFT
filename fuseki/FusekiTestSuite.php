@@ -150,7 +150,7 @@ class FusekiTestSuite extends TestSuite
     {
         global $modeDebug, $modeVerbose, $TESTENDPOINT;
         $len = strlen($TESTENDPOINT->getEndpointWrite());
-        $urlGraphData = substr($endpoint->getEndpointWrite(), 0, strrpos($endpoint->getEndpointWrite(), "update")) . "data?";
+        $urlGraphData = substr($TESTENDPOINT->getEndpointWrite(), 0, strrpos($TESTENDPOINT->getEndpointWrite(), "update")) . "data?";
 
         if ($graph == "DEFAULT") {
             $postdata = array();
@@ -170,7 +170,7 @@ class FusekiTestSuite extends TestSuite
         $code = $curl->getHttpResponseCode();
 
         if ($code < 200 || $code >= 300) {
-            echo "ERROR " . $code . " : cannot import files TTL in 4store!!";
+            echo "ERROR " . $code . " : cannot import files TTL in Fusiki !!";
             exit();
         }
     }

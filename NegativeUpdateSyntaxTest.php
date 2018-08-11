@@ -1,7 +1,7 @@
  <?php
 
 class NegativeUpdateSyntaxTest {
-	function countApprovedTests()
+    static function countApprovedTests()
     {
         global $modeDebug, $modeVerbose, $ENDPOINT, $GRAPHTESTS;
 

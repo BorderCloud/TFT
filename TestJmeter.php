@@ -40,7 +40,7 @@ class TestJmeter extends AbstractTest
         $command = "jmeter -n -t $fileJmeterTestPlan -JHOSTNAME=$TESTENDPOINT_HOSTNAME -JPORT=$TESTENDPOINT_PORT -JPATH=$TESTENDPOINT_PATH  -l $resultFile -X";
         $output = shell_exec($command);
         //print_r($output);
-        if (!file_exists($fileJmeterTestPlan)) {
+        if (!file_exists($resultFile)) {
             $this->AddFail("ERROR IN JMETER TEST : \n >>> " . $command . "\n" . $output . "\n");
             return;
         } else {

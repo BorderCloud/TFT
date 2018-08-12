@@ -101,9 +101,11 @@ $CONFIG = parse_ini_file("config.ini", true);
 
 //List of servers available that you can test with this script
 $listTriplestore =  $CONFIG["CONFIG"]["listTriplestore"];
+$JMETER =  $CONFIG["CONFIG"]["jmeter"];
 
 //List of test suite available that you can pass
 $listTestSuite =  $CONFIG["CONFIG"]["listTestSuite"];
+
 
 $usage = "
 USAGE : tft [-l|--list] [-t|--triplestore=NAME]

@@ -107,7 +107,7 @@ class ProtocolTest {
             $err = $test->GetErrors();
             $fail = $test->GetFails();
 
-            if (count($err) > 0 || count($fail) > 0) {
+            if (!(count($err) > 0 || count($fail) > 0)) {
                 echo ".";
                 $Report->addTestCasePassed($iriTest,$iriAssertProtocol,$labelAssertProtocol);
             }else{

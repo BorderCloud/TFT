@@ -87,8 +87,6 @@ class ProtocolTest {
 
 			$iriAssertProtocol =$row["testiri"]."/"."Protocol";
 			$labelAssertProtocol = trim($row["name"])." : Test the protocol.";
-			$iriAssertResponse =$row["testiri"]."/"."Response";
-			$labelAssertResponse = trim($row["name"])." : Test the response.";
 
 			if($modeVerbose){
 				echo "\n".$iriTest.":".trim($row["name"]).":" ;
@@ -108,27 +106,16 @@ class ProtocolTest {
             $test->doTestPlan();
             $err = $test->GetErrors();
             $fail = $test->GetFails();
-            if (count($err) != 0) {
-                echo "E";//echo "\n".$nameTestQueryPassed." ERROR";
-                $Report->addTestCaseError($iriTest,$iriAssertProtocol,$labelAssertProtocol,
-                    print_r($err,true));
-                echo "S";//echo "\n".$nameTestQueryDataPassed." SKIP";
-                $Report->addTestCaseSkipped($iriTest,$iriAssertResponse,$labelAssertResponse,
-                    "Cannot read result because test:" . $iriAssertProtocol . " is failed."
-                );
-            }else{
-                echo ".";//echo "\n".$nameTestQueryPassed." PASSED";
-                $Report->addTestCasePassed($iriTest,$iriAssertProtocol,$labelAssertProtocol);
 
-                if(count($fail) != 0){
-                    echo "F";
-                    $Report->addTestCaseFailure($iriTest,$iriAssertResponse,$labelAssertResponse,
-                        print_r($fail,true));
-                }else{
-                    echo ".";
-                    $Report->addTestCasePassed($iriTest,$iriAssertResponse,$labelAssertResponse,
-                        $test->GetTime());
-                }
+            if (count($err) > 0 || count($fail) > 0) {
+                echo ".";
+                $Report->addTestCasePassed($iriTest,$iriAssertProtocol,$labelAssertProtocol);
+            }else{
+                echo "F";//"\n".$nameTestQueryPassed." PASSED";
+
+                $Report->addTestCaseFailure($iriTest,$iriAssertProtocol,$labelAssertProtocol,
+                    print_r($fail,true). print_r($err,true));
+                //echo $error;
             }
 		}
 	}

@@ -37,7 +37,7 @@ class TestJmeter extends AbstractTest
         $resultFile = str_replace(".jmx", ".jtl", $fileJmeterTestPlan);
 
         //TODO example to install jmeter with export PATH=$PATH:/home/LOGIN/dev/apache-jmeter-4.0/bin/
-        $command = $JMETER." -n -t $fileJmeterTestPlan -JHOSTNAME=$TESTENDPOINT_HOSTNAME -JPORT=$TESTENDPOINT_PORT -JPATH=$TESTENDPOINT_PATH  -l $resultFile -X";
+        $command = $JMETER." -n -t $fileJmeterTestPlan -JHOSTNAME=$TESTENDPOINT_HOSTNAME -JPORT=$TESTENDPOINT_PORT -JPATH=$TESTENDPOINT_PATH  -l $resultFile  --forceDeleteResultFile";
         $output = shell_exec($command);
         //print_r($output);
         if (!file_exists($resultFile)) {

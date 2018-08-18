@@ -53,8 +53,8 @@ class TestSuite
             if (is_string($value[1]) && preg_match("/manifest[^\.]*\.ttl$/i", $value[1])) {
                 echo ".";
                 Tools::loadData($this->endpoint, $path, $this->graph);
+                $nb++;
             }
-            $nb++;
         }
 
         echo "\n";

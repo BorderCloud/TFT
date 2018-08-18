@@ -8,7 +8,7 @@ class ProtocolTest {
 		$q = Test::PREFIX.'
 		SELECT (COUNT(?s) AS ?count) WHERE {
 			GRAPH <'.$GRAPHTESTS .'> { ?s a mf:ProtocolTest ;
-							 dawgt:approval dawgt:Approved .}} ';
+							 dawgt:approval dawgt:ApprovedMustToHave .}} ';
 		$res = $ENDPOINT->query($q, 'row');
 		$err = $ENDPOINT->getErrors();
 		if ($err) {
@@ -35,7 +35,7 @@ class ProtocolTest {
 					?testiri a 		mf:ProtocolTest ;
 						 mf:name    	?name ;
 						 mf:action 	?jmeterPlanTest  ;
-						 dawgt:approval dawgt:Approved .
+						 dawgt:approval dawgt:ApprovedMustToHave .
 				 }
 		}
 		 ORDER BY ?testiri

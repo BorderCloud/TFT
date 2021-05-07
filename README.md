@@ -1,8 +1,12 @@
 # TFT
-===
 
 TFT (Tester for Triplestore) is a script PHP to pass tests through a sparql endpoint.
 
+# install JMeter for protocol tests
+wget http://mirrors.standaloneinstaller.com/apache//jmeter/binaries/apache-jmeter-5.4.1.tgz
+tar xvzf apache-jmeter-5.4.1.tgz
+mv  apache-jmeter-5.4.1 jmeter
+rm apache-jmeter-5.4.1.tgz
 
 ## How to use it ?
 
@@ -12,52 +16,13 @@ You can read the doc here: https://bordercloud.github.io/tft-reports/
 
 Example of project with Travis Ci and TFT :
 
-* [Blazegraph 2.2.0](https://github.com/BorderCloud/tft-blazegraph)
-* [Jena-Fuseki 3.8.0](https://github.com/BorderCloud/tft-jena-fuseki)
-* [Stardog community 5.3.3](https://github.com/BorderCloud/tft-stardog)
 * [OpenLink Virtuoso version community 7/stable](https://github.com/BorderCloud/tft-virtuoso7-stable)
+  
+* TODO [Blazegraph 2.2.0](https://github.com/BorderCloud/tft-blazegraph)
+* TODO [Jena-Fuseki 4.0.0](https://github.com/BorderCloud/tft-jena-fuseki)
+* TODO [Stardog community 5.3.3](https://github.com/BorderCloud/tft-stardog)
 
-
-## Old docs
-
-Installation of CURL
-============
-If, you have errors about CURL, probably you need to install the lib php-curl.
-
-Example with ubuntu & fedora :
-```
-# apt-get install php5-curl
-apt-get install php70w-common
-or
-# yum install php5-curl
-yum / dnf install php70w-common
-```
-
-Usage with Jenkins & Jena-Fuseki
-==================
-
-```
-rm -rf TFT
-git clone  --recursive https://github.com/BorderCloud/TFT.git
-cd TFT
-
-./tft-testsuite -a -t fuseki -q http://example.com:3030/tests/query -u http://example.com:3030/tests/update
-
-./tft \
--t fuseki \
--q http://example.com:3030/tests/query \
--u http://example.com:3030/tests/update \
--tt fuseki -tq http://127.0.0.1/ds/query -tu http://127.0.0.1/ds/update \
--o ./junit \
--r ${BUILD_URL} \
---softwareName=Fuseki --softwareDescribeTag=v${VERSIONFUSEKI}  --softwareDescribe="${BUILD_TAG}#${FILEFUSEKI}"
-
-./tft-score \
--t fuseki \
--q http://example.com:3030/tests/query \
--u http://example.com:3030/tests/update \
--r ${BUILD_URL}
-```
+## Usage with Jenkins
 
 Jenkins will be read the reports Junit/XML with this line :
 
@@ -65,9 +30,7 @@ Jenkins will be read the reports Junit/XML with this line :
 TFT/junit/*junit.xml
 ```
 
-
-Usage with Virtuoso
-==================
+## Usage sparql-auth of Virtuoso
 ```
 git clone --recursive https://github.com/BorderCloud/TFT.git
 cd TFT
@@ -101,8 +64,7 @@ cd TFT
       -l LOGIN -p 'PASSWORD'
 ```
 
-Read the last score with SPARQL
-===============================
+## Read the last score with SPARQL
 
 Example :
 ```
@@ -126,10 +88,9 @@ FILTER(STR(xsd:date(?LastDate)) = STR(xsd:date(NOW())))
 }
 ```
 
-License
-=======
+## License
 
-TFT (c)2018 by Karima Rafes - INRIA (in 2014), BORDERCLOUD
+TFT (c)2021 by Karima Rafes, BORDERCLOUD
 
 TFT is licensed under a Creative Commons Attribution-ShareAlike 4.0 International License.
 

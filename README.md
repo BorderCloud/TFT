@@ -3,10 +3,12 @@
 TFT (Tester for Triplestore) is a script PHP to pass tests through a sparql endpoint.
 
 # install JMeter for protocol tests
+```
 wget http://mirrors.standaloneinstaller.com/apache//jmeter/binaries/apache-jmeter-5.4.1.tgz
 tar xvzf apache-jmeter-5.4.1.tgz
 mv  apache-jmeter-5.4.1 jmeter
 rm apache-jmeter-5.4.1.tgz
+```
 
 ## How to use it ?
 

@@ -19,10 +19,8 @@ You can read the doc here: https://bordercloud.github.io/tft-reports/
 Example of project with Travis Ci and TFT :
 
 * [OpenLink Virtuoso version community 7/stable](https://github.com/BorderCloud/tft-virtuoso7-stable)
-  
-* TODO [Blazegraph 2.2.0](https://github.com/BorderCloud/tft-blazegraph)
-* TODO [Jena-Fuseki 4.0.0](https://github.com/BorderCloud/tft-jena-fuseki)
-* TODO [Stardog community 5.3.3](https://github.com/BorderCloud/tft-stardog)
+* [Blazegraph 2.1.5](https://github.com/BorderCloud/tft-blazegraph)
+* [Jena-Fuseki 4.0.0](https://github.com/BorderCloud/tft-jena-fuseki)
 
 ## Usage with Jenkins
 

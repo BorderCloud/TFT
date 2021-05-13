@@ -1,71 +1,7 @@
 #!/usr/bin/php
 <?php
 ini_set('memory_limit', '2000M');
-/*
 
-* TEST SCRIPT:
-
-cd /home/rafes/projects/gridobs3/tools/testsparql11
-
-//virtuoso
-./tft -i -t fuseki -q http://dev.grid-observatory.org:3030/tests/query -u http://dev.grid-observatory.org:3030/tests/update \
--tt virtuoso -te http://dev.grid-observatory.org:8890/tests/ \
--o ./junit \
--r http://dev.grid-observatory.org/testsVirtuoso
-
-./tft -t fuseki -q http://dev.grid-observatory.org:3030/tests/query -u http://dev.grid-observatory.org:3030/tests/update \
--tt virtuoso -tq http://onevm-194.lal.in2p3.fr:8095/sparql/ -tu http://onevm-194.lal.in2p3.fr:8095/sparql/ \
--o ./junit -r http://dev.grid-observatory.org/testsVirtuoso10  \
---softwareName=virtuoso --softwareDescribeTag=v0.2  --softwareDescribe=v0.2-truc
-
-curl -v -H "Accept: application/sparql-results+xml" \
---data-urlencode \
-'query=SELECT (COUNT(?s) AS ?count) WHERE {GRAPH ?g {  ?s ?p ?v .}}' \
-http://dev.grid-observatory.org:8890/sparql/
-
-//4Store
-./tft -i -t fuseki -q http://dev.grid-observatory.org:3030/tests/query -u http://dev.grid-observatory.org:3030/tests/update \
--tt 4store -te http://dev.grid-observatory.org:8000/ \
--o ./junit \
--r http://dev.grid-observatory.org/tests
-
-//sesame
-./tft -i -t fuseki -q http://dev.grid-observatory.org:3030/tests/query -u http://dev.grid-observatory.org:3030/tests/update \
- -tt sesame -tq http://dev.grid-observatory.org:8080/openrdf-sesame/repositories/sparql \
- -tu http://dev.grid-observatory.org:8080/openrdf-sesame/repositories/sparql/statements \
--o ./junit \
--r http://dev.grid-observatory.org/tests
-
-//fuseki
-./tft -i -t 4store -e http://dev.grid-observatory.org:8000/ \
--tt fuseki -tq http://dev.grid-observatory.org:3030/tests/query \
--tu http://dev.grid-observatory.org:3030/tests/update \
--o ./junit \
--r http://dev.grid-observatory.org/tests
-
-// Allegrograph :
-./tft -i -t fuseki -q http://dev.grid-observatory.org:3030/tests/query -u http://dev.grid-observatory.org:3030/tests/update \
--tt allegrograph -tq http://dev.grid-observatory.org:10035/repositories/tests -tu http://dev.grid-observatory.org:10035/repositories/tests \
---testnameParameterUpdate=query \
--o ./junit \
--r http://dev.grid-observatory.org/tests
-
-./tft -t fuseki -q http://dev.grid-observatory.org:3030/tests/query -u http://dev.grid-observatory.org:3030/tests/update \
--tt allegrograph -tq http://dev.grid-observatory.org:10035/repositories/tests \
--tu http://dev.grid-observatory.org:10035/repositories/tests --testnameParameterUpdate=query \
--o ./junit -r http://dev.grid-observatory.org/testsVirtuoso10  --softwareName=virtuoso \
---softwareDescribeTag=v0.2  --softwareDescribe=v0.2-truc
-
-
-
-
-./tft -t fuseki -q http://dev.grid-observatory.org:3030/tests/query -u http://dev.grid-observatory.org:3030/tests/update \
--tt allegrograph -tq http://dev.grid-observatory.org:10035/repositories/tests -tu http://dev.grid-observatory.org:10035/repositories/tests \
---testnameParameterUpdate=query \
--o ./junit -r http://dev.grid-observatory.org/testsVirtuoso10  \
---softwareName=virtuoso --softwareDescribeTag=v0.2  --softwareDescribe=v0.2-truc
-
-*/
 require_once __DIR__ . '/vendor/autoload.php';
 
 use BorderCloud\SPARQL\Curl;

@@ -25,106 +25,46 @@ class UpdateEvaluationTest {
 		$Report = new TestsReport("UpdateEvaluationTest",$TAGTESTS.'-UpdateEvaluationTest-junit.xml');
 
 		$q = Test::PREFIX.' 
-SELECT DISTINCT ?testiri ?name ?queryTest  ?ChangeMultiGraph ?graphInput ?graphOutput
-		# ?ChangeDefaultGraph
-WHERE
-{GRAPH <'.$GRAPHTESTS.'>
-				 {
-					?manifest a mf:Manifest ;
-						  mf:entries  ?collection .
-						  ?collection rdf:rest*/rdf:first  ?testiri .
-						  
-					?testiri 	a 		mf:UpdateEvaluationTest ;
-							 mf:name    	?name ;
-							 dawgt:approval dawgt:Approved ;
-							 mf:action [ 
-										ut:request ?queryTest;
-										]
-					OPTIONAL{
-							?testiri mf:action [ ut:data  ?graphInput   ] .
-							}
-					OPTIONAL{
-							?testiri mf:result [ ut:data  ?graphOutput ] .
-							}
-					OPTIONAL{
-						?testiri	mf:action [ 
-										ut:graphData ?graphListInput	].
-								#	mf:result [ 
-								#		ut:graphData ?graphListOutput	]
-						}
-					#BIND(BOUND(?graphInput) AS ?ChangeDefaultGraph)
-					BIND(BOUND(?graphListInput) AS ?ChangeMultiGraph)					
-			}
+SELECT DISTINCT ?testiri ?name ?queryTest 
+?dataInput ?dataOutput
+?dataInputExist ?graphDataInputExist ?serviceDataInputExist
+?dataOutputExist ?graphDataOutputExist
+WHERE {
+    GRAPH <'.$GRAPHTESTS.'> {
+      #  VALUES ?testiri {<http://www.w3.org/2009/sparql/docs/tests/data-sparql11/construct/manifest#constructwhere04>}
+        ?manifest   a mf:Manifest ;
+                    mf:entries  ?collection .
+					?collection rdf:rest*/rdf:first  ?testiri .
+					
+		?testiri 	a mf:UpdateEvaluationTest ;
+					mf:name	?name ;
+					dawgt:approval dawgt:Approved ;
+					mf:action [ ut:request ?queryTest ]
+		OPTIONAL {
+			?testiri mf:action [ ut:data ?dataInput	]							
+		}				
+		OPTIONAL {
+			?testiri mf:action [ ut:graphData ?graphDataInput	]							
+		}	
+		OPTIONAL {
+			?testiri mf:action [ ut:serviceData ?serviceDataInput ]							
 		}
+		OPTIONAL {
+			?testiri mf:result [ ut:data ?dataOutput ]					
+		}				
+		OPTIONAL {
+			?testiri mf:result [ ut:graphData ?graphDataOutput ]		
+		}
+        BIND(BOUND(?dataInput) AS ?dataInputExist)
+        BIND(BOUND(?graphDataInput) AS ?graphDataInputExist)
+        BIND(BOUND(?serviceDataInput) AS ?serviceDataInputExist)	
+    
+        BIND(BOUND(?dataOutput) AS ?dataOutputExist)
+        BIND(BOUND(?graphDataOutput) AS ?graphDataOutputExist)
+    }
+}
 ORDER BY ?testiri
  ';
-		 /* maybe a day
-$q = Test::PREFIX.'
-		 prefix rdf:    <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
-prefix : <http://www.w3.org/2009/sparql/docs/tests/data-sparql11/bind/manifest#>
-prefix rdfs:	<http://www.w3.org/2000/01/rdf-schema#>
-prefix mf:     <http://www.w3.org/2001/sw/DataAccess/tests/test-manifest#>
-prefix qt:     <http://www.w3.org/2001/sw/DataAccess/tests/test-query#>
-prefix dawgt:   <http://www.w3.org/2001/sw/DataAccess/tests/test-dawg#>
-prefix ut:     <http://www.w3.org/2009/sparql/tests/test-update#>
-CONSTRUCT {
-		?testiri 	a 	mf:UpdateEvaluationTest ;
-					 mf:name    	?name ;
-					 dawgt:approval dawgt:Approved ;
-					 mf:action [
-								ut:request ?queryTest;
-								ut:data  ?graphInput ;
-								ut:graphData [ ut:graph ?graphDataInput ;
-												rdfs:label ?graphDataLabelInput ]
-								];
-					mf:result [ ut:data  ?graphOutput ;
-										ut:graphData [ ut:graph ?graphDataResult ;
-											rdfs:label ?graphDataLabelResult]
-								] .
-			}
-		where
-		 {GRAPH  <http://bordercloud.github.io/TFT-tests/sparql11-test-suite/>
-				 {
-					?testiri a 				mf:UpdateEvaluationTest ;
-							 mf:name    	?name ;
-							 dawgt:approval dawgt:Approved .
-					OPTIONAL{
-							?testiri mf:action [
-										ut:request ?queryTest;
-										ut:data  ?graphInput   	];
-									mf:result [ ut:data  ?graphOutput ;
-										ut:graphData ?resultGraphData ] .
-							}
-				OPTIONAL{
-						?testiri	mf:action [
-										ut:graphData [ ut:graph ?graphDataInput ;
-										rdfs:label ?graphDataLabelInput ]	];
-									mf:result [
-										ut:graphData [ ut:graph ?graphDataResult ;
-										rdfs:label ?graphDataLabelResult]	]
-						}
-			}
-		}
-ORDER BY ?testiri
-LIMIT 2';
-*/
-	/*
-		 :add01 rdf:type mf:UpdateEvaluationTest ;
-    mf:name "ADD 1" ;
-    rdfs:comment "Add the default graph to an existing graph" ;
-    dawgt:approval dawgt:Approved;
-    dawgt:approvedBy <http://www.w3.org/2009/sparql/meeting/2012-02-07#resolution_3> ;
-    mf:action [ ut:request <add-01.ru> ;
-                ut:data <add-default.ttl> ;
-                ut:graphData [ ut:graph <add-01-pre.ttl> ;
-                               rdfs:label "http://example.org/g1" ]
-              ] ;
-    mf:result [ ut:data <add-default.ttl> ;
-                ut:graphData [ ut:graph <add-01-post.ttl> ;
-                               rdfs:label "http://example.org/g1" ]
-              ] .
-
-		 */
 		//echo $q;
 		$ENDPOINT->ResetErrors();
 		$rows = $ENDPOINT->query($q,"rows");
@@ -181,22 +121,25 @@ LIMIT 2';
 
 			$test = new Test(trim($row["queryTest"]));
 
-			/*if($row["ChangeDefaultGraph"]){
-				$test->addGraphInput(trim($row["graphInput"]));
-				$test->addGraphOutput(trim($row["graphOutput"]));
-			}*/
-			if (array_key_exists('graphInput', $row)) {
-				$test->addGraphInput(trim($row["graphInput"]));;
-			}
-			if (array_key_exists('graphOutput', $row)) {
-				$test->addGraphInput(trim($row["graphOutput"]));;
-			}
+            $graphName = "DEFAULT";
+            if($row["dataInputExist"]){
+                $test->addGraphInput(trim($row["dataInput"]),$graphName,$graphName);
+            }
+            if($row["graphDataInputExist"]){
+                $test->readAndAddMultigraphInput($GRAPHTESTS,$iriTest,false); //todo check error http://www.w3.org/2009/sparql/docs/tests/data-sparql11/exists/exists03.rq
+            }
+            if($row["serviceDataInputExist"]){
+                throw new Exception("not tested");
+                $test->readAndAddService($GRAPHTESTS,$iriTest);
+            }
 
-			if($row["ChangeMultiGraph"]){
-				$test->readAndAddMultigraph($GRAPHTESTS,$iriTest,false);
-			}
-
-
+            $graphName = "DEFAULT";
+            if($row["dataOutputExist"]){
+                $test->addGraphOutput(trim($row["dataOutput"]),$graphName,$graphName);
+            }
+            if($row["graphDataOutputExist"]){
+                $test->readAndAddMultigraphOutput($GRAPHTESTS,$iriTest,false); //todo check error http://www.w3.org/2009/sparql/docs/tests/data-sparql11/exists/exists03.rq
+            }
 			/*echo "ListGraphInput";
 			echo $iriTest;
 			echo "ListGraphInput";

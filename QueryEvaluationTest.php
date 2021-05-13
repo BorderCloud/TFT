@@ -56,38 +56,49 @@ class QueryEvaluationTest {
 TESTS : QueryEvaluationTest";// ( ".QueryEvaluationTest::countApprovedTests()." Approved, ".QueryEvaluationTest::countSkipTests()." Skipped, ".QueryEvaluationTest::countAllTests()." Total\n";
 		$Report = new TestsReport("QueryEvaluationTest",$TAGTESTS.'-QueryEvaluationTest-junit.xml');
 		$q = Test::PREFIX.' 
-SELECT DISTINCT ?testiri ?name ?queryTest  
-		?ChangeDefaultGraph ?ChangeMultiGraph ?ChangeServiceGraph
-		?graphInputDefault ?graphOutput ?graphInputDefaultName
-WHERE
-{GRAPH <'.$GRAPHTESTS .'>
-	 {
-                ?manifest a 		mf:Manifest ;
-                          mf:entries  	?collection .
-			  ?collection 	rdf:rest*/rdf:first  ?testiri .
+SELECT DISTINCT ?testiri ?name ?queryTest 
+?dataInput ?dataOutput
+?dataInputExist ?graphDataInputExist ?serviceDataInputExist
+?testSkipped
+WHERE {
+    GRAPH <'.$GRAPHTESTS .'> {
+      # VALUES ?testiri {<http://www.w3.org/2009/sparql/docs/tests/data-sparql11/json-res/manifest#jsonres03>}
+        ?manifest   a  mf:Manifest ;
+                    mf:entries ?collection .
+        ?collection rdf:rest*/rdf:first ?testiri .
 			  
-		?testiri a 			mf:QueryEvaluationTest ;
-				 mf:name    	?name ;
+		?testiri a  mf:QueryEvaluationTest ;
+				 mf:name ?name ;
 				 dawgt:approval dawgt:Approved ;
-				 mf:action   [ 
+				 mf:action [ 
 								qt:query  	?queryTest 
 							] ;
-				mf:result  ?graphOutput .		
-		OPTIONAL{
-			?testiri mf:action [ qt:data    ?graphInputDefault	]							
-			}				
-		OPTIONAL{
-			?testiri mf:action [ qt:graphData    ?graphInputDefaultName	]							
-			}		
-		OPTIONAL{
-			?testiri mf:action [ qt:graphData    [ qt:graph   ?graphInputGraph ]	]							
-			}		
-		OPTIONAL{
-			?testiri mf:action [ qt:serviceData    ?serviceInputGraph	]							
-			}	
-		BIND(BOUND(?graphInputDefault) AS ?ChangeDefaultGraph)
-		BIND(BOUND(?graphInputGraph) AS ?ChangeMultiGraph)		
-		BIND(BOUND(?serviceInputGraph) AS ?ChangeServiceGraph)		
+				 mf:result  ?dataOutput .		
+		OPTIONAL {
+			?testiri mf:action [ qt:data ?dataInput	]							
+		}				
+		OPTIONAL {
+			?testiri mf:action [ qt:graphData ?graphDataInput ]							
+		}
+		OPTIONAL {
+			?testiri mf:action [ qt:serviceData ?serviceDataInput ]							
+		}	
+		
+        BIND(BOUND(?dataInput) AS ?dataInputExist)
+        BIND(BOUND(?graphDataInput) AS ?graphDataInputExist)
+        BIND(BOUND(?serviceDataInput) AS ?serviceDataInputExist)
+        
+        #DISABLE TFT not supports tests with Entailment regime
+        OPTIONAL {
+            ?testiri mf:action [ sd:EntailmentProfile ?EntailmentProfile ] ;
+        }
+        OPTIONAL {
+            ?testiri mf:action [ sd:entailmentRegime ?entailmentRegime ] ;
+        }
+        OPTIONAL {
+            ?testiri mf:action [ sd:supportedEntailmentProfile ?supportedEntailmentProfile ] ;
+        }
+        BIND((BOUND(?EntailmentProfile) || BOUND(?entailmentRegime) || BOUND(?supportedEntailmentProfile)) AS ?testSkipped)
 	}
 }
 ORDER BY ?testiri
@@ -131,6 +142,8 @@ ORDER BY ?testiri
 //			$Report->addTestCasePassed($iriTest,$iriAssert,$labelAssert);
 		}
 
+
+
 		foreach ($rows["result"]["rows"] as $row){
 			$iriTest = trim($row["testiri"]);
 
@@ -143,7 +156,6 @@ ORDER BY ?testiri
 			if(! preg_match("/service/i", $iriTest))
 				continue;
 			*/
-
 			$iriAssertProtocol =$row["testiri"]."/"."Protocol";
 			$labelAssertProtocol = trim($row["name"])." : Test the protocol.";
 			$iriAssertResponse =$row["testiri"]."/"."Response";
@@ -155,33 +167,28 @@ ORDER BY ?testiri
 
 			$test = new Test(trim($row["queryTest"]));
 
-            $GraphName = "DEFAULT";
-			if($row["ChangeDefaultGraph"]){
-			    if (!$row["ChangeMultiGraph"] && array_key_exists('graphInputDefaultName', $row)) {
-				   $GraphName = trim($row["graphInputDefaultName"]);
-				}
-				$test->addGraphInput(trim($row["graphInputDefault"]),"DEFAULT",$GraphName);
-				$test->addGraphOutput(trim($row["graphOutput"]),"DEFAULT",$GraphName);
-			}
-			if($row["ChangeMultiGraph"]){
-				$test->readAndAddMultigraph($GRAPHTESTS,$iriTest); //todo check error http://www.w3.org/2009/sparql/docs/tests/data-sparql11/exists/exists03.rq
-			}
+            if ($row["testSkipped"]){
+                echo "S";
+                $messageSkipped = "TFT not supports tests with Entailment regime.";
+                $Report->addTestCaseSkipped($iriTest,$iriAssertProtocol,$labelAssertProtocol,$messageSkipped);
+                echo "S";
+                $Report->addTestCaseSkipped($iriTest,$iriAssertResponse,$labelAssertResponse,$messageSkipped);
+                continue;
+            }
 
-			if($row["ChangeServiceGraph"]){
-				$test->readAndAddService($GRAPHTESTS,$iriTest);
-			}
+            $graphName = "DEFAULT";
+            $test->addGraphOutput(trim($row["dataOutput"]),$graphName,$graphName);
+            if($row["dataInputExist"]){
+                $test->addGraphInput(trim($row["dataInput"]),$graphName,$graphName);
+            }
+            if($row["graphDataInputExist"]){
+                $test->readAndAddMultigraphInput($GRAPHTESTS,$iriTest); //todo check error http://www.w3.org/2009/sparql/docs/tests/data-sparql11/exists/exists03.rq
+            }
+            if($row["serviceDataInputExist"]){
+                $test->readAndAddService($GRAPHTESTS,$iriTest);
+            }
 
-			/*echo "ListGraphInput";
-			echo $iriTest;
-			echo "ListGraphInput";
-			print_r($test->ListGraphInput);
-			echo "ListGraphOutput";
-			print_r($test->ListGraphOutput);
-			//exit();*/
-
-			//echo "\nmf:name    	\"".$row["name"]."\" ;\n";
-
-			$test->doQuery(true,$GraphName);
+			$test->doQuery(true,"DEFAULT");
 			$err = $test->GetErrors();
 			$fail = $test->GetFails();
 			if (count($err) != 0) {

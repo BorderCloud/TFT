@@ -12,7 +12,6 @@ use BorderCloud\SPARQL\ParserCSV;
 use BorderCloud\SPARQL\ParserSparqlResult;
 use BorderCloud\SPARQL\ToolsBlankNode;
 
-
 class Test extends AbstractTest  {
 
     const  PREFIX = <<<'EOT'
@@ -23,22 +22,18 @@ prefix mf:     <http://www.w3.org/2001/sw/DataAccess/tests/test-manifest#>
 prefix qt:     <http://www.w3.org/2001/sw/DataAccess/tests/test-query#> 
 prefix dawgt:   <http://www.w3.org/2001/sw/DataAccess/tests/test-dawg#> 
 prefix ut:     <http://www.w3.org/2009/sparql/tests/test-update#> 
+prefix sd:    <http://www.w3.org/ns/sparql-service-description#>
 
 EOT;
 
 	public $query = "";
-	/*public $data = "";
-	public $resultData = "";*/
 	public $URLquery = "";
-	/*public $URLdataDefaultGraph = "";
-	public $URLresultDataDefaultGraph = "";*/
 
 	public $ListGraphInput = null;
 	public $ListGraphOutput = null;
 	public $ListGraphResult = null;
 
 	public $URLresultDataDefaultGraphType = "application/sparql-results+xml";
-	//public $resultQuery = null;
 
 	public $_tabDiff = null;
 
@@ -55,24 +50,6 @@ EOT;
 	private function readGraphResult()
 	{
 		global $TESTENDPOINT,$TTRIPLESTORE;
-
-		/*$q = Test::PREFIX.'
-		select DISTINCT  ?g
-		where
-		 {GRAPH  ?g
-				 {
-					?s ?p ?o.
-				}
-		}';
-
-		$rows = $TESTENDPOINT->query($q,"rows");
-		$errorsQuery = $TESTENDPOINT->getErrors();
-		if ($errorsQuery) {
-			$this->_errors = $errorsQuery;
-		}else{
-
-
-		}*/
 
 		foreach ($this->ListGraphOutput as $name=>$dataOutput) {
 			$output = $dataOutput["mimetype"];
@@ -115,68 +92,80 @@ EOT;
 	function addGraphOutput($url, $name="DEFAULT", $graphname="DEFAULT",$endpoint="DEFAULT")
 	{
 		$this->ListGraphOutput[$name]= array ("graphname"=>$graphname,"url"=>$url,"mimetype"=> $this->getType($url),"endpoint"=>$endpoint);
-
-		/*echo "\n**************************** INPUT\n";
-		echo print_r($this->ListGraphInput);
-		echo "\n**************************** OUTPUT\n";
-		echo print_r($this->ListGraphOutput);
-		echo "\n**************************** \n";
-		exit();*/
 	}
 
-
-
-	function readAndAddMultigraph($graphTest,$iriTest,$query=true)
-	{
-		global $ENDPOINT;
-		$qGraphInput = "";
-		$qGraphOutput = "";
-		$prefix = "";
-		if($query){
-			$prefix = "qt";
-		}else{
-			$prefix =  "ut";
-		}
-
-		$qGraphInput = Test::PREFIX.' 
-		select DISTINCT  ?graphData ?graphName
+    function readAndAddMultigraphInput($graphTest,$iriTest,$query=true)
+    {
+        global $ENDPOINT;
+        $qGraphInput = "";
+        $prefix = "";
+        if($query){
+            $prefix = "qt";
+        }else{
+            $prefix =  "ut";
+        }
+        $qGraphInput = Test::PREFIX.' 
+		select DISTINCT  ?graphData ?graphName ?graphDataContent ?graphNameExist
 		where
 		 {GRAPH  <'.$graphTest.'>
 				 {
-					<'.$iriTest.'>  	mf:action [ '.$prefix.':graphData 
-										  [ '.$prefix.':graph ?graphData ;
-											rdfs:label ?graphName ]
-									].				
+					<'.$iriTest.'>  	mf:action [ '.$prefix.':graphData  ?graphData ].
+					
+					OPTIONAL {
+					    ?graphData '.$prefix.':graph ?graphDataContent ;
+									rdfs:label ?graphName .
+					}				
 				}
+				
+            BIND(BOUND(?graphName) AS ?graphNameExist)
 		}';
-		$qGraphOutput = Test::PREFIX.' 
-		select DISTINCT  ?graphData ?graphName
+
+        $rowsGraph = $ENDPOINT->query($qGraphInput,"rows");
+        //print_r($rowsGraph);
+        foreach ($rowsGraph["result"]["rows"] as $rowGraph){
+            if ($rowGraph["graphNameExist"]) {
+                $this->addGraphInput($rowGraph["graphDataContent"],$rowGraph["graphName"],$rowGraph["graphName"]);
+            } else {
+                $this->addGraphInput($rowGraph["graphData"],$rowGraph["graphData"],$rowGraph["graphData"]);
+            }
+        }
+    }
+    function readAndAddMultigraphOutput($graphTest,$iriTest,$query=true)
+    {
+        global $ENDPOINT;
+        $qGraphOutput = "";
+        $prefix = "";
+        if($query){
+            $prefix = "qt";
+        }else{
+            $prefix =  "ut";
+        }
+
+        $qGraphOutput = Test::PREFIX.' 
+        select DISTINCT  ?graphData ?graphName ?graphDataContent ?graphNameExist
 		where
 		 {GRAPH  <'.$graphTest.'>
 				 {
-					<'.$iriTest.'> 	mf:result [ '.$prefix.':graphData 
-					                                  [ '.$prefix.':graph ?graphData ;
-										   rdfs:label ?graphName ]
-								] .		
+
+					<'.$iriTest.'>  	mf:result [ '.$prefix.':graphData  ?graphData ].
+					
+					OPTIONAL {
+					    ?graphData '.$prefix.':graph ?graphDataContent ;
+									rdfs:label ?graphName .
+					}				
 				}
+				
+            BIND(BOUND(?graphName) AS ?graphNameExist)
 		}';
-		/*
-		echo "\n****************************\n";
-		echo $qGraphInput;
-		echo "\n****************************\n";
-		echo $qGraphOutput;
-		*/
-		$rowsGraph = $ENDPOINT->query($qGraphInput,"rows");
-		//print_r($rowsGraph);
-		foreach ($rowsGraph["result"]["rows"] as $rowGraph){
-			$this->addGraphInput($rowGraph["graphData"],$rowGraph["graphName"],$rowGraph["graphName"]);
-		}
-		$rowsGraph = $ENDPOINT->query($qGraphOutput,"rows");
-		//print_r($rowsGraph);
-		foreach ($rowsGraph["result"]["rows"] as $rowGraph){
-			$this->addGraphOutput($rowGraph["graphData"],$rowGraph["graphName"],$rowGraph["graphName"]);
-		}
-	}
+        $rowsGraph = $ENDPOINT->query($qGraphOutput,"rows");
+        foreach ($rowsGraph["result"]["rows"] as $rowGraph){
+            if ($rowGraph["graphNameExist"]) {
+                $this->addGraphOutput($rowGraph["graphDataContent"],$rowGraph["graphName"],$rowGraph["graphName"]);
+            } else {
+                $this->addGraphOutput($rowGraph["graphData"],$rowGraph["graphData"],$rowGraph["graphData"]);
+            }
+        }
+    }
 
 	function readAndAddService($graphTest,$iriTest)
 	{
@@ -241,14 +230,7 @@ EOT;
 
 		$this->replaceServiceIRIQuery();
 		$this->checkBaseQuery();
-		// todo erase
-//        if($name == "DEFAULT"){
-//            $this->ListGraphResult["DEFAULT"] = $TESTENDPOINT->queryRead($this->query , $output);
-//        }else{
-            $this->ListGraphResult[$name] = $TESTENDPOINT->queryRead($this->query , $output);
-//        }
-		//$this->ListGraphResult["DEFAULT"] = $TESTENDPOINT->queryRead($this->query , $output);
-        //$this->readGraphResult();
+		$this->ListGraphResult[$name] = $TESTENDPOINT->queryRead($this->query , $output);
 
 		$errorsQuery = $TESTENDPOINT->getErrors();
 		if ($errorsQuery) {
@@ -295,7 +277,6 @@ EOT;
 			return;
 		}
 		$t1 = SparqlClient::mtime();
-		//$this->query = $CURL->fetchUrl($this->URLquery);
         $queryContent = $this->LoadContentFile($this->URLquery)		;
         if(empty($queryContent)){
             //LoadContentFile has already insert AddFail
@@ -322,7 +303,18 @@ EOT;
 				$message = $this->checkResult();
 
 				// check
-				if(count( $this->_tabDiff)>0){
+				if (count($this->ListGraphOutput) === 0) {
+				    // check if empty and without graph
+                    $nbTriples = $this->countTriples();
+                    $nbGraphs = $this->countGraphs();
+                    if($nbTriples > 0 || $nbGraphs > 0) {
+                        $this->AddFail(
+                            "The test is failed.". $message
+                            ."Nb triples found : ".$nbTriples."\n"
+                            ."Nb graphs found : ".$nbGraphs."\n"
+                        );
+                    }
+                } elseif(count($this->_tabDiff)>0) {
 					$this->AddFail("The test is failed.". $message);
 				}
 			}
@@ -364,31 +356,26 @@ EOT;
 	}
 
 	private function checkResult(){
-	    global $CURL;
-
 		$message =  $this->printTestHead();
-		foreach ($this->ListGraphOutput as $name=>$dataOutput) {
-			//read data
-			//$expected = $CURL->fetchUrl($dataOutput["url"]);
+
+        $message .=  "Number of graphs expected : ".count($this->ListGraphOutput)." \n\n";
+        foreach ($this->ListGraphOutput as $name=>$dataOutput) {
+            //read data
             $expected = $this->LoadContentFile($dataOutput["url"]);
+            //print_r($this->ListGraphResult);
+            $message .=  "\n================================================================= \n";
+            $message .=  "Expected data in graph : \n\n";
+            $message .=  "FILE  <".$dataOutput["url"]."> \n";
+            $message .= "GRAPH <".$dataOutput["graphname"]."> :\n";
+            $message .= $expected."\n";
 
-			//$this->ListGraphOutput[$nameGraph]["content"]=$expected;
-
-			//print_r($this->ListGraphResult);
-			$message .=  "\n================================================================= \n";
-			$message .=  "Expected data in graph : \n\n";
-			$message .=  "FILE  <".$dataOutput["url"]."> \n";
-			$message .= "GRAPH <".$dataOutput["graphname"]."> :\n";
-			$message .= $expected."\n";
-
-			$message .= $this->checkDataInGraph($dataOutput["graphname"],
-							    $dataOutput["mimetype"],
-							    $expected,
-							    $this->ListGraphResult[$dataOutput["graphname"]],
-							    $dataOutput["url"]);
-			$message .=  "\n================================================================= \n";
-
-		}
+            $message .= $this->checkDataInGraph($dataOutput["graphname"],
+                $dataOutput["mimetype"],
+                $expected,
+                $this->ListGraphResult[$dataOutput["graphname"]],
+                $dataOutput["url"]);
+            $message .=  "\n================================================================= \n";
+        }
 		return $message;
 	}
 
@@ -447,7 +434,7 @@ EOT;
 				   $nameGraphTemp = $url;
 				$tabResultDataExpected = ParserTurtle::turtleToArray($expected,$nameGraphTemp);
 				$tabResultDataset = ParserTurtle::turtleToArray($result,$nameGraphTemp);
-                                $tabDiff = ParserTurtle::compare($tabResultDataExpected,$tabResultDataset,$sort,$distinct);
+                $tabDiff = ParserTurtle::compare($tabResultDataExpected,$tabResultDataset,$sort,$distinct);
 				break;
 			case  "application/sparql-results+json":
 				$tabResultDataExpected = json_decode($expected, true);
@@ -519,6 +506,18 @@ EOT;
 		return $res["count"]; //todo trycatch //test with sesame */
     }
 
+    public function countGraphs(){
+        global $modeDebug,$modeVerbose,$TESTENDPOINT;
+
+        $TESTENDPOINT->ResetErrors();
+        $q = 'SELECT (COUNT(DISTINCT ?g) AS ?count) WHERE {GRAPH ?g {  ?s ?p ?v .}} ';
+        $res = $TESTENDPOINT->query($q, 'row');
+        $err = $TESTENDPOINT->getErrors();
+        if ($err) {
+            return -1;
+        }
+        return $res["count"];
+    }
 
 	function clearAllTriples() {
 		global $modeDebug,$modeVerbose,$TESTENDPOINT,$TTRIPLESTORE,$CONFIG;
@@ -556,13 +555,8 @@ EOT;
     }
 
 	private function importGraphInput(){
-		global $modeDebug,$modeVerbose,$TESTENDPOINT,$TTRIPLESTORE,$CURL,$CONFIG;
-		//echo "########################################################";
-		//print_r($this->ListGraphInput);
-		//exit();
+		global $modeDebug,$modeVerbose,$TESTENDPOINT,$TTRIPLESTORE,$CONFIG;
 		foreach ($this->ListGraphInput as $name=>$data){
-
-			//$content =$CURL->fetchUrl($data["url"]);
             $content = $this->LoadContentFile($data["url"]);
 			$this->ListGraphInput[$name]["content"]=$content ;
 
@@ -594,18 +588,13 @@ EOT;
 
 				$tempEndpoint = $CONFIG["SERVICE"]["endpoint"][$nameEndpoint];
 
-				$endpoint = new SparqlClient($tempEndpoint,false,$modeDebug);
+				$endpoint = new SparqlClient($modeDebug);
 				$endpoint->setEndpointRead($tempEndpoint);
 				$endpoint->setEndpointWrite($tempEndpoint);
 
                 $testsuite = new TestSuite($endpoint,"","");
                 $testsuite->importData($data["url"],$data["graphname"]);
 			}
-
-			/*echo "importGraphInput\n";
-			echo $name."\n";
-			echo $content;
-			*/
 		}
 	}
 
@@ -635,7 +624,6 @@ EOT;
 	}
 
 	private function checkBaseQuery(){
-		global $CONFIG;
 	      	if (! preg_match("/BASE/i",$this->query)) {
 		    $urlTab = parse_url($this->URLquery);
 		    $pathParts = pathinfo($urlTab['path']);

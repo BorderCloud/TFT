@@ -668,7 +668,7 @@ foreach($listTestSuite as $URL => $folder){
 
 	CSVResultFormatTest::doAllTests();
 
-	UpdateEvaluationTest::doAllTests(); //ok test multi graph
+	UpdateEvaluationTest::doAllTests();
 
 	PositiveUpdateSyntaxTest::doAllTests();
 

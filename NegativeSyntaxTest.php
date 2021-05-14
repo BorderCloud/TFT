@@ -90,7 +90,7 @@ TESTS : NegativeSyntaxTest\n";
 				echo "\n".$iriTest.":".trim($row["name"]).":" ;
 			}
 
-			$test = new Test(trim($row["queryTest"]));
+			$test = new Test(trim($row["queryTest"]),$iriTest);
 			$test->doQuery();
 			$err = $test->GetErrors();
 			$fail = $test->GetFails();
@@ -100,7 +100,7 @@ TESTS : NegativeSyntaxTest\n";
 					$Report->addTestCasePassed($iriTest,$iriAssertSyntax,$labelAssertSyntax);
 			}else{
 					echo "F";//"\n".$nameTestQueryPassed." PASSED";
-					$error = "ERROR : Server cannot see this wrong query.\n Query :\n".$test->query;
+					$error = "ERROR : Server cannot detect this wrong query.\n Query :\n".$test->query."\n\n";
 					$error .= "Response of server :\n";
 					$error .= print_r($test->ListGraphResult,true);
 					$Report->addTestCaseFailure($iriTest,$iriAssertSyntax,$labelAssertSyntax,

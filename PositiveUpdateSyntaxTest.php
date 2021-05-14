@@ -90,7 +90,7 @@ class PositiveUpdateSyntaxTest {
 				echo "\n".$iriTest.":".trim($row["name"]).":" ;
 			}
 
-			$test = new Test(trim($row["queryTest"]));
+			$test = new Test(trim($row["queryTest"]),$iriTest);
 			$test->doUpdate(false);
 			$err = $test->GetErrors();
 			$fail = $test->GetFails();

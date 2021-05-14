@@ -119,7 +119,7 @@ ORDER BY ?testiri
 				echo "ok";
 			exit();*/
 
-			$test = new Test(trim($row["queryTest"]));
+			$test = new Test(trim($row["queryTest"]),$iriTest);
 
             $graphName = "DEFAULT";
             if($row["dataInputExist"]){

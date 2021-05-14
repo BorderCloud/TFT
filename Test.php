@@ -37,10 +37,13 @@ EOT;
 
 	public $_tabDiff = null;
 
-	function __construct($URLquery)
+	public $iriTest = "";
+
+	function __construct($URLquery,$iriTest)
 	{
         parent::__construct();
-		$this->URLquery = $URLquery;
+        $this->URLquery = $URLquery;
+        $this->iriTest = $iriTest;
 
 		$this->ListGraphInput = array();
 		$this->ListGraphOutput = array();
@@ -339,10 +342,11 @@ EOT;
 	}
 
 	private function printTestHead(){
-		$message = "";
-
+		$message = "\niriTest : <".$this->iriTest.">";
 		$message .= "\n================================================================= \n";
-		$message .=  "queryTest :<".$this->URLquery.">\n".$this->query;
+        $message .=
+            "queryTest :<".$this->URLquery.">\n"
+            .$this->query;
 		$message .=  "\n================================================================= \n";
 		$message .=  "Data in input : \n\n";
 		foreach ($this->ListGraphInput as $name=>$data) {

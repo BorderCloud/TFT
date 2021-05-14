@@ -95,7 +95,7 @@ class CSVResultFormatTest {
 				echo "\n".$iriTest.":".trim($row["name"]).":" ;
 			}
 
-			$test = new Test(trim($row["queryTest"]));
+			$test = new Test(trim($row["queryTest"]),$iriTest);
 			$test->addGraphInput(trim($row["graphInput"]));
 			$test->addGraphOutput(trim($row["graphOutput"]));
 			$test->doQuery(true);

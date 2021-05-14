@@ -62,7 +62,7 @@ SELECT DISTINCT ?testiri ?name ?queryTest
 ?testSkipped
 WHERE {
     GRAPH <'.$GRAPHTESTS .'> {
-      # VALUES ?testiri {<http://www.w3.org/2009/sparql/docs/tests/data-sparql11/json-res/manifest#jsonres03>}
+     #VALUES ?testiri {<http://www.w3.org/2009/sparql/docs/tests/data-sparql11/csv-tsv-res/manifest#tsv02>}
         ?manifest   a  mf:Manifest ;
                     mf:entries ?collection .
         ?collection rdf:rest*/rdf:first ?testiri .
@@ -165,7 +165,7 @@ ORDER BY ?testiri
 				echo "\n".$iriTest.":".trim($row["name"]).":" ;
 			}
 
-			$test = new Test(trim($row["queryTest"]));
+			$test = new Test(trim($row["queryTest"]),$iriTest);
 
             if ($row["testSkipped"]){
                 echo "S";

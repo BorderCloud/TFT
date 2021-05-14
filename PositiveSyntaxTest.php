@@ -6,9 +6,13 @@ class PositiveSyntaxTest {
 
 		$ENDPOINT->ResetErrors();
 		$q = Test::PREFIX.'
-		SELECT (COUNT(?s) AS ?count) WHERE {
-			GRAPH <'.$GRAPHTESTS .'> { ?s a mf:PositiveSyntaxTest11 ;
-							 dawgt:approval dawgt:Approved .}} ';
+		SELECT (COUNT(?s) AS ?count)
+		 WHERE {
+			GRAPH <'.$GRAPHTESTS .'> {
+			    ?s  a mf:PositiveSyntaxTest11 ;
+				    dawgt:approval dawgt:Approved .
+			}
+		} ';
 		$res = $ENDPOINT->query($q, 'row');
 		$err = $ENDPOINT->getErrors();
 		if ($err) {
@@ -25,12 +29,14 @@ class PositiveSyntaxTest {
 TESTS : PositiveSyntaxTest\n";
 		$Report = new TestsReport("PositiveSyntaxTest",$TAGTESTS.'-PositiveSyntaxTest-junit.xml');
 
-		$q = Test::PREFIX.' 
+        //# VALUES ?testiri {<http://www.w3.org/2009/sparql/docs/tests/data-sparql11/syntax-fed/manifest#test_1>
+        // <http://www.w3.org/2009/sparql/docs/tests/data-sparql11/syntax-fed/manifest#test_2>}
 
-		 select DISTINCT ?testiri ?name ?queryTest where
-		 {GRAPH <'.$GRAPHTESTS.'>
-				 {
-					?manifest a 		mf:Manifest ;
+        $q = Test::PREFIX.' 
+         select DISTINCT ?testiri ?name ?queryTest
+		  where {
+		        GRAPH <'.$GRAPHTESTS.'> {
+			       ?manifest a 		mf:Manifest ;
 						  mf:entries  	?collection .
 						  ?collection 	rdf:rest*/rdf:first  ?testiri .
 			  
@@ -38,19 +44,10 @@ TESTS : PositiveSyntaxTest\n";
 						 mf:name    	?name ;
 						 dawgt:approval dawgt:Approved ;
 						 mf:action 	?queryTest  .
-
-				 }
+				}
 		}
 		 ORDER BY ?testiri
 		';
-		 /*
-
-		 				  OPTIONAL{
-					 ?queryTest  rdf:resource ?queryTestHref.
-					  ?queryTestHref rdfs:member ?queryTestBase.
-					}
-					*/
-		//echo $q;
 		$ENDPOINT->ResetErrors();
 		$rows = $ENDPOINT->query($q, 'rows');
 		$err = $ENDPOINT->getErrors();
@@ -101,7 +98,7 @@ TESTS : PositiveSyntaxTest\n";
 				echo "\n".$class.":".$nameTestQueryDataPassed." Tests :";
 			}
 
-			$test = new Test(trim($row["queryTest"]));
+			$test = new Test(trim($row["queryTest"]),$iriTest);
 			$test->doQuery();
 			$err = $test->GetErrors();
 			$fail = $test->GetFails();

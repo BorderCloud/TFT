@@ -12,7 +12,7 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/BorderCloud/SPARQL.git",
-                "reference": "2f26d989e040be27514380cb4186bf3f47db321d"
+                "reference": "bcb114b7af844325284b494f69c39fad719c01a4"
             },
             "require": {
                 "ext-curl": "*",
@@ -52,7 +52,7 @@
                 "RDF",
                 "SPARQL"
             ],
-            "time": "2021-05-13T16:32:44+00:00"
+            "time": "2021-05-14T15:51:47+00:00"
         }
     ],
     "packages-dev": [],
